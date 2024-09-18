@@ -1,0 +1,62 @@
+name: Haskell CI
+
+on:
+  pull_request:
+    types:
+      - opened
+    branches-ignore:
+      - 'ga-ignore-**'
+  push:
+    branches-ignore:
+      - 'ga-ignore-**'
+
+env:
+  # All binaries separated by ' '
+  EXECUTABLES: "glados"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      - name: Permissions bug workaround
+        run: "chown -R $(id -un):$(id -gn) ~"
+      - name: Setup
+        run: stack setup --allow-different-user
+      - name: Build
+        run: make
+        timeout-minutes: 2
+      - name: Check if all files exist
+        run: |
+          for file in $EXECUTABLES; do
+            if test -f "$file"; then
+              echo "File $file exists"
+            else
+              echo "File $file does not exist"
+              exit 1
+            fi
+          done
+  run_tests:
+    name: "Running Tests"
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker
+
+    needs: build
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      - name: Permissions bug workaround
+        run: "chown -R $(id -un):$(id -gn) ~"
+      - name: Setup
+        run: stack setup --allow-different-user
+      - name: Build
+        run: make
+        timeout-minutes: 2
+      - name: Run tests
+        run: make tests
