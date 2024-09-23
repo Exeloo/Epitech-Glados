@@ -1,3 +1,16 @@
-data Function = Func {funcName :: String, funcArgs :: [Ast], funcBody :: [Ast]} | Call {callFunc :: String, callArgs :: Ast} deriving Show
+data AstDeclaration = FuncDeclaration { args :: [Symbol], body :: [Ast]} deriving Show
 
-data Ast =  Str String | Lst [Ast] | Inte Int | Sym String | Boolean Bool | FuncAst Function deriving Show
+data AstAssignation = VarAssignation { key :: Symbol, value :: Ast} deriving Show
+
+newtype AstCall = FuncCall { args :: [Ast]} deriving Show
+
+data Ast =
+  Symbol String |
+  Boolean Bool |
+  Integer Int |
+  Str String |
+  List [Ast] |
+  Declaration AstDeclaration |
+  Assignation AstAssignation |
+  Call AstCall
+    deriving Show
