@@ -45,7 +45,9 @@ callAST a b = Just (Lst [Sym a, b])
 evalAST :: Ast-> Maybe Ast
 evalAST (Inte x) = Just (Inte x)
 evalAST (Sym x) = Just (Sym x)
-evalAST (Define {defineKey = key, defineValue = value}) = Just (Define {defineKey = key, defineValue = value})
+evalAST (Define {defineKey = key, defineValue = value}) = case evalAST value of
+    Just x -> Just x
+    Nothing -> Nothing
 evalAST (Call func (Lst args)) = case mapM evalAST args of
     Just x -> case callAST func (Lst x) of
         Just x -> Just x
@@ -60,7 +62,7 @@ main :: IO ()
 main = case evalAST (Call {callFunc = "*", callArgs = Lst [Inte 6, Call {callFunc = "+", callArgs = Lst [Inte 4, Inte 3]}]}) of
         Just x -> putStrLn (show x)
         Nothing -> putStrLn "Nothing"
--- main = case sexprToAST ["+", "-", "*", "/"] (List [(Symbol "define"), (Symbol "x"), (List [(Symbol "a"), (Symbol "b")]), (Symbol "+", )]) of
+-- main = case sexprToAST ["+", "-", "*", "/"] (List [List [(Symbol "define"), (List [(Symbol "x"), (Symbol "a"), (Symbol "b")]), List [(Symbol "+"), (Symbol "a"), (Symbol "b")]]List[(Symbol "x"), (Integer 5), (Integer 2)]]) of
 --         Just x -> putStrLn (show x)
 --         Nothing -> putStrLn "Nothing"
 -- main = case sexprToAST (List [(Symbol "define"), (Symbol "x"), (Integer 5)]) of
