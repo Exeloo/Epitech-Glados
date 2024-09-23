@@ -1,0 +1,84 @@
+name: Release CI/CD
+
+on:
+  release:
+    types:
+      - "created"
+
+env:
+  # All binaries separated by ' '
+  EXECUTABLES: "glados"
+  MIRROR_URL: "git@github.com:EpitechPromo2027/B-FUN-500-PAR-5-1-glados-deniz.uzuntok-husson.git"
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      - name: Permissions bug workaround
+        run: "chown -R $(id -un):$(id -gn) ~"
+      - name: Setup
+        run: stack setup --allow-different-user
+      - name: Build
+        run: make
+        timeout-minutes: 2
+      - name: Check if all files exist
+        run: |
+          for file in $EXECUTABLES; do
+            if test -f "$file"; then
+              echo "File $file exists"
+            else
+              echo "File $file does not exist"
+              exit 1
+            fi
+          done
+
+  run_tests:
+    name: "Running Tests"
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker
+
+    needs: build
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      - name: Permissions bug workaround
+        run: "chown -R $(id -un):$(id -gn) ~"
+      - name: Setup
+        run: stack setup --allow-different-user
+      - name: Build
+        run: make
+        timeout-minutes: 2
+      - name: Run tests
+        run: make tests
+
+  generate:
+    name: "Create release-artifacts"
+    runs-on: ubuntu-latest
+    container:
+      image: epitechcontent/epitest-docker
+
+    needs: run_tests
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+      - name: Permissions bug workaround
+        run: "chown -R $(id -un):$(id -gn) ~"
+      - name: Setup
+        run: stack setup --allow-different-user
+      - name: Build
+        run: make
+        timeout-minutes: 2
+      - name: Upload the artifacts
+        uses: skx/github-action-publish-binaries@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
+        with:
+          args: ${{ env.EXECUTABLES }}
