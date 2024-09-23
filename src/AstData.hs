@@ -1,11 +1,17 @@
-data AstDeclaration = FuncDeclaration { args :: [Symbol], body :: [Ast]} deriving Show
+module AstData () where
 
-data AstAssignation = VarAssignation { key :: Symbol, value :: Ast} deriving Show
+data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: [Ast] } deriving Show
 
-newtype AstCall = FuncCall { args :: [Ast]} deriving Show
+data AstAssignation = VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } deriving Show
+
+type Symbol = String
+
+data FuncArg = Func AstDeclaration | Sym Symbol deriving Show
+
+data AstCall = FuncCall { callFunction :: FuncArg, callArgs :: [Ast] } deriving Show
 
 data Ast =
-  Symbol String |
+  Symb Symbol |
   Boolean Bool |
   Integer Int |
   Str String |
