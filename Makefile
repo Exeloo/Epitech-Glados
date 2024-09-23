@@ -31,4 +31,7 @@ functional:
 
 tests: unit functional
 
+lint:
+	hlint src
+
 .PHONY:	all clean fclean re unit functional tests
