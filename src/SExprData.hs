@@ -5,7 +5,7 @@
 -- SExpData
 -}
 
-module SExprData (SExpr) where
+module SExprData (SExpr(..)) where
 
 import Symbol
 
@@ -16,7 +16,8 @@ data SExpr =
   SString String
 
 instance Show SExpr where
-    show (SInt x) = "Integer : " ++ show x ++ " "
-    show (SSymbol x) = "Symbol : " ++ show x ++ " "
-    show (SList xs) = "List : [" ++ unwords (map show xs) ++ "]"
-    show (SString x) = "String : '" ++ show x ++ "' "
+    show (SInt x) = "Integer: " ++ show x
+    show (SSymbol x) = "Symbol: " ++ show x
+    show (SList x) = "List: [" ++ foldl (\a b -> a ++ (if null a then "" else ", ") ++ show b) [] x ++ "]"
+    show (SString x) = "String: \"" ++ x ++ "\""
+  
