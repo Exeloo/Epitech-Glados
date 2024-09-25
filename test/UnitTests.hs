@@ -2,7 +2,6 @@ import Test.HUnit
 import AstEval
 import AstData
 
--- Test cases for callAST
 testCallASTAdd = TestCase $ assertEqual "10 + 5 = 15" (Just (AInt 15)) (callAST "+" (AList [AInt 10, AInt 5]))
 testCallASTSub = TestCase $ assertEqual "10 - 5 = 5" (Just (AInt 5)) (callAST "-" (AList [AInt 10, AInt 5]))
 testCallASTMul = TestCase $ assertEqual "10 * 5 = 50" (Just (AInt 50)) (callAST "*" (AList [AInt 10, AInt 5]))

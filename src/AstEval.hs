@@ -15,7 +15,7 @@ callAST "-" (AList [AInt x, AInt y]) = Just (AInt (x - y))
 callAST "*" (AList [AInt x, AInt y]) = Just (AInt (x * y))
 callAST "div" (AList [AInt x, AInt y]) = Just (AInt (x `div` y))
 callAST "mod" (AList [AInt x, AInt y]) = Just (AInt (x `mod` y))
-callAST "eq?" (AList [AInt x, AInt y]) = Just (ABool (x == y))
+callAST "eq?" (AList [x, y]) = Just (ABool (x == y))
 callAST "<" (AList [AInt x, AInt y]) = Just (ABool (x < y))
 callAST "if" (AList [func, a, b]) = case func of
   ABool True -> Just a
