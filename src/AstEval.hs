@@ -17,6 +17,13 @@ callAST "div" (AList [AInt x, AInt y]) = Just (AInt (x `div` y))
 callAST "mod" (AList [AInt x, AInt y]) = Just (AInt (x `mod` y))
 callAST "eq?" (AList [AInt x, AInt y]) = Just (ABool (x == y))
 callAST "<" (AList [AString x, AString y]) = Just (ABool (x == y))
+callAST "if" (AList [func, a, b]) = case func of
+  ABool True -> Just a
+  ABool False -> Just b
+  ACall FuncCall { callFunction = FSymbol f, callArgs = arg } -> Nothing
+  _ -> Nothing
+callAST "#t" _ = Just (ABool True)
+callAST "#f" _ = Just (ABool False)
 callAST a b = Just (AList [ASymbol a, b])
 
 replaceSymbol :: Ast -> Ast -> Ast -> Ast
@@ -33,6 +40,6 @@ replaceSymbol _ _ b = b
 
 evalAstFunc :: [Ast] -> Ast -> [Ast] -> Maybe Ast
 evalAstFunc (arg:args) func (argcall:argcalls) = evalAstFunc args (replaceSymbol arg argcall func) argcalls
-evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ | f `elem` ["+", "-", "*", "/"] = callAST f (AList args)
+evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ | f `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = callAST f (AList args)
 evalAstFunc [] func [] = Just func
 evalAstFunc _ _ _ = Nothing
