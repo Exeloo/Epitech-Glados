@@ -36,9 +36,9 @@ getInput flag = do
                 then return ()
             else
                 getInputLine flag
-    else do
-        putStr "> "
-        hFlush stdout
+    else
+        putStr "> " >>
+        hFlush stdout >>
         getInputLine flag
 
 
