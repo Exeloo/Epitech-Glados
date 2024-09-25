@@ -5,7 +5,7 @@
 -- AstEval
 -}
 
-module AstEval (evalAST) where
+module AstEval (evalAST, callAST, replaceSymbol) where
 
 import AstData
 

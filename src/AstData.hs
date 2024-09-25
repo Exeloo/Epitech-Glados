@@ -27,3 +27,11 @@ data Ast =
   AAssignation AstAssignation |
   ACall AstCall
     deriving Show
+
+instance Eq Ast where
+  (AInt x) == (AInt y) = x == y
+  (ABool x) == (ABool y) = x == y
+  (ASymbol x) == (ASymbol y) = x == y
+  (AList xs) == (AList ys) = xs == ys
+  (ACall FuncCall { callFunction = FSymbol f1, callArgs = arg1 }) == (ACall FuncCall { callFunction = FSymbol f2, callArgs = arg2 }) = f1 == f2 && arg1 == arg2
+  _ == _ = False
