@@ -10,26 +10,26 @@ module AstEval (callAST) where
 import AstData
 
 callAST :: String -> Ast -> Maybe Ast
-callAST "+" (Lst [Inte x, Inte y]) = Just (Inte (x + y))
-callAST "-" (Lst [Inte x, Inte y]) = Just (Inte (x - y))
-callAST "*" (Lst [Inte x, Inte y]) = Just (Inte (x * y))
-callAST "/" (Lst [Inte x, Inte y]) = Just (Inte (x `div` y))
-callAST a b = Just (Lst [Sym a, b])
+callAST "+" (AList [AInt x, AInt y]) = Just (AInt (x + y))
+callAST "-" (AList [AInt x, AInt y]) = Just (AInt (x - y))
+callAST "*" (AList [AInt x, AInt y]) = Just (AInt (x * y))
+callAST "/" (AList [AInt x, AInt y]) = Just (AInt (x `div` y))
+callAST a b = Just (AList [ASymbol a, b])
 
 replaceSymbol :: Ast -> Ast -> Ast -> Ast
-replaceSymbol (Sym s) (a) (Sym b) = case s == b of
+replaceSymbol (ASymbol s) (a) (ASymbol b) = case s == b of
   True -> a
-  False -> Sym b
-replaceSymbol (Sym s) (a) (Lst lst) = case map (replaceSymbol (Sym s) (a)) lst of
-  [Sym s'] -> Sym s'
-  lst' -> Lst lst'
-replaceSymbol (Sym s) (a) (ACall FuncCall {callFunction = f, callArgs = Lst args}) = case map (replaceSymbol (Sym s) (a)) args of
-  [Sym s'] -> Sym s'
-  args' -> ACall FuncCall {callFunction = f, callArgs = Lst args'}
-replaceSymbol (Sym s) (a) b = b
+  False -> ASymbol b
+replaceSymbol (ASymbol s) (a) (AList lst) = case map (replaceSymbol (ASymbol s) (a)) lst of
+  [ASymbol s'] -> ASymbol s'
+  lst' -> AList lst'
+replaceSymbol (ASymbol s) (a) (ACall FuncCall {callFunction = f, callArgs = args}) = case map (replaceSymbol (ASymbol s) (a)) args of
+  [ASymbol s'] -> ASymbol s'
+  args' -> ACall FuncCall {callFunction = f, callArgs = args'}
+replaceSymbol _ _ b = b
 
 evalAstFunc :: [Ast] -> Ast -> [Ast] -> Maybe Ast
 evalAstFunc (arg:args) func (argcall:argcalls) = evalAstFunc args (replaceSymbol arg argcall func) argcalls
-evalAstFunc _ (ACall FuncCall {callFunction = f, callArgs = Lst args}) _ | f `elem` ["+", "-", "*", "/"] = callAST f (Lst args)
+evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ | f `elem` ["+", "-", "*", "/"] = callAST f (AList args)
 evalAstFunc [] func [] = Just func
 evalAstFunc _ _ _ = Nothing

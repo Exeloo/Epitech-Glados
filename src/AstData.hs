@@ -5,7 +5,7 @@
 -- AstData
 -}
 
-module AstData (Ast, AstDeclaration, AstAssignation, AstFuncArg, AstCall) where
+module AstData (Ast(..), AstDeclaration(..), AstAssignation(..), AstFuncArg(..), AstCall(..)) where
 
 import Symbol
 
