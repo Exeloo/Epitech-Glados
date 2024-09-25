@@ -13,7 +13,10 @@ callAST :: String -> Ast -> Maybe Ast
 callAST "+" (AList [AInt x, AInt y]) = Just (AInt (x + y))
 callAST "-" (AList [AInt x, AInt y]) = Just (AInt (x - y))
 callAST "*" (AList [AInt x, AInt y]) = Just (AInt (x * y))
-callAST "/" (AList [AInt x, AInt y]) = Just (AInt (x `div` y))
+callAST "div" (AList [AInt x, AInt y]) = Just (AInt (x `div` y))
+callAST "mod" (AList [AInt x, AInt y]) = Just (AInt (x `mod` y))
+callAST "eq?" (AList [AInt x, AInt y]) = Just (ABool (x == y))
+callAST "<" (AList [AString x, AString y]) = Just (ABool (x == y))
 callAST a b = Just (AList [ASymbol a, b])
 
 replaceSymbol :: Ast -> Ast -> Ast -> Ast
