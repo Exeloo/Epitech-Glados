@@ -27,6 +27,8 @@ library
   exposed-modules:
       AstData
       Launch
+      SExprData
+      Symbol
   other-modules:
       Paths_glados
   autogen-modules:

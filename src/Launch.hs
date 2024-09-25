@@ -5,7 +5,7 @@
 -- Launch
 -}
 
-module Launch where
+module Launch (launch, fileExist, getParamsLine) where
 
 import System.Directory (doesFileExist)
 import System.IO (hFlush, stdout, hIsTerminalDevice, stdin, isEOF)

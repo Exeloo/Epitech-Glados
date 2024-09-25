@@ -1,4 +1,15 @@
-module LaunchUnitTests where
+module LaunchUnitTests (
+    testFileExist1,
+    testFileExist2,
+    testGetParamsLine1,
+    testGetParamsLine2,
+    testGetParamsLine3,
+    testGetParamsLine4,
+    testLaunch1,
+    testLaunch2,
+    testLaunch3,
+    testLaunch4
+    ) where
 
 import Test.HUnit
 import Launch

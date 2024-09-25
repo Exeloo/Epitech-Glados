@@ -26,7 +26,7 @@ re:	fclean all
 unit:
 	stack test
 
-functional:
+functional: re
 	${SRC_TEST}${TEST}
 
 tests: unit functional
