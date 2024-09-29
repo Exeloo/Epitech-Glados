@@ -27,6 +27,7 @@ library
   exposed-modules:
       AstData
       Launch
+      Parser
       SExprData
       Symbol
   other-modules:
@@ -65,6 +66,7 @@ test-suite glados-test
   main-is: UnitTests.hs
   other-modules:
       LaunchUnitTests
+      UnitTestsParser
       Paths_glados
   autogen-modules:
       Paths_glados
