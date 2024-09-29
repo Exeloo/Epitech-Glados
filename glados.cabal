@@ -27,6 +27,7 @@ library
   exposed-modules:
       AstData
       Launch
+      Evaluation
       SExprData
       Symbol
   other-modules:
@@ -64,7 +65,11 @@ test-suite glados-test
   type: exitcode-stdio-1.0
   main-is: UnitTests.hs
   other-modules:
+<<<<<<< HEAD
       LaunchUnitTests
+=======
+      EvalUnitTests
+>>>>>>> 609d917 (feat: add check list function to check var by scope)
       Paths_glados
   autogen-modules:
       Paths_glados

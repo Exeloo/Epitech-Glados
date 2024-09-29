@@ -1,4 +1,5 @@
 import Test.HUnit
+import EvalUnitTests
 import LaunchUnitTests
 
 testlist :: Test
@@ -12,8 +13,7 @@ testlist = TestList [
     TestLabel "testLaunch1" testLaunch1,
     TestLabel "testLaunch2" testLaunch2,
     TestLabel "testLaunch3" testLaunch3,
-    TestLabel "testLaunch4" testLaunch4
-    ]
+    TestLabel "testLaunch4" testLaunch4]
 
 main :: IO ()
 main = do
