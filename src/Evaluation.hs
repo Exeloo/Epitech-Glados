@@ -8,9 +8,14 @@
 module Evaluation where
 
 import AstData
+import Symbol
 
-checkElemList :: Ast -> [[Ast]] -> Either String Bool
+getAssignationKeyList :: [Ast] -> [Symbol]
+getAssignationKeyList [] = []
+getAssignationKeyList ((AAssignation (VarAssignation a _)):xs) = a:(getAssignationKeyList xs)
+getAssignationKeyList (_:xs) = getAssignationKeyList xs
+
+checkElemList :: Symbol -> [[Ast]] -> Either String Bool
 checkElemList _ [] = Left "Not existing"
-checkElemList x (y:ys) | (elem x y) == True = Right True
+checkElemList x (y:ys) | (elem x (getAssignationKeyList y)) == True = Right True
                        | otherwise = checkElemList x ys
-
