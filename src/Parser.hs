@@ -1,4 +1,4 @@
-module Parser(parseSExpr) where
+module Parser(parseSExpr, parseSString, parseSSymbol, parseSInt, parseSList) where
 
 import Text.Megaparsec
 import Text.Megaparsec.Char
@@ -12,10 +12,10 @@ spaces :: SexprParser ()
 spaces = skipMany spaceChar
 
 parseSString :: SexprParser SExpr
-parseSString = SString <$> ((char '"' *> manyTill charLiteral (char '"')) <|> (char '\'' *> manyTill charLiteral (char '\'')))
+parseSString = SString <$> ((char '"' *> someTill charLiteral (char '"')) <|> (char '\'' *> someTill charLiteral (char '\'')))
 
 parseSSymbol :: SexprParser SExpr
-parseSSymbol = SSymbol <$> ((:) <$> (letterChar <|> oneOf "-_+") <*> many (alphaNumChar <|> oneOf "-_+"))
+parseSSymbol = SSymbol <$> some (alphaNumChar <|> oneOf "-_+<>?")
 
 parseSInt :: SexprParser SExpr
 parseSInt = SInt . read <$> some digitChar

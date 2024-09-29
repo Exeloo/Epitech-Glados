@@ -1,8 +1,9 @@
-import Test.HUnit
+import Test.HUnit ( runTestTT, Test(TestLabel, TestList) )
 import LaunchUnitTests
+import UnitTestsParser(parserTestList)
 
-testlist :: Test
-testlist = TestList [
+testList :: Test
+testList = TestList [
     TestLabel "testFileExist1" testFileExist1,
     TestLabel "testFileExist2" testFileExist2,
     TestLabel "testGetParamsLine1" testGetParamsLine1,
@@ -17,5 +18,6 @@ testlist = TestList [
 
 main :: IO ()
 main = do
-    runTestTT testlist
+    _ <- runTestTT testList
+    _ <- runTestTT parserTestList
     return ()
