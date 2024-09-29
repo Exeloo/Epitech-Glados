@@ -2,8 +2,8 @@ import Test.HUnit
 import EvalUnitTests
 import LaunchUnitTests
 
-testlist :: Test
-testlist = TestList [
+testList :: Test
+testList = TestList [
     TestLabel "testFileExist1" testFileExist1,
     TestLabel "testFileExist2" testFileExist2,
     TestLabel "testGetParamsLine1" testGetParamsLine1,
@@ -17,8 +17,6 @@ testlist = TestList [
     TestLabel "testCheckElemList1" testCheckElemList1,
     TestLabel "testCheckElemList2" testCheckElemList2,
     TestLabel "testCheckElemList3" testCheckElemList3,
-    TestLabel "getAssignationKeyList1" getAssignationKeyList1,
-    TestLabel "getAssignationKeyList2" getAssignationKeyList2,
     TestLabel "testfindAssignation1" testfindAssignation1,
     TestLabel "testfindAssignation2" testfindAssignation2,
     TestLabel "testfindAssignation3" testfindAssignation3,
@@ -31,5 +29,5 @@ testlist = TestList [
 
 main :: IO ()
 main = do
-    runTestTT testlist
+    runTestTT testList
     return ()

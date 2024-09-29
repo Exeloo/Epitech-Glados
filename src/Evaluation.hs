@@ -10,15 +10,11 @@ module Evaluation where
 import AstData
 import Symbol
 
-getAssignationKeyList :: [Ast] -> [Symbol]
-getAssignationKeyList [] = []
-getAssignationKeyList ((AAssignation (VarAssignation a _)):xs) = a:(getAssignationKeyList xs)
-getAssignationKeyList (_:xs) = getAssignationKeyList xs
-
 checkElemList :: Symbol -> [[Ast]] -> Either String Bool
 checkElemList _ [] = Left "Not existing"
-checkElemList x (y:ys) | (elem x (getAssignationKeyList y)) == True = Right True
-                       | otherwise = checkElemList x ys
+checkElemList x (y:ys) = case (findAssignation x y) of
+                    Nothing -> checkElemList x ys
+                    Just _ -> Right True
 
 findAssignation :: Symbol -> [Ast] -> Maybe Ast
 findAssignation _ [] = Nothing
