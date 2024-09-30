@@ -1,6 +1,7 @@
-import Test.HUnit
 import EvalUnitTests
+import Test.HUnit ( runTestTT, Test(TestLabel, TestList) )
 import LaunchUnitTests
+import UnitTestsParser(parserTestList)
 
 testList :: Test
 testList = TestList [
@@ -29,5 +30,6 @@ testList = TestList [
 
 main :: IO ()
 main = do
-    runTestTT testList
+    _ <- runTestTT testList
+    _ <- runTestTT parserTestList
     return ()
