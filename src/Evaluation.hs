@@ -27,3 +27,7 @@ getElemList _ [] = Left "No usefull data"
 getElemList x (xs) = case (findAssignation x (last xs)) of
                 Nothing -> getElemList x (init xs)
                 Just a -> Right a
+
+addAssignation :: Ast -> [[Ast]] -> [[Ast]]
+addAssignation x [] = [[x]]
+addAssignation x xs = (init xs) ++ ([(last xs) ++ [x]])

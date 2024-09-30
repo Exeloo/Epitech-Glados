@@ -40,3 +40,10 @@ testgetElemList4 = TestCase (assertEqual "test empty list again" (Left "No usefu
 
 testgetElemList5 :: Test
 testgetElemList5 = TestCase (assertEqual "test getting from last scope" (Right (AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "the true one"}))) (getElemList "a" [[AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "the false one"})], [AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "the true one"}), AAssignation (VarAssignation {assignationKey = "c", assignationValue = ASymbol "x"})]]))
+
+testaddAssignation1 :: Test
+testaddAssignation1 = TestCase (assertEqual "test adding element empty list" ([[(AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "x"}))]]) (addAssignation (AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "x"})) []))
+
+testaddAssignation2 :: Test
+testaddAssignation2 = TestCase (assertEqual "test adding element non empty list" ([[(AAssignation (VarAssignation {assignationKey = "b", assignationValue = ASymbol "x"}))], [(AAssignation (VarAssignation {assignationKey = "c", assignationValue = ASymbol "x"})), (AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "x"}))]]) (addAssignation (AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "x"})) [[(AAssignation (VarAssignation {assignationKey = "b", assignationValue = ASymbol "x"}))], [(AAssignation (VarAssignation {assignationKey = "c", assignationValue = ASymbol "x"}))]]))
+
