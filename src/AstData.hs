@@ -9,13 +9,13 @@ module AstData (Ast(..), AstDeclaration(..), AstAssignation(..), AstFuncArg(..),
 
 import Symbol
 
-data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: [Ast] } deriving Show
+data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: [Ast] } deriving (Show, Eq)
 
-data AstAssignation = VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } deriving Show
+data AstAssignation = VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } deriving (Show, Eq)
 
-data AstFuncArg = FFunc AstDeclaration | FSymbol Symbol deriving Show
+data AstFuncArg = FFunc AstDeclaration | FSymbol Symbol deriving (Show, Eq)
 
-data AstCall = FuncCall { callFunction :: AstFuncArg, callArgs :: [Ast] } deriving Show
+data AstCall = FuncCall { callFunction :: AstFuncArg, callArgs :: [Ast] } deriving (Show, Eq)
 
 data Ast =
   ASymbol Symbol |

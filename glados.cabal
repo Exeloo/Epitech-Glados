@@ -28,6 +28,7 @@ library
       AstData
       AstEval
       Launch
+      Evaluation
       Parser
       SExprData
       Symbol
@@ -68,6 +69,7 @@ test-suite glados-test
   other-modules:
       LaunchUnitTests
       UnitTestAstEval
+      EvalUnitTests
       UnitTestsParser
       Paths_glados
   autogen-modules:
