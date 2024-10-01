@@ -5,17 +5,17 @@
 -- AstData
 -}
 
-module AstData (Ast, AstDeclaration, AstAssignation, AstFuncArg, AstCall) where
+module AstData (Ast (..), AstDeclaration, AstAssignation (..), AstFuncArg, AstCall) where
 
 import Symbol
 
-data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: [Ast] } deriving Show
+data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: [Ast] } deriving (Show, Eq)
 
-data AstAssignation = VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } deriving Show
+data AstAssignation = VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } deriving (Show, Eq)
 
-data AstFuncArg = FFunc AstDeclaration | FSymbol Symbol deriving Show
+data AstFuncArg = FFunc AstDeclaration | FSymbol Symbol deriving (Show, Eq)
 
-data AstCall = FuncCall { callFunction :: AstFuncArg, callArgs :: [Ast] } deriving Show
+data AstCall = FuncCall { callFunction :: AstFuncArg, callArgs :: [Ast] } deriving (Show, Eq)
 
 data Ast =
   ASymbol Symbol |
@@ -26,4 +26,4 @@ data Ast =
   ADeclaration AstDeclaration |
   AAssignation AstAssignation |
   ACall AstCall
-    deriving Show
+    deriving (Show, Eq)
