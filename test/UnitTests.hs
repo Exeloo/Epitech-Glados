@@ -2,6 +2,7 @@ import EvalUnitTests
 import Test.HUnit ( runTestTT, Test(TestLabel, TestList) )
 import LaunchUnitTests
 import UnitTestsParser(parserTestList)
+import UnitTestAstEval
 
 testList :: Test
 testList = TestList [
@@ -34,4 +35,5 @@ main :: IO ()
 main = do
     _ <- runTestTT testList
     _ <- runTestTT parserTestList
+    _ <- runTestTT testlistAstEval
     return ()
