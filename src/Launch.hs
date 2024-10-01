@@ -10,6 +10,9 @@ module Launch (launch, fileExist, getParamsLine) where
 import System.Directory (doesFileExist)
 import System.IO (hFlush, stdout, hIsTerminalDevice, stdin, isEOF)
 import Data.Maybe (isJust, fromJust)
+import Text.Megaparsec (parse, errorBundlePretty)
+
+import Parser
 
 fileExist :: [String] -> IO (Maybe String)
 fileExist [] = return Nothing
@@ -41,27 +44,31 @@ getInput flag = do
         hFlush stdout >>
         getInputLine flag
 
+checkParse :: String -> Bool -> IO ()
+checkParse line flag =
+    let res = parse parseSList "" line
+    in case res of
+        Left err -> putStrLn $ "Parse error: " ++ errorBundlePretty err
+        Right sexpr ->
+            if flag
+                then putStrLn (line ++ " flag") -- compile with flag "-l"
+            else
+                putStrLn line
+
 
 getInputLine :: Bool -> IO ()
 getInputLine flag = do
     line <- getLine
-    if flag
-        then putStrLn (line ++ " flag") -- compile with flag "-l"
-    else
-        putStrLn line
+    checkParse line flag
     getInput flag
 
 getFile :: Bool -> String -> IO ()
-getFile False path = do
+getFile flag path = do
     content <- readFile path
-    putStrLn content
-getFile _ path = do
-    content <- readFile path
-    putStrLn (content ++ "\nflag") -- compile with flag "-l"
+    checkParse content flag
 
 simpleLine :: Bool -> String -> IO ()
-simpleLine False str = putStrLn str
-simpleLine _ str = putStrLn (str ++ " flag") -- compile with flag "-l"
+simpleLine flag str = checkParse str flag
 
 launch :: [String] -> IO Bool
 launch [] = getInput False >> return True
