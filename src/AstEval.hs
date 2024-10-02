@@ -7,53 +7,61 @@
 
 module AstEval (evalAST, callAST, replaceSymbol) where
 
+import Symbol
 import AstData
+import Evaluation
 
-callAST :: String -> Ast -> Either String Ast
-callAST "+" (AList [AInt x, AInt y]) = Right (AInt (x + y))
-callAST "-" (AList [AInt x, AInt y]) = Right (AInt (x - y))
-callAST "*" (AList [AInt x, AInt y]) = Right (AInt (x * y))
-callAST "div" (AList [AInt x, AInt y]) = Right (AInt (x `div` y))
-callAST "mod" (AList [AInt x, AInt y]) = Right (AInt (x `mod` y))
-callAST "eq?" (AList [x, y]) = Right (ABool (x == y))
-callAST "<" (AList [AInt x, AInt y]) = Right (ABool (x < y))
-callAST "if" (AList [func, a, b]) = case func of
+callAST :: String -> [Ast] -> Either String Ast
+callAST "+" [AInt x, AInt y] = Right (AInt (x + y))
+callAST "-" [AInt x, AInt y] = Right (AInt (x - y))
+callAST "*" [AInt x, AInt y] = Right (AInt (x * y))
+callAST "div" [AInt x, AInt y] = Right (AInt (x `div` y))
+callAST "mod" [AInt x, AInt y] = Right (AInt (x `mod` y))
+callAST "eq?" [x, y] = Right (ABool (x == y))
+callAST "<" [AInt x, AInt y] = Right (ABool (x < y))
+callAST "if" [func, a, b] = case func of
   ABool True -> Right a
   ABool False -> Right b
   ASymbol "#t" -> Right a
   ASymbol "#f" -> Right b
-  ACall FuncCall { callFunction = FSymbol f, callArgs = arg } -> case callAST f (AList arg) of
+  ACall FuncCall { callFunction = FSymbol f, callArgs = arg } -> case callAST f arg of
     Right (ABool True) -> Right a
     Right (ABool False) -> Right b
   _ -> Left "Invalid if statement"
-callAST a b = Right (AList [ASymbol a, b])
+callAST _ _ = Left "Invalid function"
 
-replaceSymbol :: Ast -> Ast -> Ast -> Ast
-replaceSymbol (ASymbol s) (a) (ASymbol b) = case s == b of
+replaceSymbol :: Symbol -> Ast -> Ast -> Ast
+replaceSymbol s (a) (ASymbol b) = case s == b of
   True -> a
   False -> ASymbol b
-replaceSymbol (ASymbol s) (a) (AList lst) = case map (replaceSymbol (ASymbol s) (a)) lst of
-  [ASymbol s'] -> ASymbol s'
-  lst' -> AList lst'
-replaceSymbol (ASymbol s) (a) (ACall FuncCall {callFunction = f, callArgs = args}) = case map (replaceSymbol (ASymbol s) (a)) args of
+replaceSymbol s (a) (ACall FuncCall {callFunction = f, callArgs = args}) = case map (replaceSymbol s (a)) args of
   [ASymbol s'] -> ASymbol s'
   args' -> ACall FuncCall {callFunction = f, callArgs = args'}
+replaceSymbol s (a) (AList lst) = case map (replaceSymbol s (a)) lst of
+  [ASymbol s'] -> ASymbol s'
+  lst' -> AList lst'
 replaceSymbol _ _ b = b
 
-evalAstFunc :: [Ast] -> Ast -> [Ast] -> Either String Ast
+evalAstFunc :: [Symbol] -> Ast -> [Ast] -> Either String Ast
 evalAstFunc (arg:args) func (argcall:argcalls) = evalAstFunc args (replaceSymbol arg argcall func) argcalls
-evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ | f `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = callAST f (AList args)
+evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ | f `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = callAST f args
+evalAstFunc _ (ACall FuncCall {callFunction = FFunc f, callArgs = args}) _ = evalAST (ACall FuncCall {callFunction = FFunc f, callArgs = [AInt 1]})
+evalAstFunc _ (AList [body]) [] = evalAstFunc [] body []
 evalAstFunc [] func [] = Right func
-evalAstFunc _ _ _ = Left "Invalid function"
+evalAstFunc _ _ [] = Left "Invalid function, not enough arguments"
+evalAstFunc [] _ _ = Left "Invalid function, too many arguments"
 
-evalAST :: Ast-> Maybe Ast
-evalAST (AInt x) = Just (AInt x)
-evalAST (ASymbol x) = Just (ASymbol x)
+evalAST :: Ast-> Either String Ast
+evalAST (AInt x) = Right (AInt x)
+evalAST (ASymbol x) = Right (ASymbol x)
 evalAST (ACall FuncCall {callFunction = FSymbol func, callArgs = args})= case mapM evalAST args of
-    Just x -> case callAST func (AList x) of
-        Just x -> Just x
-        Nothing -> Nothing
-    Nothing -> Nothing
+    Right x -> case callAST func x of
+        Right x -> Right x
+        Left x -> Left x
+    Left x -> Left x
+evalAST (ACall FuncCall {callFunction = FFunc FuncDeclaration { declareArgs = argfunc, declareBody = body }, callArgs = args}) = case evalAstFunc argfunc (AList body) args of
+  Right x -> Right x
+  Left x -> Left x
 evalAST (AList x) = case mapM evalAST x of
-    Just x -> Just (AList x)
-    Nothing -> Nothing
+    Right x -> Right (AList x)
+    Left x -> Left x
