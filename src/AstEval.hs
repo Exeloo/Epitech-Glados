@@ -10,7 +10,6 @@ module AstEval (evalAST, callAST, replaceSymbol) where
 import Symbol
 import AstData
 import Evaluation
-import Data.Either (fromRight)
 
 checkListSymbol :: [Ast] -> [[Ast]] -> Either String Bool
 checkListSymbol [] _ = Right False
