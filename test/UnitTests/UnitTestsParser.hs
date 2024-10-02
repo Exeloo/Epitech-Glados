@@ -1,4 +1,4 @@
-module UnitTestsParser(parserTestList) where
+module UnitTests.UnitTestsParser(parserTestList) where
 
 import Test.HUnit
 import Text.Megaparsec

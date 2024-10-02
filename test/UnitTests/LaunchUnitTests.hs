@@ -1,15 +1,4 @@
-module LaunchUnitTests (
-    testFileExist1,
-    testFileExist2,
-    testGetParamsLine1,
-    testGetParamsLine2,
-    testGetParamsLine3,
-    testGetParamsLine4,
-    testLaunch1,
-    testLaunch2,
-    testLaunch3,
-    testLaunch4
-    ) where
+module UnitTests.LaunchUnitTests (testlistLaunch) where
 
 import Test.HUnit
 import Launch
@@ -23,7 +12,6 @@ testFileExist2 :: Test
 testFileExist2 = TestCase $ do
     res <- fileExist ["notExist1", ".gitignore"]
     assertEqual "file exist" (Just ".gitignore") res
-
 
 testGetParamsLine1 :: Test
 testGetParamsLine1 = TestCase (assertEqual "get first element" "params1" (getParamsLine ["params1", "-l"]))
@@ -50,9 +38,23 @@ testLaunch2 = TestCase $ do
 testLaunch3 :: Test
 testLaunch3 = TestCase $ do
     res <- launch ["README.md"]
-    assertEqual "file exist " True res
+    assertEqual "file not good" False res
 
 testLaunch4 :: Test
 testLaunch4 = TestCase $ do
-    res <- launch ["define foo 42"]
+    res <- launch ["(define foo 42)"]
     assertEqual "Simple line" True res
+
+testlistLaunch :: Test
+testlistLaunch = TestList [
+    TestLabel "testFileExist1" testFileExist1,
+    TestLabel "testFileExist2" testFileExist2,
+    TestLabel "testGetParamsLine1" testGetParamsLine1,
+    TestLabel "testGetParamsLine2" testGetParamsLine2,
+    TestLabel "testGetParamsLine3" testGetParamsLine3,
+    TestLabel "testGetParamsLine4" testGetParamsLine4,
+    TestLabel "testLaunch1" testLaunch1,
+    TestLabel "testLaunch2" testLaunch2,
+    TestLabel "testLaunch3" testLaunch3,
+    TestLabel "testLaunch4" testLaunch4
+    ]
