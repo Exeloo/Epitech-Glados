@@ -9,24 +9,24 @@ module AstEval (evalAST, callAST, replaceSymbol) where
 
 import AstData
 
-callAST :: String -> Ast -> Maybe Ast
-callAST "+" (AList [AInt x, AInt y]) = Just (AInt (x + y))
-callAST "-" (AList [AInt x, AInt y]) = Just (AInt (x - y))
-callAST "*" (AList [AInt x, AInt y]) = Just (AInt (x * y))
-callAST "div" (AList [AInt x, AInt y]) = Just (AInt (x `div` y))
-callAST "mod" (AList [AInt x, AInt y]) = Just (AInt (x `mod` y))
-callAST "eq?" (AList [x, y]) = Just (ABool (x == y))
-callAST "<" (AList [AInt x, AInt y]) = Just (ABool (x < y))
+callAST :: String -> Ast -> Either String Ast
+callAST "+" (AList [AInt x, AInt y]) = Right (AInt (x + y))
+callAST "-" (AList [AInt x, AInt y]) = Right (AInt (x - y))
+callAST "*" (AList [AInt x, AInt y]) = Right (AInt (x * y))
+callAST "div" (AList [AInt x, AInt y]) = Right (AInt (x `div` y))
+callAST "mod" (AList [AInt x, AInt y]) = Right (AInt (x `mod` y))
+callAST "eq?" (AList [x, y]) = Right (ABool (x == y))
+callAST "<" (AList [AInt x, AInt y]) = Right (ABool (x < y))
 callAST "if" (AList [func, a, b]) = case func of
-  ABool True -> Just a
-  ABool False -> Just b
-  ASymbol "#t" -> Just a
-  ASymbol "#f" -> Just b
+  ABool True -> Right a
+  ABool False -> Right b
+  ASymbol "#t" -> Right a
+  ASymbol "#f" -> Right b
   ACall FuncCall { callFunction = FSymbol f, callArgs = arg } -> case callAST f (AList arg) of
-    Just (ABool True) -> Just a
-    Just (ABool False) -> Just b
-  _ -> Nothing
-callAST a b = Just (AList [ASymbol a, b])
+    Right (ABool True) -> Right a
+    Right (ABool False) -> Right b
+  _ -> Left "Invalid if statement"
+callAST a b = Right (AList [ASymbol a, b])
 
 replaceSymbol :: Ast -> Ast -> Ast -> Ast
 replaceSymbol (ASymbol s) (a) (ASymbol b) = case s == b of
@@ -40,11 +40,11 @@ replaceSymbol (ASymbol s) (a) (ACall FuncCall {callFunction = f, callArgs = args
   args' -> ACall FuncCall {callFunction = f, callArgs = args'}
 replaceSymbol _ _ b = b
 
-evalAstFunc :: [Ast] -> Ast -> [Ast] -> Maybe Ast
+evalAstFunc :: [Ast] -> Ast -> [Ast] -> Either String Ast
 evalAstFunc (arg:args) func (argcall:argcalls) = evalAstFunc args (replaceSymbol arg argcall func) argcalls
 evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ | f `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = callAST f (AList args)
-evalAstFunc [] func [] = Just func
-evalAstFunc _ _ _ = Nothing
+evalAstFunc [] func [] = Right func
+evalAstFunc _ _ _ = Left "Invalid function"
 
 evalAST :: Ast-> Maybe Ast
 evalAST (AInt x) = Just (AInt x)
