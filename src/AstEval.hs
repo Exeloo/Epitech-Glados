@@ -1,6 +1,6 @@
 {-
 -- EPITECH PROJECT, 2024
--- bootstrap_haskell
+-- glados
 -- File description:
 -- AstEval
 -}
