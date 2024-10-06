@@ -1,59 +1,72 @@
 {-
 -- EPITECH PROJECT, 2024
--- bootstrap_haskell
+-- glados
 -- File description:
 -- AstEval
 -}
 
 module AstEval (evalAST, callAST, replaceSymbol) where
 
+import Symbol
 import AstData
+import Evaluation
 
-callAST :: String -> Ast -> Maybe Ast
-callAST "+" (AList [AInt x, AInt y]) = Just (AInt (x + y))
-callAST "-" (AList [AInt x, AInt y]) = Just (AInt (x - y))
-callAST "*" (AList [AInt x, AInt y]) = Just (AInt (x * y))
-callAST "div" (AList [AInt x, AInt y]) = Just (AInt (x `div` y))
-callAST "mod" (AList [AInt x, AInt y]) = Just (AInt (x `mod` y))
-callAST "eq?" (AList [x, y]) = Just (ABool (x == y))
-callAST "<" (AList [AInt x, AInt y]) = Just (ABool (x < y))
-callAST "if" (AList [func, a, b]) = case func of
-  ABool True -> Just a
-  ABool False -> Just b
-  ASymbol "#t" -> Just a
-  ASymbol "#f" -> Just b
-  ACall FuncCall { callFunction = FSymbol f, callArgs = arg } -> case callAST f (AList arg) of
-    Just (ABool True) -> Just a
-    Just (ABool False) -> Just b
-  _ -> Nothing
-callAST a b = Just (AList [ASymbol a, b])
+callAST :: String -> [Ast] -> Either String Ast
+callAST "+" [AInt x, AInt y] = Right (AInt (x + y))
+callAST "-" [AInt x, AInt y] = Right (AInt (x - y))
+callAST "*" [AInt x, AInt y] = Right (AInt (x * y))
+callAST "div" [AInt x, AInt y] = Right (AInt (x `div` y))
+callAST "mod" [AInt x, AInt y] = Right (AInt (x `mod` y))
+callAST "eq?" [x, y] = Right (ABool (x == y))
+callAST "<" [AInt x, AInt y] = Right (ABool (x < y))
+callAST "if" [func, a, b] = case func of
+  ABool True -> Right a
+  ABool False -> Right b
+  ASymbol "#t" -> Right a
+  ASymbol "#f" -> Right b
+  ACall FuncCall { callFunction = FSymbol f, callArgs = arg } -> case callAST f arg of
+    Right (ABool True) -> Right a
+    Right (ABool False) -> Right b
+    _ -> Left "Invalid if statement"
+  _ -> Left "Invalid if statement"
+callAST _ _ = Left "Invalid function"
 
-replaceSymbol :: Ast -> Ast -> Ast -> Ast
-replaceSymbol (ASymbol s) (a) (ASymbol b) = case s == b of
-  True -> a
-  False -> ASymbol b
-replaceSymbol (ASymbol s) (a) (AList lst) = case map (replaceSymbol (ASymbol s) (a)) lst of
-  [ASymbol s'] -> ASymbol s'
-  lst' -> AList lst'
-replaceSymbol (ASymbol s) (a) (ACall FuncCall {callFunction = f, callArgs = args}) = case map (replaceSymbol (ASymbol s) (a)) args of
+replaceSymbol :: Symbol -> Ast -> [[Ast]] -> Ast -> Ast
+replaceSymbol _ _ var (ASymbol b)  | checkElemList b var == Right True = case getElemList b var of
+  Right (AAssignation (VarAssignation {assignationKey = _, assignationValue = x})) -> x
+  Left _ -> ASymbol b
+replaceSymbol s (a) _ (ASymbol b) | s == b = a
+replaceSymbol s (a) var (ACall FuncCall {callFunction = f, callArgs = args}) = case map (replaceSymbol s (a) var) args  of
   [ASymbol s'] -> ASymbol s'
   args' -> ACall FuncCall {callFunction = f, callArgs = args'}
-replaceSymbol _ _ b = b
+replaceSymbol s (a) var (AList lst) = case map (replaceSymbol s (a) var) lst  of
+  [ASymbol s'] -> ASymbol s'
+  lst' -> AList lst'
+replaceSymbol _ _ _ b = b
 
-evalAstFunc :: [Ast] -> Ast -> [Ast] -> Maybe Ast
-evalAstFunc (arg:args) func (argcall:argcalls) = evalAstFunc args (replaceSymbol arg argcall func) argcalls
-evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ | f `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = callAST f (AList args)
-evalAstFunc [] func [] = Just func
-evalAstFunc _ _ _ = Nothing
+evalAstFunc :: [Symbol] -> Ast -> [Ast] -> [[Ast]] -> Either String Ast
+evalAstFunc (arg:args) func (argcall:argcalls) a = evalAstFunc args (replaceSymbol arg argcall a func) argcalls a
+evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ _ | f `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = callAST f args
+evalAstFunc _ (ACall FuncCall {callFunction = FFunc f, callArgs = args}) _ a = evalAST a (ACall FuncCall {callFunction = FFunc f, callArgs = args})
+evalAstFunc _ (AList [body]) [] a = evalAstFunc [] body [] a
+evalAstFunc [] func [] _= Right func
+evalAstFunc _ _ [] _ = Left "Invalid function, not enough arguments"
+evalAstFunc [] _ _ _ = Left "Invalid function, too many arguments"
 
-evalAST :: Ast-> Maybe Ast
-evalAST (AInt x) = Just (AInt x)
-evalAST (ASymbol x) = Just (ASymbol x)
-evalAST (ACall FuncCall {callFunction = FSymbol func, callArgs = args})= case mapM evalAST args of
-    Just x -> case callAST func (AList x) of
-        Just x -> Just x
-        Nothing -> Nothing
-    Nothing -> Nothing
-evalAST (AList x) = case mapM evalAST x of
-    Just x -> Just (AList x)
-    Nothing -> Nothing
+evalAST :: [[Ast]] -> Ast -> Either String Ast
+evalAST _ (AInt x) = Right (AInt x)
+evalAST a (ASymbol x) = Right (replaceSymbol x (ASymbol x) a (ASymbol x))
+evalAST _ (AAssignation var) = Right (AAssignation var)
+evalAST a (ACall FuncCall {callFunction = FSymbol func, callArgs = args})= case mapM (evalAST a) args of
+    Right x -> case callAST func x of
+        Right x' -> Right x'
+        Left x' -> Left x'
+    Left x -> Left x
+evalAST a (ACall FuncCall {callFunction = FFunc FuncDeclaration { declareArgs = argfunc, declareBody = body }, callArgs = args}) = case evalAstFunc argfunc (AList body) args a of
+  Right x -> Right x
+  Left x -> Left x
+evalAST a (AList (x:xs)) = case evalAST a x of
+  Right (AAssignation var) -> Right (addAssignation (AAssignation var) a) >>= \x' -> evalAST x' (AList xs)
+  Right _ -> evalAST a (AList xs)
+  Left x' -> Left x'
+evalAST _ _ = Left "Invalid function"
