@@ -13,9 +13,24 @@ import Symbol
 
 type AstResult = Either String Ast
 
+parseUnamedInstruction :: AstDeclaration -> [SExpr] -> AstResult
+parseUnamedInstruction declaration args =
+  case sExpElementsToAst args of
+    Left err -> Left err
+    Right (AList params) -> Right (ACall FuncCall {callFunction = FFunc declaration, callArgs = params})
+    _ -> Left "Internal Error"
+
 sExpListToAst :: [SExpr] -> AstResult
-sExpListToAst ((SSymbol sym):xs) = parseInstruction sym xs
-sExpListToAst arr = sExpElementsToAst arr
+sExpListToAst [] = Right (AList [])
+sExpListToAst (x:xs) =
+  case sExpElementToAst x of
+    Left err -> Left err
+    Right (ASymbol sym) -> parseInstruction sym xs
+    Right (ADeclaration declaration) -> parseUnamedInstruction declaration xs
+    Right r -> case sExpElementsToAst xs of
+      Left err -> Left err
+      Right (AList rs) -> Right (AList (r:rs))
+      _ -> Left "Internal Error"
 
 sExpElementToAst :: SExpr -> AstResult
 sExpElementToAst (SInt x) = Right (AInt x)
@@ -54,11 +69,19 @@ parseDefine ((SList ((SSymbol sym):args)):var:[]) =
       Right value -> Right (AAssignation VarAssignation {assignationKey = sym, assignationValue = (ADeclaration FuncDeclaration {declareArgs = params, declareBody = [value]})})
 parseDefine _ = Left "Invalid lisp: define takes 2 params"
 
---parseLambda :: [SExpr] -> AstResult
+parseLambda :: [SExpr] -> AstResult
+parseLambda ((SList (args)):var:[]) =
+  case parseFuncArgs args of
+    Left err -> Left err
+    Right params -> case sExpElementToAst var of
+      Left err -> Left err
+      Right value -> Right (ADeclaration FuncDeclaration {declareArgs = params, declareBody = [value]})
+parseLambda _ = Left "Invalid lisp: lambda takes 2 params"
 
 parseInstruction :: Symbol -> [SExpr] -> AstResult
 parseInstruction "define" xs = parseDefine xs
---parseInstruction "lambda" xs = parseLambda xs
+parseInstruction "lambda" xs = parseLambda xs
+parseInstruction sym [] = Right (ASymbol sym)
 parseInstruction sym xs =
   case sExpElementsToAst xs of
     Left err -> Left err
@@ -66,8 +89,13 @@ parseInstruction sym xs =
     _ -> Left "Internal Error"
 
 sExpInstructionToAst :: [SExpr] -> AstResult
-sExpInstructionToAst ((SSymbol sym):xs) = parseInstruction sym xs
-sExpInstructionToAst _ = Left "Invalid lisp: the first value of an instruction must be a symbol"
+sExpInstructionToAst (x:xs) =
+  case sExpElementToAst x of
+    Left err -> Left err
+    Right (ASymbol sym) -> parseInstruction sym xs
+    Right (ADeclaration declaration) -> parseUnamedInstruction declaration xs
+    _ -> Left "Invalid lisp: the first element must be an instruction"
+sExpInstructionToAst _ = Left "Invalid lisp: the first element must be an instruction"
 
 
 sExpToAst :: SExpr -> AstResult
