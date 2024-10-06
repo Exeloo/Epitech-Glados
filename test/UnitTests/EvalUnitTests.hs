@@ -1,9 +1,8 @@
-module EvalUnitTests where
+module UnitTests.EvalUnitTests (testlistEval) where
 
 import Test.HUnit
 import Evaluation
 import AstData
-import Symbol
 
 testCheckElemList1 :: Test
 testCheckElemList1 = TestCase (assertEqual "test" (Left "Not existing") (checkElemList ("test") []))
@@ -47,3 +46,20 @@ testaddAssignation1 = TestCase (assertEqual "test adding element empty list" ([[
 testaddAssignation2 :: Test
 testaddAssignation2 = TestCase (assertEqual "test adding element non empty list" ([[(AAssignation (VarAssignation {assignationKey = "b", assignationValue = ASymbol "x"}))], [(AAssignation (VarAssignation {assignationKey = "c", assignationValue = ASymbol "x"})), (AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "x"}))]]) (addAssignation (AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "x"})) [[(AAssignation (VarAssignation {assignationKey = "b", assignationValue = ASymbol "x"}))], [(AAssignation (VarAssignation {assignationKey = "c", assignationValue = ASymbol "x"}))]]))
 
+testlistEval :: Test
+testlistEval = TestList [
+    TestLabel "testCheckElemList1" testCheckElemList1,
+    TestLabel "testCheckElemList2" testCheckElemList2,
+    TestLabel "testCheckElemList3" testCheckElemList3,
+    TestLabel "testfindAssignation1" testfindAssignation1,
+    TestLabel "testfindAssignation2" testfindAssignation2,
+    TestLabel "testfindAssignation3" testfindAssignation3,
+    TestLabel "testfindAssignation4" testfindAssignation4,
+    TestLabel "testgetElemList1" testgetElemList1,
+    TestLabel "testgetElemList2" testgetElemList2,
+    TestLabel "testgetElemList3" testgetElemList3,
+    TestLabel "testgetElemList4" testgetElemList4,
+    TestLabel "testgetElemList5" testgetElemList5,
+    TestLabel "testaddAssignation1" testaddAssignation1,
+    TestLabel "testaddAssignation2" testaddAssignation2
+    ]

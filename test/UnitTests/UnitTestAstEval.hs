@@ -1,4 +1,4 @@
-module UnitTestAstEval (testlistAstEval) where
+module UnitTests.UnitTestAstEval (testlistAstEval) where
 
 import Test.HUnit
 import AstEval

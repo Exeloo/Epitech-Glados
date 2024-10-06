@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
--- This file has been generated from package.yaml by hpack version 0.36.0.
+-- This file has been generated from package.yaml by hpack version 0.37.0.
 --
 -- see: https://github.com/sol/hpack
 
@@ -67,10 +67,10 @@ test-suite glados-test
   type: exitcode-stdio-1.0
   main-is: UnitTests.hs
   other-modules:
-      EvalUnitTests
-      LaunchUnitTests
-      UnitTestAstEval
-      UnitTestsParser
+      UnitTests.EvalUnitTests
+      UnitTests.LaunchUnitTests
+      UnitTests.UnitTestAstEval
+      UnitTests.UnitTestsParser
       Paths_glados
   autogen-modules:
       Paths_glados
