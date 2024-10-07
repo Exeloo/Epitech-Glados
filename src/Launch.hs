@@ -14,7 +14,11 @@ import System.IO (hFlush, stdout, hIsTerminalDevice, stdin, isEOF)
 import Data.Maybe (isJust, fromJust)
 import Text.Megaparsec (parse, errorBundlePretty)
 
+import AstData
+import AstEval
 import Parser
+import SExprData
+import SExprToAst
 
 handleCtrl :: IOException -> IO Bool
 handleCtrl e | isEOFError e = return True
@@ -64,7 +68,7 @@ checkParse :: String -> Bool -> IO Bool
 checkParse line flag =
     case parse parseSList "" line of
         Left err -> putStrLn ("Parse error: " ++ errorBundlePretty err) >> return False
-        Right res -> putStrLn (line ++ if flag then " flag" else "") >> return True -- compile with flag "-l"
+        Right res -> getAst res -- compile with flag "-l"
 
 checkLines :: [String] -> Bool -> IO Bool
 checkLines [] _ = return True
@@ -82,7 +86,6 @@ launchParams args =
         then getFile ("-l" `elem` args) (fromJust file)
     else
         simpleLine ("-l" `elem` args) (getParamsLine args)
-
 
 getInputLine :: Bool -> IO Bool
 getInputLine flag =
@@ -103,3 +106,13 @@ launch args | (length args > 2) = return False
             | (length args == 2) && not ("-l" `elem` args) = return False
             | ("-l" `elem` args) && (length args == 1) = getInput True
             | otherwise = launchParams args
+
+getAst :: SExpr -> IO Bool
+getAst x = case sExpToAst x of
+    Left a -> putStrLn (a) >> return False
+    Right a -> evaluateAst a
+
+evaluateAst :: Ast -> IO Bool
+evaluateAst x = case evalAST [[]] x of
+    Left a -> putStrLn (a) >> return False
+    Right a -> return True
