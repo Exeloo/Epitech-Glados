@@ -39,3 +39,7 @@ echo "=== Test Summary ==="
 echo "Passed : $passed"
 echo "Failed : $failed"
 echo "Crashed : $crashed"
+
+if [[ $failed != 0 || $failed != 0 ]]; then
+  exit 1
+fi
