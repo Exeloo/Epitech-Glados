@@ -31,6 +31,7 @@ library
       Launch
       Parser
       SExprData
+      SExprToAst
       Symbol
   other-modules:
       Paths_glados
@@ -71,6 +72,7 @@ test-suite glados-test
       UnitTests.LaunchUnitTests
       UnitTests.UnitTestAstEval
       UnitTests.UnitTestsParser
+      UnitTests.UnitTestsSExprToAst
       Paths_glados
   autogen-modules:
       Paths_glados
