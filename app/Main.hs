@@ -6,10 +6,10 @@ import System.Exit
 import System.Environment
 
 main :: IO ()
-main = do
-    args <- getArgs
-    res <- launch args
-    if res
+main = getArgs >>= \args ->
+    if "--help" `elem` args
         then exitSuccess
-    else
-        exitWith (ExitFailure 84)
+        else launch args >>= \res ->
+            if res
+                then exitSuccess
+                else exitWith (ExitFailure 84)
