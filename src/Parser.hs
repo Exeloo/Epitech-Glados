@@ -15,7 +15,7 @@ parseSString :: SexprParser SExpr
 parseSString = SString <$> ((char '"' *> someTill charLiteral (char '"')) <|> (char '\'' *> someTill charLiteral (char '\'')))
 
 parseSSymbol :: SexprParser SExpr
-parseSSymbol = SSymbol <$> some (alphaNumChar <|> oneOf "-_+<>?")
+parseSSymbol = SSymbol <$> some (alphaNumChar <|> oneOf "-_+<>?*")
 
 parseSInt :: SexprParser SExpr
 parseSInt = SInt . read <$> some digitChar
