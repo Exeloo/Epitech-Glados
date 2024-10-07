@@ -10,6 +10,7 @@ module SExprToAst (sExpToAst) where
 import AstData
 import SExprData
 import Symbol
+import AstEval
 
 type AstResult = Either String Ast
 
@@ -97,7 +98,10 @@ sExpInstructionToAst (x:xs) =
     _ -> Left "Invalid lisp: the first element must be an instruction"
 sExpInstructionToAst _ = Left "Invalid lisp: the first element must be an instruction"
 
-
 sExpToAst :: SExpr -> AstResult
-sExpToAst (SList xs) = sExpInstructionToAst xs
+sExpToAst (SList xs) = case sExpInstructionToAst xs of
+  Left err -> Left err
+  Right ast -> case evalAST [[]] ast of
+    Left err -> Left (err ++ " ast: " ++ show ast)
+    Right result -> Right result
 sExpToAst _ = Left "Invalid lisp (first value must be an array)"
