@@ -58,8 +58,8 @@ jobs:
       - name: Run tests
         run: make tests
 
-  generate:
-    name: "Create release-artifacts"
+  upload_artifacts:
+    name: "Upload Artifacts"
     runs-on: ubuntu-latest
     container:
       image: epitechcontent/epitest-docker
@@ -76,9 +76,12 @@ jobs:
       - name: Build
         run: make
         timeout-minutes: 2
-      - name: Upload the artifacts
-        uses: skx/github-action-publish-binaries@master
+      - name: Upload Assets
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
         with:
-          args: ${{ env.EXECUTABLES }}
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./glados
+          asset_name: glados
+          asset_content_type: "application/octet-stream"
