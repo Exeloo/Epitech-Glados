@@ -12,13 +12,13 @@ import AstData
 import Evaluation
 
 callAST :: String -> [Ast] -> Either String Ast
-callAST "+" [AInt x, AInt y] = Right (AInt (x + y))
-callAST "-" [AInt x, AInt y] = Right (AInt (x - y))
-callAST "*" [AInt x, AInt y] = Right (AInt (x * y))
-callAST "div" [AInt x, AInt y] = Right (AInt (x `div` y))
-callAST "mod" [AInt x, AInt y] = Right (AInt (x `mod` y))
+callAST "+" [x, y] = Right (AInt (evalArgInt x + evalArgInt y))
+callAST "-" [x, y] = Right (AInt (evalArgInt x - evalArgInt y))
+callAST "*" [x, y] = Right (AInt (evalArgInt x * evalArgInt y))
+callAST "div" [x, y] = Right (AInt (evalArgInt x `div` evalArgInt y))
+callAST "mod" [x, y] = Right (AInt (evalArgInt x `mod` evalArgInt y))
 callAST "eq?" [x, y] = Right (ABool (x == y))
-callAST "<" [AInt x, AInt y] = Right (ABool (x < y))
+callAST "<" [x, y] = Right (ABool (evalArgInt x < evalArgInt y))
 callAST "if" [func, a, b] = case func of
   ABool True -> Right a
   ABool False -> Right b
@@ -31,8 +31,13 @@ callAST "if" [func, a, b] = case func of
   _ -> Left "Invalid if statement"
 callAST a _ = Left $ "callAST : Invalid function: " ++ a
 
+evalArgInt :: Ast -> Int
+evalArgInt ast = case evalAST [[]] ast of
+  Right (AInt x) -> x
+  _ -> 0
+
 replaceSymbol :: Symbol -> Ast -> [[Ast]] -> Ast -> Ast
-replaceSymbol _ _ var (ASymbol b)  | checkElemList b var == Right True = case getElemList b var of
+replaceSymbol _ _ _ (ASymbol b)  | checkElemList b [[]] == Right True = case getElemList b [[]] of
   Right (AAssignation (VarAssignation {assignationKey = _, assignationValue = x})) -> x
   _ -> ASymbol b
 replaceSymbol s (a) _ (ASymbol b) | s == b = a
@@ -48,19 +53,23 @@ evalAstFunc :: [Symbol] -> Ast -> [Ast] -> [[Ast]] -> Either String Ast
 evalAstFunc (arg:args) func (argcall:argcalls) a = evalAstFunc args (replaceSymbol arg argcall a func) argcalls a
 evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ _ | f `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = callAST f args
 evalAstFunc _ (AList [body]) [] a = evalAstFunc [] body [] a
-evalAstFunc [] func [] _= Right func
+evalAstFunc [] func [] _= Right (func)
 evalAstFunc _ _ [] _ = Left "Invalid function, not enough arguments"
 evalAstFunc [] _ _ _ = Left "Invalid function, too many arguments"
 
 findFunc :: Symbol -> [Ast] -> [[Ast]] -> Either String Ast
-findFunc func args var = case getElemList func var of
+findFunc func args _ = case getElemList func [[]] of
   Right (AAssignation (VarAssignation {assignationKey = _, assignationValue = ADeclaration func'})) -> Right (ACall FuncCall {callFunction = FFunc func', callArgs = args})
-  Right x -> Left $ "Function not found: " ++ show x
-  Left _ -> Left "Function not found"
+  Right x -> Left $ "Function not found1: " ++ show x
+  Left x -> Left $ "Function not found2: " ++ x
 
 evalAST :: [[Ast]] -> Ast -> Either String Ast
 evalAST _ (AInt x) = Right (AInt x)
 evalAST a (ASymbol x) = Right (replaceSymbol x (ASymbol x) a (ASymbol x))
+-- evalAST a (AAssignation var) = Right (addAssignation (AAssignation var) a) >>= \x -> Left $ show x
+evalAST a (AAssignation var) = case addAssignation (AAssignation var) a of
+  [x] -> Left $ show (head x)
+  x -> Left $ show x
 evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) | func `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = case mapM (evalAST a) args of
     Right x -> case callAST func x of
         Right x' -> Right x'
@@ -75,5 +84,4 @@ evalAST a (ACall FuncCall {callFunction = FFunc FuncDeclaration { declareArgs = 
 evalAST a (AList x) = case mapM (evalAST a) x of
   Right x' -> Right (AList x')
   Left x' -> Left x'
-evalAST a (AAssignation var) = Right (addAssignation (AAssignation var) a) >>= \_ -> Right (AString "#Procedure")
 evalAST _ _ = Left "Invalid function"
