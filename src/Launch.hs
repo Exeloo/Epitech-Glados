@@ -14,8 +14,6 @@ import System.IO (hFlush, stdout, hIsTerminalDevice, stdin, isEOF)
 import Data.Maybe (isJust, fromJust)
 import Text.Megaparsec (parse, errorBundlePretty)
 
-import AstData
-import AstEval
 import Parser
 import SExprData
 import SExprToAst

@@ -1,6 +1,6 @@
 {-
 -- EPITECH PROJECT, 2024
--- B-FUN-500_glados
+-- glados
 -- File description:
 -- Evaluation
 -}
