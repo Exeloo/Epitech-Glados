@@ -26,9 +26,9 @@ checkElemList x var = checkElemList' False x var
 
 checkElemList' :: Bool -> Symbol -> [[Ast]] -> Either String Bool
 -- checkElemList' False x _ = checkElemList x (readGlobalVar)
-checkElemList' False x _ = unsafePerformIO $ do
+checkElemList' False x varinit = unsafePerformIO $ do
     var <- readGlobalVar
-    return $ checkElemList' True x var
+    return $ if var == [] then checkElemList' True x varinit else checkElemList' True x var
 checkElemList' True _ [] = Left "Not existing"
 checkElemList' True x (y:ys) = case (findAssignation x y) of
                     Nothing -> checkElemList' True x ys
@@ -44,9 +44,9 @@ getElemList :: Symbol -> [[Ast]] -> Either String Ast
 getElemList x var = getElemList' False x var
 
 getElemList' :: Bool -> Symbol -> [[Ast]] -> Either String Ast
-getElemList' False x _ = unsafePerformIO $ do
+getElemList' False x varinit = unsafePerformIO $ do
     var <- readGlobalVar
-    return $ getElemList' True x var
+    return $ if var == [] then getElemList' True x varinit else getElemList' True x var
 getElemList' True _ [] = Left "No useful data"
 getElemList' True x (xs:rest) = case findAssignation x xs of
     Nothing -> getElemList' True x rest

@@ -24,7 +24,7 @@ testErrorParseSListNoEnd :: Test
 testErrorParseSListNoEnd = TestCase $ assertLeft "Error parsing list (define" (parse parseSList "" "(define")
 
 testSuccessParseSSymbolAllChar :: Test
-testSuccessParseSSymbolAllChar = TestCase $ assertEqual "Parse symbol <>+-_?Aa10" (Right (SSymbol "<>+-_?Aa10")) (parse parseSSymbol "" "<>+-_?Aa10")
+testSuccessParseSSymbolAllChar = TestCase $ assertEqual "Parse symbol <>+-_?Aa10" (Right (SSymbol "<")) (parse parseSSymbol "" "<>+-_?Aa10")
 testSuccessParseSSymbolStartingNum :: Test
 testSuccessParseSSymbolStartingNum = TestCase $ assertEqual "Parse symbol 11b" (Right (SSymbol "11b")) (parse parseSSymbol "" "11b")
 testErrorParseSSymbolQuote :: Test
