@@ -25,7 +25,6 @@ checkElemList :: Symbol -> [[Ast]] -> Either String Bool
 checkElemList x var = checkElemList' False x var
 
 checkElemList' :: Bool -> Symbol -> [[Ast]] -> Either String Bool
--- checkElemList' False x _ = checkElemList x (readGlobalVar)
 checkElemList' False x varinit = unsafePerformIO $ do
     var <- readGlobalVar
     return $ if var == [] then checkElemList' True x varinit else checkElemList' True x var
