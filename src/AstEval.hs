@@ -68,8 +68,8 @@ evalAST _ (AInt x) = Right (AInt x)
 evalAST a (ASymbol x) = Right (replaceSymbol x (ASymbol x) a (ASymbol x))
 -- evalAST a (AAssignation var) = Right (addAssignation (AAssignation var) a) >>= \x -> Left $ show x
 evalAST a (AAssignation var) = case addAssignation (AAssignation var) a of
-  [x] -> Left $ show (head x)
-  x -> Left $ show x
+  [x] -> Right $ AString (show (head x))
+  x -> Right $ AString (show x)
 evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) | func `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = case mapM (evalAST a) args of
     Right x -> case callAST func x of
         Right x' -> Right x'
