@@ -26,7 +26,6 @@ data Ast =
   ADeclaration AstDeclaration |
   AAssignation AstAssignation |
   ACall AstCall
-    deriving Show
 
 instance Eq Ast where
   (AInt x) == (AInt y) = x == y
@@ -38,3 +37,10 @@ instance Eq Ast where
   (ACall FuncCall { callFunction = FFunc f1, callArgs = arg1 }) == (ACall FuncCall { callFunction = FFunc f2, callArgs = arg2 }) = f1 == f2 && arg1 == arg2
   (AAssignation VarAssignation { assignationKey = k1, assignationValue = v1 }) == (AAssignation VarAssignation { assignationKey = k2, assignationValue = v2 }) = k1 == k2 && v1 == v2
   _ == _ = False
+
+instance Show Ast where
+  show (AInt x) = show x
+  show (ABool x) = if x then "#t" else "#f"
+  show (ASymbol x) = x
+  show (AString x) = x
+  show _ = "#<procedure>"

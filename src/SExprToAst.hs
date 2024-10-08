@@ -102,6 +102,6 @@ sExpToAst :: SExpr -> AstResult
 sExpToAst (SList xs) = case sExpInstructionToAst xs of
   Left err -> Left err
   Right ast -> case evalAST [[]] ast of
-    Left err -> Left (err ++ " ast: " ++ show ast)
+    Left err -> Left err
     Right result -> Right result
 sExpToAst _ = Left "Invalid lisp (first value must be an array)"

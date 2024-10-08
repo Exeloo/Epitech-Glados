@@ -110,9 +110,9 @@ launch args | (length args > 2) = return False
 getAst :: SExpr -> IO Bool
 getAst x = case sExpToAst x of
     Left a -> putStrLn (a) >> return False
-    Right a -> evaluateAst a
+    Right a -> putStrLn (show a) >> return True
 
-evaluateAst :: Ast -> IO Bool
-evaluateAst x = case evalAST [[]] x of
-    Left a -> putStrLn (a) >> return False
-    Right a -> return True
+-- evaluateAst :: Ast -> IO Bool
+-- evaluateAst x = case evalAST [[]] x of
+--     Left a -> putStrLn (a) >> return False
+--     Right a -> putStrLn (show a) >> return True
