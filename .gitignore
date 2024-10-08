@@ -119,3 +119,5 @@ cabal.project.local~
 ### Private template
 /private/
 
+# executable
+glados
