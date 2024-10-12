@@ -73,7 +73,7 @@ evalAstFunc _ _ [] _ = Left "Invalid function, not enough arguments"
 evalAstFunc [] _ _ _ = Left "Invalid function, too many arguments"
 
 findFunc :: Symbol -> [Ast] -> [[Ast]] -> Either String Ast
-findFunc func args _ = case getElemList func [[]] of
+findFunc func args var = case getElemList func var of
   Right (AAssignation (VarAssignation {assignationKey = _, assignationValue = ADeclaration func'})) -> Right (ACall FuncCall {callFunction = FFunc func', callArgs = args})
   Right x -> Left $ "Function not found1: " ++ show x
   Left x -> Left $ "Function not found2: " ++ x
@@ -84,21 +84,33 @@ evalAssignation a (AAssignation var) = case addAssignation (AAssignation var) a 
   x -> Right $ AString (show x)
 evalAssignation a b = evalAST a b
 
+evalSyscall :: [[Ast]] -> Symbol ->[Ast] -> Either String Ast
+evalSyscall a func args = case mapM (evalAST a) args of
+    Right x -> callAST func x
+    Left x -> Left x
+
+evalFunction :: [[Ast]] -> Symbol -> [Ast] -> Either String Ast
+evalFunction a func args = case findFunc func args a of
+  Right x -> evalAST a x
+  Left x -> Left x
+
+evalFuncDeclaration :: [[Ast]] -> [Symbol] -> [Ast] -> [Ast] -> Either String Ast
+evalFuncDeclaration  a argfunc body args = case evalAstFunc argfunc (AList body) args a of
+  Right x -> Right x
+  Left x -> Left x
+
+evalList :: [[Ast]] -> [Ast] -> Either String Ast
+evalList a x = case mapM (evalAST a) x of
+  Right x' -> Right (AList x')
+  Left x' -> Left x'
+
 evalAST :: [[Ast]] -> Ast -> Either String Ast
 evalAST _ (AInt x) = Right (AInt x)
 evalAST a (ASymbol x) = Right (replaceSymbol x (ASymbol x) a (ASymbol x))
 evalAST a (AAssignation var) = evalAssignation a (AAssignation var)
-evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) | syscall = case mapM (evalAST a) args of
-    Right x -> callAST func x
-    Left x -> Left x
-  where syscall = func `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"]
-evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) = case findFunc func args a of
-  Right x -> evalAST a x
-  Left x -> Left x
-evalAST a (ACall FuncCall {callFunction = FFunc FuncDeclaration { declareArgs = argfunc, declareBody = body }, callArgs = args}) = case evalAstFunc argfunc (AList body) args a of
-  Right x -> Right x
-  Left x -> Left x
-evalAST a (AList x) = case mapM (evalAST a) x of
-  Right x' -> Right (AList x')
-  Left x' -> Left x'
+evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) | syscall = evalSyscall a func args
+            where syscall = func `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"]
+evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) = evalFunction a func args
+evalAST a (ACall FuncCall {callFunction = FFunc FuncDeclaration { declareArgs = argfunc, declareBody = body }, callArgs = args}) = evalFuncDeclaration a argfunc body args
+evalAST a (AList x) = evalList a x
 evalAST _ _ = Left "Invalid function"
