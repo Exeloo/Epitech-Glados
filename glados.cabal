@@ -50,12 +50,12 @@ library compiler-lib
 
 library executer-lib
   exposed-modules:
-      ArgData
+      ExecInstructions
       InstructionData
       Launch
       Parser
       SExprData
-      StackData
+      SExprToInstructions
   other-modules:
       Paths_glados
   autogen-modules:
