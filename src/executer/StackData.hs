@@ -1,9 +1,6 @@
-module StackData (ValueData(..), Stack, InstCall(..)) where
+module StackData (ValueData(..), Stack(..)) where
 
-data InstCall = Add | Sub | Mul | Div | Eq | Less
-    deriving (Show, Eq)
-
-data ValueData = VInt Int | VBool Bool | VCall InstCall
+data ValueData = VInt Int | VBool Bool
     deriving (Show, Eq)
 
 type Stack = [ValueData]
