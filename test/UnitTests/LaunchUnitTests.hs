@@ -1,60 +1,126 @@
 module UnitTests.LaunchUnitTests (testlistLaunch) where
 
 import Test.HUnit
+import System.IO
+import Control.Exception (bracket)
+import GHC.IO.Handle (hDuplicateTo, hDuplicate)
+import System.Process.Internals (createPipe)
+import System.IO.Error (mkIOError, eofErrorType)
+import GHC.IO.Exception (IOErrorType(..), IOErrorType(UserError))
+
 import Launch
 
-testFileExist1 :: Test
-testFileExist1 = TestCase $ do
+fileInput :: FilePath -> IO Bool -> IO Bool
+fileInput filePath action = bracket
+    (openFile filePath ReadMode)
+    hClose
+    (\fileHandle -> do
+        originalStdin <- hDuplicate stdin
+        hDuplicateTo fileHandle stdin
+        result <- action
+        hDuplicateTo originalStdin stdin
+        return result)
+
+captureOutput :: IO Bool -> IO Bool
+captureOutput action = do
+    (readEnd, writeEnd) <- createPipe
+    originalStdout <- hDuplicate stdout
+    hDuplicateTo writeEnd stdout
+
+    result <- bracket (return ())
+                      (const $ hDuplicateTo originalStdout stdout >> hClose writeEnd >> hClose readEnd)
+                      (\_ -> action)
+    return result
+
+
+paramsFileNotExist :: Test
+paramsFileNotExist = TestCase $ do
     res <- fileExist ["notExist1", "notExist2"]
     assertEqual "no files exist" Nothing res
 
-testFileExist2 :: Test
-testFileExist2 = TestCase $ do
+paramsFileExist :: Test
+paramsFileExist = TestCase $ do
     res <- fileExist ["notExist1", ".gitignore"]
     assertEqual "file exist" (Just ".gitignore") res
 
-testGetParamsLine1 :: Test
-testGetParamsLine1 = TestCase (assertEqual "get first element" "params1" (getParamsLine ["params1", "-l"]))
+getFirstParams :: Test
+getFirstParams = TestCase (assertEqual "get first element" "params1" (getParamsLine ["params1", "-l"]))
 
-testGetParamsLine2 :: Test
-testGetParamsLine2 = TestCase (assertEqual "get last element" "params2" (getParamsLine ["-l", "params2"]))
+getLastParams :: Test
+getLastParams = TestCase (assertEqual "get last element" "params2" (getParamsLine ["-l", "params2"]))
 
-testGetParamsLine3 :: Test
-testGetParamsLine3 = TestCase (assertEqual "get empty string when the list is empty" [] (getParamsLine []))
+getEmptyParams :: Test
+getEmptyParams = TestCase (assertEqual "get empty string when the list is empty" [] (getParamsLine []))
 
-testGetParamsLine4 :: Test
-testGetParamsLine4 = TestCase (assertEqual "get empty string when the list only contains '-l' " [] (getParamsLine ["-l"]))
+getEmptyParamsFlag :: Test
+getEmptyParamsFlag = TestCase (assertEqual "get empty string when the list only contains '-l' " [] (getParamsLine ["-l"]))
 
-testLaunch1 :: Test
-testLaunch1 = TestCase $ do
+launchTooMany :: Test
+launchTooMany = TestCase $ do
     res <- launch ["too", "many", "arguments"]
     assertEqual "too many arguments" False res
 
-testLaunch2 :: Test
-testLaunch2 = TestCase $ do
+launchTooManyWFlag :: Test
+launchTooManyWFlag = TestCase $ do
     res <- launch ["two", "arguments"]
     assertEqual "two arguments without '-l' " False res
 
-testLaunch3 :: Test
-testLaunch3 = TestCase $ do
-    res <- launch ["README.md"]
+launchFileNotGood :: Test
+launchFileNotGood = TestCase $ do
+    res <- captureOutput $ launch ["test/files_tests/lisp_test_error"]
     assertEqual "file not good" False res
 
-testLaunch4 :: Test
-testLaunch4 = TestCase $ do
-    res <- launch ["(define foo 42)"]
+launchFileGood :: Test
+launchFileGood = TestCase $ do
+    res <- captureOutput $ launch ["test/files_tests/lisp_test"]
+    assertEqual "file good" True res
+
+launchParamsLineGood :: Test
+launchParamsLineGood = TestCase $ do
+    res <- captureOutput $ launch ["(define foo 42)"]
     assertEqual "Simple line" True res
+
+launchFileStdout :: Test
+launchFileStdout = TestCase $ do
+    res <-  captureOutput $ fileInput "test/files_tests/lisp_test" (launch [])
+    assertEqual "Launch with lisp_test input" True res
+
+launchFileStdoutError :: Test
+launchFileStdoutError = TestCase $ do
+    res <-  captureOutput $ fileInput "test/files_tests/lisp_test_error" (launch ["-l"])
+    assertEqual "Launch with lisp_test_error input" False res
+
+launchParamsLineInvalid :: Test
+launchParamsLineInvalid = TestCase $ do
+    res <- captureOutput $ launch ["(42)"]
+    assertEqual "Simple line but Invalid lisp" False res
+
+handleCtrlEOF :: Test
+handleCtrlEOF = TestCase $ do
+    res <- handleCtrl (mkIOError eofErrorType "EOF Error" Nothing Nothing) True
+    assertEqual "handle EOF error but didn't have error in glados" True res
+
+handleCtrlOther :: Test
+handleCtrlOther = TestCase $ do
+    res <- handleCtrl (mkIOError UserError "Other Error" Nothing Nothing) False
+    assertEqual "handle non-EOF error but having error in glados" False res
 
 testlistLaunch :: Test
 testlistLaunch = TestList [
-    TestLabel "testFileExist1" testFileExist1,
-    TestLabel "testFileExist2" testFileExist2,
-    TestLabel "testGetParamsLine1" testGetParamsLine1,
-    TestLabel "testGetParamsLine2" testGetParamsLine2,
-    TestLabel "testGetParamsLine3" testGetParamsLine3,
-    TestLabel "testGetParamsLine4" testGetParamsLine4,
-    TestLabel "testLaunch1" testLaunch1,
-    TestLabel "testLaunch2" testLaunch2,
-    TestLabel "testLaunch3" testLaunch3,
-    TestLabel "testLaunch4" testLaunch4
+    TestLabel "paramsFileNotExist" paramsFileNotExist,
+    TestLabel "paramsFileExist" paramsFileExist,
+    TestLabel "getFirstParams" getFirstParams,
+    TestLabel "getLastParams" getLastParams,
+    TestLabel "getEmptyParams" getEmptyParams,
+    TestLabel "getEmptyParamsFlag" getEmptyParamsFlag,
+    TestLabel "launchTooMany" launchTooMany,
+    TestLabel "launchTooManyWFlag" launchTooManyWFlag,
+    TestLabel "launchFileNotGood" launchFileNotGood,
+    TestLabel "launchFileGood" launchFileGood,
+    TestLabel "launchParamsLineGood" launchParamsLineGood,
+    TestLabel "launchFileStdout" launchFileStdout,
+    TestLabel "launchFileStdoutError" launchFileStdoutError,
+    TestLabel "launchParamsLineInvalid" launchParamsLineInvalid,
+    TestLabel "handleCtrlEOF" handleCtrlEOF,
+    TestLabel "handleCtrlOther" handleCtrlOther
     ]

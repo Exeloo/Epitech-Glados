@@ -5,7 +5,7 @@
 -- Launch
 -}
 
-module Launch (launch, fileExist, getParamsLine) where
+module Launch (launch, fileExist, getParamsLine, handleCtrl) where
 
 import System.Directory (doesFileExist)
 import Control.Exception (catch, IOException)
@@ -18,9 +18,9 @@ import Parser
 import SExprData
 import SExprToAst
 
-handleCtrl :: IOException -> IO Bool
-handleCtrl e | isEOFError e = return True
-             | otherwise = return True
+handleCtrl :: IOException -> Bool -> IO Bool
+handleCtrl e res | isEOFError e = return res
+                 | otherwise = return res
 
 fileExist :: [String] -> IO (Maybe String)
 fileExist [] = return Nothing
@@ -46,20 +46,20 @@ launchFileInput flag =
     else
         getInputLine flag >>= \res ->
         if res
-            then getInput flag
+            then launchFileInput flag
         else
             return False
 
-getInput :: Bool -> IO Bool
-getInput flag =
+getInput :: Bool -> Bool -> IO Bool
+getInput flag res =
     hIsTerminalDevice stdin >>= \isTerminal ->
     if not isTerminal
         then launchFileInput flag
     else
         (putStr "> " >>
         hFlush stdout >>
-        getInputLine flag >>
-        getInput flag) `catch` handleCtrl
+        getInputLine flag >>= \resLine ->
+        getInput flag resLine) `catch` (\e -> handleCtrl e res)
 
 
 checkParse :: String -> Bool -> IO Bool
@@ -68,12 +68,12 @@ checkParse line flag =
         Left err -> putStrLn ("Parse error: " ++ errorBundlePretty err) >> return False
         Right res -> getAst res -- compile with flag "-l"
 
-checkLines :: [String] -> Bool -> IO Bool
-checkLines [] _ = return True
-checkLines (line:rest) flag =
-    checkParse line flag >>= \res ->
+checkLines :: [String] -> IO Bool
+checkLines [] = return True
+checkLines (line:rest) =
+    checkParse line False >>= \res ->
     if res
-        then checkLines rest flag
+        then checkLines rest
     else
         return False
 
@@ -81,36 +81,31 @@ launchParams :: [String] -> IO Bool
 launchParams args =
     fileExist args >>= \file ->
     if (isJust file)
-        then getFile ("-l" `elem` args) (fromJust file)
+        then getFile (fromJust file)
     else
-        simpleLine ("-l" `elem` args) (getParamsLine args)
+        simpleLine (getParamsLine args)
 
 getInputLine :: Bool -> IO Bool
 getInputLine flag =
     getLine >>= \line ->
     checkParse line flag
 
-getFile :: Bool -> String -> IO Bool
-getFile flag path =
+getFile :: String -> IO Bool
+getFile path =
     readFile path >>= \content ->
-    checkLines (lines content) flag
+    checkLines (lines content)
 
-simpleLine :: Bool -> String -> IO Bool
-simpleLine flag str = checkParse str flag
+simpleLine :: String -> IO Bool
+simpleLine str = checkParse str False
 
 launch :: [String] -> IO Bool
-launch [] = getInput False
+launch [] = getInput False True
 launch args | (length args > 2) = return False
             | (length args == 2) && not ("-l" `elem` args) = return False
-            | ("-l" `elem` args) && (length args == 1) = getInput True
+            | ("-l" `elem` args) && (length args == 1) = getInput True True
             | otherwise = launchParams args
 
 getAst :: SExpr -> IO Bool
 getAst x = case sExpToAst x of
     Left a -> putStrLn (a) >> return False
     Right a -> putStrLn (show a) >> return True
-
--- evaluateAst :: Ast -> IO Bool
--- evaluateAst x = case evalAST [[]] x of
---     Left a -> putStrLn (a) >> return False
---     Right a -> putStrLn (show a) >> return True

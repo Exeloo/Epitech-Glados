@@ -31,6 +31,16 @@ functional: re
 
 tests: unit functional
 
+coverage:
+	cabal configure --enable-coverage
+	cabal test
+	@file_path=$$(find "./dist-newstyle/build" -path "*/glados-*/hpc/vanilla/html/glados-*/hpc_index.html" | head -n 1); \
+	if [ -n "$$file_path" ]; then \
+		xdg-open "$$file_path"; \
+	else \
+		echo "No coverage report found."; \
+	fi
+
 lint:
 	hlint src
 
