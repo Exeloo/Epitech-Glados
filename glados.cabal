@@ -74,6 +74,7 @@ test-suite glados-test
       UnitTests.LaunchUnitTests
       UnitTests.UnitTestAstEval
       UnitTests.UnitTestsParser
+      UnitTests.UnitTestsSExprData
       UnitTests.UnitTestsSExprToAst
       Paths_glados
   autogen-modules:

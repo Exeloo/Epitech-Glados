@@ -4,6 +4,7 @@ import UnitTests.LaunchUnitTests
 import UnitTests.UnitTestsParser (parserTestList)
 import UnitTests.UnitTestAstEval
 import UnitTests.UnitTestsSExprToAst (testListSExprToAst)
+import UnitTests.UnitTestsSExprData (testListSExprData)
 
 main :: IO ()
 main = do
@@ -12,4 +13,5 @@ main = do
     _ <- runTestTT parserTestList
     _ <- runTestTT testlistAstEval
     _ <- runTestTT testListSExprToAst
+    _ <- runTestTT testListSExprData
     return ()
