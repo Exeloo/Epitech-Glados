@@ -45,6 +45,7 @@ library
     , base >=4.7 && <5
     , directory
     , megaparsec
+    , process >=1.6.16.0
   default-language: Haskell2010
 
 executable glados-exe
@@ -62,6 +63,7 @@ executable glados-exe
     , directory
     , glados
     , megaparsec
+    , process >=1.6.16.0
   default-language: Haskell2010
 
 test-suite glados-test
@@ -72,6 +74,7 @@ test-suite glados-test
       UnitTests.LaunchUnitTests
       UnitTests.UnitTestAstEval
       UnitTests.UnitTestsParser
+      UnitTests.UnitTestsSExprData
       UnitTests.UnitTestsSExprToAst
       Paths_glados
   autogen-modules:
@@ -85,4 +88,5 @@ test-suite glados-test
     , directory
     , glados
     , megaparsec
+    , process >=1.6.16.0
   default-language: Haskell2010

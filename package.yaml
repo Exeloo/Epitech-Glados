@@ -24,6 +24,7 @@ dependencies:
 - HUnit
 - megaparsec
 - directory
+- process >= 1.6.16.0
 
 ghc-options:
 - -Wall

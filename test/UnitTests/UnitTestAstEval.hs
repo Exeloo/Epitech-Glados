@@ -29,7 +29,7 @@ testEvalASTDefine = TestCase $ assertEqual "Eval AST Define" (Right (AInt 4)) (e
 testEvalASTInt :: Test
 testEvalASTInt = TestCase $ assertEqual "Eval AST Int" (Right (AInt 5)) (evalAST [[]] (AInt 5))
 testEvalASTSymbol :: Test
-testEvalASTSymbol = TestCase $ assertEqual "Eval AST Symbol" (Right (ASymbol x)) (evalAST [[AAssignation (VarAssignation "x" (AInt 5))]] (ASymbol "x"))
+testEvalASTSymbol = TestCase $ assertEqual "Eval AST Symbol" (Right (ASymbol "x")) (evalAST [[AAssignation (VarAssignation "x" (AInt 5))]] (ASymbol "x"))
 testEvalASTAdd :: Test
 testEvalASTAdd = TestCase $ assertEqual "Eval AST Add" (Right (AInt 15)) (evalAST [[]] (ACall FuncCall {callFunction = FSymbol "+", callArgs = [AInt 10, AInt 5]}))
 
