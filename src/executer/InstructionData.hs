@@ -1,16 +1,11 @@
-module InstructionData (InstPush(..), InstCall(..), InstructionData(..), Insts, OpeAritData(..)) where
+module InstructionData(InstructionData(..), Insts, InstCall(..)) where
 
 import StackData(ValueData(..))
 
-data OpeAritData = Add | Sub | Mul | Div
+data InstCall = Add | Sub | Mul | Div | Eq | Less | JumpIfFalse
     deriving (Show, Eq)
 
-data InstCall = Call { op :: OpeAritData }
-    deriving (Show, Eq)
-data InstPush = Push { value :: ValueData }
-    deriving (Show, Eq)
-
-data InstructionData = IPush InstPush | ICall InstCall | IRet
+data InstructionData = IPush ValueData | ICall InstCall | IRet
     deriving (Show, Eq)
 
 type Insts = [InstructionData]
