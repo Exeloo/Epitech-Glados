@@ -13,19 +13,27 @@ data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: 
 
 data AstAssignation = VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } deriving (Show, Eq)
 
-data AstFuncArg = FFunc AstDeclaration | FSymbol Symbol deriving (Show, Eq)
+data AstCall = FuncCall { callFunction :: Ast, callArgs :: [Ast] } deriving (Show, Eq)
 
-data AstCall = FuncCall { callFunction :: AstFuncArg, callArgs :: [Ast] } deriving (Show, Eq)
+data AstLoop =
+  ForLoop { forAssignation :: [Ast], forCondition :: [Ast], forIncrementation :: [Ast], forBody :: [Ast] } |
+  WhileLoop { whileCondition :: Ast, whileBody :: [Ast] }
+  deriving (Show, Eq)
+
+data AstObjectElement = ObjectElement { objectKey :: Symbol, objectValue :: Ast} deriving (Show, Eq)
 
 data Ast =
   ASymbol Symbol |
   ABool Bool |
   AInt Int |
+  AFloat Float |
   AString String |
   AList [Ast] |
+  AObject [AstObjectElement] |
   ADeclaration AstDeclaration |
   AAssignation AstAssignation |
-  ACall AstCall
+  ACall AstCall |
+  ALoop AstLoop
 
 instance Eq Ast where
   (AInt x) == (AInt y) = x == y
