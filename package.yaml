@@ -37,14 +37,6 @@ ghc-options:
 - -Wpartial-fields
 - -Wredundant-constraints
 
-library:
-  source-dirs: src
-  dependencies:
-  - base >= 4.7 && < 5
-  - megaparsec
-  - directory
-
-  
 internal-libraries:
   compiler-lib:
     source-dirs: src/compiler
@@ -69,7 +61,6 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - glados
     - compiler-lib
   vm-exe:
     main:                Main.hs
@@ -79,7 +70,6 @@ executables:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - glados
     - executer-lib
 
 
@@ -92,4 +82,4 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - glados
+    - compiler-lib
