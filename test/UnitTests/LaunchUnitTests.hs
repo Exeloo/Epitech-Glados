@@ -35,35 +35,18 @@ captureOutput action = do
 
 paramsFileNotExist :: Test
 paramsFileNotExist = TestCase $ do
-    res <- fileExist ["notExist1", "notExist2"]
+    res <- fileExist "notExist1"
     assertEqual "no files exist" Nothing res
 
 paramsFileExist :: Test
 paramsFileExist = TestCase $ do
-    res <- fileExist ["notExist1", ".gitignore"]
+    res <- fileExist ".gitignore"
     assertEqual "file exist" (Just ".gitignore") res
-
-getFirstParams :: Test
-getFirstParams = TestCase (assertEqual "get first element" "params1" (getParamsLine ["params1", "-l"]))
-
-getLastParams :: Test
-getLastParams = TestCase (assertEqual "get last element" "params2" (getParamsLine ["-l", "params2"]))
-
-getEmptyParams :: Test
-getEmptyParams = TestCase (assertEqual "get empty string when the list is empty" [] (getParamsLine []))
-
-getEmptyParamsFlag :: Test
-getEmptyParamsFlag = TestCase (assertEqual "get empty string when the list only contains '-l' " [] (getParamsLine ["-l"]))
 
 launchTooMany :: Test
 launchTooMany = TestCase $ do
-    res <- launch ["too", "many", "arguments"]
+    res <- launch ["too", "many"]
     assertEqual "too many arguments" False res
-
-launchTooManyWFlag :: Test
-launchTooManyWFlag = TestCase $ do
-    res <- launch ["two", "arguments"]
-    assertEqual "two arguments without '-l' " False res
 
 launchFileNotGood :: Test
 launchFileNotGood = TestCase $ do
@@ -87,7 +70,7 @@ launchFileStdout = TestCase $ do
 
 launchFileStdoutError :: Test
 launchFileStdoutError = TestCase $ do
-    res <-  captureOutput $ fileInput "test/files_tests/lisp_test_error" (launch ["-l"])
+    res <-  captureOutput $ fileInput "test/files_tests/lisp_test_error" (launch [])
     assertEqual "Launch with lisp_test_error input" False res
 
 launchParamsLineInvalid :: Test
@@ -109,12 +92,7 @@ testlistLaunch :: Test
 testlistLaunch = TestList [
     TestLabel "paramsFileNotExist" paramsFileNotExist,
     TestLabel "paramsFileExist" paramsFileExist,
-    TestLabel "getFirstParams" getFirstParams,
-    TestLabel "getLastParams" getLastParams,
-    TestLabel "getEmptyParams" getEmptyParams,
-    TestLabel "getEmptyParamsFlag" getEmptyParamsFlag,
     TestLabel "launchTooMany" launchTooMany,
-    TestLabel "launchTooManyWFlag" launchTooManyWFlag,
     TestLabel "launchFileNotGood" launchFileNotGood,
     TestLabel "launchFileGood" launchFileGood,
     TestLabel "launchParamsLineGood" launchParamsLineGood,
