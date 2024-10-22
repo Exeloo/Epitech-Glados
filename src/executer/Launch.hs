@@ -3,34 +3,28 @@ module Launch (launch, exec) where
 import InstructionData(InstructionData(..), Insts, InstCall(..))
 import StackData(ValueData(..), Stack)
 
-execIPush :: ValueData -> Stack -> Either String Stack
-execIPush val stack = Right (val:stack)
-
-execICall :: InstCall -> Stack -> Either String Stack
-execICall Add ((VInt a):(VInt b):s) = Right (VInt (a + b):s)
-execICall Add stack = Left (if length stack < 2 then "Add need two arguments" else "Add need two number")
-execICall Sub ((VInt a):(VInt b):s) = Right (VInt (a - b):s)
-execICall Sub stack = Left (if length stack < 2 then "Sub need two arguments" else "Sub need two number")
-execICall Mul ((VInt a):(VInt b):s) = Right (VInt (a + b):s)
-execICall Mul stack = Left (if length stack < 2 then "Mul need two arguments" else "Mul need two number")
-execICall Div ((VInt a):(VInt 0):s) = Left "Division by 0"
-execICall Div ((VInt a):(VInt b):s) = Right (VInt (div a b):s)
-execICall Div stack = Left (if length stack < 2 then "Div need two arguments" else "Div need two number")
-execICall Eq ((VInt a):(VInt b):s) = Right (VBool (a == b):s)
-execICall Eq stack = Left (if length stack < 2 then "Eq need two arguments" else "Eq need two number")
-execICall Less ((VInt a):(VInt b):s) = Right (VBool (a < b):s)
-execICall Less stack = Left (if length stack < 2 then "Less need two arguments" else "Less need two number")
-execICall JumpIfFalse ((VBool a):s) = Right (VBool (a < b):s)
-execICall JumpIfFalse stack = Left (if null stack then "JumpIfFalse need one arguments" else "JumpIfFalse need one boolean")
-execICall call _ = Left ("Unkown OP Code :" ++ (show call))
-
-exec :: Insts -> Either String Stack -> Either String ValueData
-exec [] (Left a) = Left a
-exec ((IPush a):as) (Right stack) = exec as (execIPush a stack)
-exec ((ICall a):as) (Right stack) = exec as (execICall a stack)
-exec (IRet:_) (Right (a:_)) = Right a 
-exec (a:_) _ = Left ("Unkown Instruction :" ++ (show a))
+exec :: Insts -> Stack -> Either String ValueData
+exec ((IPush a):as) stack = exec as (a:stack)
+exec ((ICall Add):as) ((VInt a):(VInt b):s) = exec as (VInt (a + b):s)
+exec ((ICall Add):_) stack = Left (if length stack < 2 then "Add need two arguments" else "Add need two number")
+exec ((ICall Sub):as) ((VInt a):(VInt b):s) = exec as (VInt (a - b):s)
+exec ((ICall Sub):_) stack = Left (if length stack < 2 then "Sub need two arguments" else "Sub need two number")
+exec ((ICall Mul):as) ((VInt a):(VInt b):s) = exec as (VInt (a * b):s)
+exec ((ICall Mul):_) stack = Left (if length stack < 2 then "Mul need two arguments" else "Mul need two number")
+exec ((ICall Div):_) ((VInt _):(VInt 0):_) = Left "Division by 0"
+exec ((ICall Div):as) ((VInt a):(VInt b):s) = exec as (VInt (div a b):s)
+exec ((ICall Div):_) stack = Left (if length stack < 2 then "Div need two arguments" else "Div need two number")
+exec ((ICall Eq):as) ((VInt a):(VInt b):s) = exec as (VBool (a == b):s)
+exec ((ICall Eq):_) stack = Left (if length stack < 2 then "Eq need two arguments" else "Eq need two number")
+exec ((ICall Less):as) ((VInt a):(VInt b):s) = exec as (VBool (a < b):s)
+exec ((ICall Less):_) stack = Left (if length stack < 2 then "Less need two arguments" else "Less need two number")
+exec ((JumpIfFalse val):as) ((VBool False):s) = exec (reverse (take val (reverse as))) s
+exec ((JumpIfFalse val):as) ((VBool True):s) = exec as s
+exec ((JumpIfFalse _):_) stack = Left "JumpIfFalse need a boolean"
+exec (IRet:_) (a:_) = Right a
+exec (IRet:_) [] = Left "Ret need a value"
+exec (a:_) _ = Left ("Unkown Instruction :" ++ show a)
 exec _ _ = Left "No Ret at end of instructions"
 
 launch :: [String] -> IO Bool
-launch [] = putStrLn (show (exec [] (Right []))) >> return False
+launch [] = print (exec [] []) >> return False
