@@ -29,13 +29,13 @@ testgetElemList1 :: Test
 testgetElemList1 = TestCase (assertEqual "test if working" (Right (AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "x"}))) (getElemList "a" [[AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "x"})], [AAssignation (VarAssignation {assignationKey = "b", assignationValue = ASymbol "x"}), AAssignation (VarAssignation {assignationKey = "c", assignationValue = ASymbol "x"})]]))
 
 testgetElemList2 :: Test
-testgetElemList2 = TestCase (assertEqual "test not existing value" (Left "No useful data") (getElemList "a" [[AAssignation (VarAssignation {assignationKey = "z", assignationValue = ASymbol "x"})], [AAssignation (VarAssignation {assignationKey = "b", assignationValue = ASymbol "x"}), AAssignation (VarAssignation {assignationKey = "c", assignationValue = ASymbol "x"})]]))
+testgetElemList2 = TestCase (assertEqual "test not existing value" (Left "No usefull data") (getElemList "a" [[AAssignation (VarAssignation {assignationKey = "z", assignationValue = ASymbol "x"})], [AAssignation (VarAssignation {assignationKey = "b", assignationValue = ASymbol "x"}), AAssignation (VarAssignation {assignationKey = "c", assignationValue = ASymbol "x"})]]))
 
 testgetElemList3 :: Test
-testgetElemList3 = TestCase (assertEqual "test empty list" (Left "No useful data") (getElemList "a" []))
+testgetElemList3 = TestCase (assertEqual "test empty list" (Left "No usefull data") (getElemList "a" []))
 
 testgetElemList4 :: Test
-testgetElemList4 = TestCase (assertEqual "test empty list again" (Left "No useful data") (getElemList "a" [[], [], [], []]))
+testgetElemList4 = TestCase (assertEqual "test empty list again" (Left "No usefull data") (getElemList "a" [[], [], [], []]))
 
 testaddAssignation1 :: Test
 testaddAssignation1 = TestCase (assertEqual "test adding element empty list" ([[(AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "x"}))]]) (addAssignation (AAssignation (VarAssignation {assignationKey = "a", assignationValue = ASymbol "x"})) []))

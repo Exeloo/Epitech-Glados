@@ -5,12 +5,12 @@
 -- SExpToAst
 -}
 
-module SExprToAst (sExpToAst) where
+module SExprToAst (sExpToAst, evaluateAst) where
 
 import AstData
 import SExprData
 import Symbol
-import AstEval
+import AstEval (evalAST)
 
 type AstResult = Either String Ast
 
@@ -104,8 +104,8 @@ sExpToAst (SList xs) = case sExpInstructionToAst xs of
   Right ast -> evaluateAst ast
 sExpToAst _ = Left "Invalid lisp (first value must be an array)"
 
-evaluateAst :: Ast -> AstResult
-evaluateAst ast = case evalAST [[]] ast of
+evaluateAst :: Ast -> [[Ast]] -> Either String [[Ast]]
+evaluateAst ast scope = case evalAST scope ast of
     Left err -> Left err
-    Right (ACall FuncCall {callFunction = declaration, callArgs = args}) -> evaluateAst (ACall FuncCall {callFunction = declaration, callArgs = args})
+    Right (ACall FuncCall {callFunction = declaration, callArgs = args}) -> evaluateAst (ACall FuncCall {callFunction = declaration, callArgs = args}) scope
     Right result -> Right result

@@ -5,11 +5,12 @@
 -- AstEval
 -}
 
-module AstEval (evalAST, callAST, replaceSymbol) where
+module AstEval (evalAST, callAST, replaceSymbol, ifAstEvaluation ,getSymbolFromList) where
 
 import Symbol
 import AstData
 import Evaluation
+import SExprToAst (evaluateAst)
 
 ifAstFunctionCall :: String -> [Ast] -> Ast -> Ast -> Either String Ast
 ifAstFunctionCall symbol args a b = case callAST symbol args of
@@ -104,13 +105,18 @@ evalList a x = case mapM (evalAST a) x of
   Right x' -> Right (AList x')
   Left x' -> Left x'
 
-evalAST :: [[Ast]] -> Ast -> Either String Ast
-evalAST _ (AInt x) = Right (AInt x)
-evalAST a (ASymbol x) = Right (replaceSymbol x (ASymbol x) a (ASymbol x))
+evalAST :: [[Ast]] -> Ast -> Either String [[Ast]]
+evalAST a (AInt x) = evalResult (AInt x) a
+evalAST a (ASymbol x) = evalResult (replaceSymbol x (ASymbol x) a (ASymbol x)) a
 evalAST a (AAssignation var) = evalAssignation a (AAssignation var)
-evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) | syscall = evalSyscall a func args
+evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) | syscall = evalResult (evalSyscall a func args) a
             where syscall = func `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"]
-evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) = evalFunction a func args
-evalAST a (ACall FuncCall {callFunction = FFunc FuncDeclaration { declareArgs = argfunc, declareBody = body }, callArgs = args}) = evalFuncDeclaration a argfunc body args
-evalAST a (AList x) = evalList a x
+evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) = evalResult (evalFunction a func args) a
+evalAST a (ACall FuncCall {callFunction = FFunc FuncDeclaration { declareArgs = argfunc, declareBody = body }, callArgs = args}) = evalResult (evalFuncDeclaration a argfunc body args) a
+evalAST a (AList x) = evalResult (evalList a x) a
 evalAST _ _ = Left "Invalid function"
+
+evalResult :: Ast -> [[Ast]] -> Either String [[Ast]]
+evalResult (ACall (FuncCall x y)) b = evaluateAst (ACall (FuncCall x y)) b
+evalResult a b = show a >> Right b
+evalResult _ _ = Left "Invalid function"
