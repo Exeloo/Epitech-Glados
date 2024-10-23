@@ -18,18 +18,18 @@ testShowSSymbol = TestCase $ assertEqual "Show SSymbol" "Symbol: \"define\"" (sh
 testShowSArray :: Test
 testShowSArray = TestCase $ assertEqual "Show SArray" "Array: [Integer: 42, Integer: 84, Integer: 21]" (show (SArray [SInt 42, SInt 84, SInt 21]))
 
-testShowSList :: Test
-testShowSList = TestCase $ assertEqual "Show SList" "List: [Integer: 42, Symbol: \"define\"]" (show (SList [SInt 42, SSymbol "define"]))
+testShowSLine :: Test
+testShowSLine = TestCase $ assertEqual "Show SLine" "Line: [Integer: 42, Symbol: \"define\"]" (show (SLine [SInt 42, SSymbol "define"]))
 
-testShowSStruct :: Test
-testShowSStruct = TestCase $ assertEqual "Show SStruct" "Struct: {\"question\": String: \"Où est la pierre ?\", \"answer\": String: \"Dans la poche !\", \"flag-triche\": Integer: 84}"
-    (show (SStruct [("question", SString "Où est la pierre ?"), ("answer", SString "Dans la poche !"), ("flag-triche", SInt 84)]))
+testShowSBracket :: Test
+testShowSBracket = TestCase $ assertEqual "Show SBracket"
+    "Bracket: {[Symbol: \"question\", String: \"Où est la pierre ?\"], | [Symbol: \"answer\", String: \"Dans la poche !\"], | [Symbol: \"flag-triche\", Integer: 84]\n}"
+    (show (SBracket [([SSymbol "question", SString "Où est la pierre ?"], ','),
+                     ([SSymbol "answer", SString "Dans la poche !"], ','),
+                     ([SSymbol "flag-triche", SInt 84], '\n')]))
 
 testShowSString :: Test
 testShowSString = TestCase $ assertEqual "Show SString" "String: \"hello\"" (show (SString "hello"))
-
-testShowUndefined :: Test
-testShowUndefined = TestCase $ assertEqual "Show Undefined" "Undefined" (show Undefined)
 
 testEqSInt :: Test
 testEqSInt = TestCase $ assertEqual "Eq SInt" True ((SInt 42) == (SInt 42))
@@ -43,8 +43,8 @@ testEqSBool = TestCase $ assertEqual "Eq SBool" True ((SBool True) == (SBool Tru
 testEqSSymbol :: Test
 testEqSSymbol = TestCase $ assertEqual "Eq SSymbol" False ((SSymbol "define") == (SSymbol "lambda"))
 
-testEqSList :: Test
-testEqSList = TestCase $ assertEqual "Eq SList" True ((SList [SInt 42, SSymbol "lambda"]) == (SList [SInt 42, SSymbol "lambda"]))
+testEqSLine :: Test
+testEqSLine = TestCase $ assertEqual "Eq SLine" True ((SLine [SInt 42, SSymbol "lambda"]) == (SLine [SInt 42, SSymbol "lambda"]))
 
 testEqSArray :: Test
 testEqSArray = TestCase $ assertEqual "Eq SArray" True ((SArray [SInt 42, SInt 84]) == (SArray [SInt 42, SInt 84]))
@@ -52,11 +52,10 @@ testEqSArray = TestCase $ assertEqual "Eq SArray" True ((SArray [SInt 42, SInt 8
 testEqSString :: Test
 testEqSString = TestCase $ assertEqual "Eq SString" False ((SString "hello") == (SString "goodbye"))
 
-testEqSStruct :: Test
-testEqSStruct = TestCase $ assertEqual "Eq SStruct" True ((SStruct [("pierre", SString "dans la poche")]) == (SStruct [("pierre", SString "dans la poche")]))
-
-testEqUndefined :: Test
-testEqUndefined = TestCase $ assertEqual "Eq Undefined" True (Undefined == Undefined)
+testEqSBracket :: Test
+testEqSBracket = TestCase $ assertEqual "Eq SBracket" True
+    ((SBracket [([SSymbol "pierre", SString "dans la poche"], ',')]) ==
+     (SBracket [([SSymbol "pierre", SString "dans la poche"], ',')]))
 
 testEqDifferentTypes :: Test
 testEqDifferentTypes = TestCase $ assertEqual "Eq Different Types" False ((SInt 42) == (SSymbol "define"))
@@ -69,18 +68,16 @@ testListSExprData =
     TestLabel "testShowSBool" testShowSBool,
     TestLabel "testShowSSymbol" testShowSSymbol,
     TestLabel "testShowSArray" testShowSArray,
-    TestLabel "testShowSList" testShowSList,
-    TestLabel "testShowSStruct" testShowSStruct,
+    TestLabel "testShowSLine" testShowSLine,
+    TestLabel "testShowSBracket" testShowSBracket,
     TestLabel "testShowSString" testShowSString,
-    TestLabel "testShowUndefined" testShowUndefined,
     TestLabel "testEqSInt" testEqSInt,
     TestLabel "testEqSFloat" testEqSFloat,
     TestLabel "testEqSBool" testEqSBool,
     TestLabel "testEqSSymbol" testEqSSymbol,
-    TestLabel "testEqSList" testEqSList,
+    TestLabel "testEqSLine" testEqSLine,
     TestLabel "testEqSArray" testEqSArray,
     TestLabel "testEqSString" testEqSString,
-    TestLabel "testEqSStruct" testEqSStruct,
-    TestLabel "testEqUndefined" testEqUndefined,
+    TestLabel "testEqSBracket" testEqSBracket,
     TestLabel "testEqDifferentTypes" testEqDifferentTypes
   ]
