@@ -7,9 +7,9 @@
 
 module SExprData (SExpr(..)) where
 
-import Symbol
+import Data.List (intercalate)
 
-type Separator = Char
+import Symbol
 
 type Body = [SExpr]
 
@@ -20,7 +20,7 @@ data SExpr =
    SString String |
    SSymbol Symbol |
    SArray [SExpr] |
-   SBracket [(Body, Separator)] |
+   SStruct [Body] |
    SLine [SExpr]
 
 instance Show SExpr where
@@ -30,7 +30,7 @@ instance Show SExpr where
   show (SString x) = "String: \"" ++ x ++ "\""
   show (SSymbol x) = "Symbol: " ++ show x
   show (SArray x) = "Array: [" ++ foldl (\a b -> a ++ (if null a then "" else ", ") ++ show b) [] x ++ "]"
-  show (SBracket x) = "Bracket: {" ++ foldl (\a (b, sep) -> a ++ (if null a then "" else " | ") ++ "[" ++ foldl (\a' b' -> a' ++ (if null a' then "" else ", ") ++ show b') [] b ++ "]" ++ [sep]) [] x ++ "}"
+  show (SStruct x) = "Struct: {" ++ intercalate ", " (map showElement x) ++ "}" where showElement elems = "[" ++ intercalate ", " (map show elems) ++ "]"
   show (SLine x) = "Line: [" ++ foldl (\a b -> a ++ (if null a then "" else ", ") ++ show b) [] x ++ "]"
 
 instance Eq SExpr where
@@ -40,7 +40,7 @@ instance Eq SExpr where
   (SString str1) == (SString str2) = str1 == str2
   (SSymbol s1) == (SSymbol s2) = s1 == s2
   (SArray a1) == (SArray a2) = a1 == a2
-  (SBracket br1) == (SBracket br2) = br1 == br2
+  (SStruct br1) == (SStruct br2) = br1 == br2
   (SLine l1) == (SLine l2) = l1 == l2
   _ == _ = False
 
