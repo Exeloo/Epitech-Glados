@@ -1,4 +1,4 @@
-module StackData (ValueData(..), Stack) where
+module StackData (ValueData(..), Stack, InstCall(..)) where
 
 data InstCall = Add | Sub | Mul | Div | Eq | Less
     deriving (Show, Eq)

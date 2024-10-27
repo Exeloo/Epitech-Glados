@@ -50,6 +50,7 @@ library compiler-lib
 
 library executer-lib
   exposed-modules:
+      ArgData
       InstructionData
       Launch
       StackData

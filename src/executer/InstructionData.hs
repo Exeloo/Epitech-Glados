@@ -6,4 +6,3 @@ data InstructionData = Push ValueData | Call | Ret | JumpIfFalse Int | PushArg I
     deriving (Show, Eq)
 
 type Insts = [InstructionData]
-

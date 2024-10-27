@@ -1,7 +1,7 @@
 module Launch (launch, exec) where
 
-import InstructionData(InstructionData(..), Insts, InstCall(..))
-import StackData(ValueData(..), Stack)
+import InstructionData(InstructionData(..), Insts)
+import StackData(ValueData(..), Stack, InstCall(..))
 import ArgData (Args)
 
 deleteIndex :: Int -> [a] -> [a]
@@ -11,19 +11,19 @@ deleteIndex idx (a:as) = a:deleteIndex (idx - 1) as
 
 exec :: Args -> Insts -> Stack -> Either String ValueData
 exec args ((Push a):as) stack = exec args as (a:stack)
-exec args ((Call Add):as) ((VInt a):(VInt b):s) = exec args as (VInt (a + b):s)
-exec _ ((Call Add):_) stack = Left (if length stack < 2 then "Add need two arguments" else "Add need two number")
-exec args ((Call Sub):as) ((VInt a):(VInt b):s) = exec args as (VInt (a - b):s)
-exec _ ((Call Sub):_) stack = Left (if length stack < 2 then "Sub need two arguments" else "Sub need two number")
-exec args ((Call Mul):as) ((VInt a):(VInt b):s) = exec args as (VInt (a * b):s)
-exec _ ((Call Mul):_) stack = Left (if length stack < 2 then "Mul need two arguments" else "Mul need two number")
-exec _ ((Call Div):_) ((VInt _):(VInt 0):_) = Left "Division by 0"
-exec args ((Call Div):as) ((VInt a):(VInt b):s) = exec args as (VInt (div a b):s)
-exec _ ((Call Div):_) stack = Left (if length stack < 2 then "Div need two arguments" else "Div need two number")
-exec args ((Call Eq):as) ((VInt a):(VInt b):s) = exec args as (VBool (a == b):s)
-exec _ ((Call Eq):_) stack = Left (if length stack < 2 then "Eq need two arguments" else "Eq need two number")
-exec args ((Call Less):as) ((VInt a):(VInt b):s) = exec args as (VBool (a < b):s)
-exec _ ((Call Less):_) stack = Left (if length stack < 2 then "Less need two arguments" else "Less need two number")
+exec args ((Call):as) ((VCall Add):(VInt a):(VInt b):s) = exec args as (VInt (a + b):s)
+exec _ ((Call):_) ((VCall Add):_) = Left "Add need two number"
+exec args ((Call):as) ((VCall Sub):(VInt a):(VInt b):s) = exec args as (VInt (a - b):s)
+exec _ ((Call):_) ((VCall Sub):_) = Left "Sub need two number"
+exec args ((Call):as) ((VCall Mul):(VInt a):(VInt b):s) = exec args as (VInt (a * b):s)
+exec _ ((Call):_) ((VCall Mul):_) = Left "Mul need two number"
+exec _ ((Call):_) ((VCall Div):(VInt _):(VInt 0):_) = Left "Division by 0"
+exec args ((Call):as) ((VCall Div):(VInt a):(VInt b):s) = exec args as (VInt (div a b):s)
+exec _ ((Call):_) ((VCall Div):_) = Left "Div need two number"
+exec args ((Call):as) ((VCall Eq):(VInt a):(VInt b):s) = exec args as (VBool (a == b):s)
+exec _ ((Call):_) ((VCall Eq):_) = Left "Eq need two number"
+exec args ((Call):as) ((VCall Less):(VInt a):(VInt b):s) = exec args as (VBool (a < b):s)
+exec _ ((Call):_) ((VCall Less):_) = Left "Less need two number"
 exec args ((JumpIfFalse val):as) ((VBool False):s) = if length as < val then Left "Can't jump more instructions than available" else exec args (reverse (take (length as - val) (reverse as))) s
 exec args ((JumpIfFalse val):as) ((VBool True):s) = exec args as s
 exec _ ((JumpIfFalse _):_) _ = Left "JumpIfFalse need a boolean"
