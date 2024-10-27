@@ -1,11 +1,8 @@
-module InstructionData(InstructionData(..), Insts, InstCall(..)) where
+module InstructionData(InstructionData(..), Insts) where
 
-import StackData(ValueData(..))
+import StackData(ValueData(..), InstCall(..))
 
-data InstCall = Add | Sub | Mul | Div | Eq | Less
-    deriving (Show, Eq)
-
-data InstructionData = IPush ValueData | ICall InstCall | IRet | JumpIfFalse Int
+data InstructionData = IPush ValueData | ICall | IRet | JumpIfFalse Int
     deriving (Show, Eq)
 
 type Insts = [InstructionData]
