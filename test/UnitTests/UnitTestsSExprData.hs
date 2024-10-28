@@ -21,6 +21,12 @@ testShowSArray = TestCase $ assertEqual "Show SArray" "Array: [Integer: 42, Inte
 testShowSLine :: Test
 testShowSLine = TestCase $ assertEqual "Show SLine" "Line: [Integer: 42, Symbol: \"define\"]" (show (SLine [SInt 42, SSymbol "define"]))
 
+testShowSParenthesis :: Test
+testShowSParenthesis = TestCase $ assertEqual "Show SParenthesis" "Parenthesis: (Symbol: \"foo\", Symbol: \">\", Integer: 42)" (show (SParenthesis [SSymbol "foo", SSymbol ">", SInt 42]))
+
+testShowSBracket :: Test
+testShowSBracket = TestCase $ assertEqual "Show SBracket" "Bracket: {Line: [Symbol: \"foo\", Symbol: \"=\", Integer: 84], Line: [Symbol: \"foo\", Symbol: \">\", Integer: 42]}" (show (SBracket [(SLine [SSymbol "foo", SSymbol "=", SInt 84]), (SLine [SSymbol "foo", SSymbol ">", SInt 42])]))
+
 testShowSStruct :: Test
 testShowSStruct = TestCase $ assertEqual "Show SStruct" "Struct: {[Symbol: \"question\", String: \"Où est la pierre ?\"], [Symbol: \"answer\", String: \"Dans la poche !\"]}"
     (show (SStruct [[SSymbol "question", SString "Où est la pierre ?"], [SSymbol "answer", SString "Dans la poche !"]]))
@@ -54,6 +60,16 @@ testEqSStruct = TestCase $ assertEqual "Eq SStruct" True
     (SStruct [[SSymbol "Quoi", SString "la pierre"], [SSymbol "Où", SString "Dans la poche"]] ==
      SStruct [[SSymbol "Quoi", SString "la pierre"], [SSymbol "Où", SString "Dans la poche"]])
 
+testEqSParenthesis :: Test
+testEqSParenthesis = TestCase $ assertEqual "Eq SParenthesis" True
+    (SParenthesis [SSymbol "foo", SSymbol "=", SInt 84] ==
+    SParenthesis [SSymbol "foo", SSymbol "=", SInt 84])
+
+testEqSBracket :: Test
+testEqSBracket = TestCase $ assertEqual "Eq SBracket" True
+    (SBracket [SLine [SSymbol "foo", SSymbol ">", SInt 42]] ==
+    SBracket [SLine [SSymbol "foo", SSymbol ">", SInt 42]])
+
 testEqDifferentTypes :: Test
 testEqDifferentTypes = TestCase $ assertEqual "Eq Different Types" False ((SInt 42) == (SSymbol "define"))
 
@@ -67,6 +83,8 @@ testListSExprData =
     TestLabel "testShowSArray" testShowSArray,
     TestLabel "testShowSLine" testShowSLine,
     TestLabel "testShowSStruct" testShowSStruct,
+    TestLabel "testShowSParenthesis" testShowSParenthesis,
+    TestLabel "testShowSBracket" testShowSBracket,
     TestLabel "testShowSString" testShowSString,
     TestLabel "testEqSInt" testEqSInt,
     TestLabel "testEqSFloat" testEqSFloat,
@@ -76,5 +94,7 @@ testListSExprData =
     TestLabel "testEqSArray" testEqSArray,
     TestLabel "testEqSString" testEqSString,
     TestLabel "testEqSStruct" testEqSStruct,
+    TestLabel "testEqSParenthesis" testEqSParenthesis,
+    TestLabel "testEqSBracket" testEqSBracket,
     TestLabel "testEqDifferentTypes" testEqDifferentTypes
   ]
