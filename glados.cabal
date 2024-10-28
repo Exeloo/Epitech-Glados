@@ -53,6 +53,8 @@ library executer-lib
       ArgData
       InstructionData
       Launch
+      Parser
+      SExprData
       StackData
   other-modules:
       Paths_glados
