@@ -28,6 +28,7 @@ data Ast =
   AInt Int |
   AFloat Float |
   AString String |
+  ALine [Ast] |
   AList [Ast] |
   AObject [AstObjectElement] |
   ADeclaration AstDeclaration |
