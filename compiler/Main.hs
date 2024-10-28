@@ -11,7 +11,6 @@ help = putStrLn "USAGE: ./glados [file/line]\n" >>
        putStrLn "       line       line of code used" >>
        exitSuccess
 
-
 main :: IO ()
 main = getArgs >>= \args ->
     if "--help" `elem` args
