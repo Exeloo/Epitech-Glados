@@ -1,0 +1,42 @@
+Push 5
+
+.start:
+PushStackOnArg
+PushArgOnStack 0
+PushArgOnStack 0
+PopArg
+Push 1
+PushStackOnArg
+
+.loop:
+
+PushStackOnArg
+PushArgOnStack 0
+Push 1
+Push Less
+Call
+JumpIfFalse end
+
+PushArgOnStack 0
+
+PushArgOnStack 0
+PushArgOnStack 1
+
+Push Mul
+Call
+
+PopArg
+PopArg
+
+PushStackOnArg
+
+Push 1
+Push Sub
+Call
+
+PushStackOnArg
+
+PushArgOnStack 0
+
+.end:
+Ret

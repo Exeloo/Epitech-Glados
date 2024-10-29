@@ -23,7 +23,7 @@ source-repository head
   type: git
   location: https://github.com/githubuser/glados
 
-library
+library compiler-lib
   exposed-modules:
       AstData
       AstEval
@@ -38,7 +38,30 @@ library
   autogen-modules:
       Paths_glados
   hs-source-dirs:
-      src
+      src/compiler
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      HUnit
+    , base >=4.7 && <5
+    , directory
+    , megaparsec
+    , process >=1.6.16.0
+  default-language: Haskell2010
+
+library executer-lib
+  exposed-modules:
+      ArgData
+      InstructionData
+      Launch
+      Parser
+      SExprData
+      StackData
+  other-modules:
+      Paths_glados
+  autogen-modules:
+      Paths_glados
+  hs-source-dirs:
+      src/executer
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       HUnit
@@ -55,13 +78,31 @@ executable glados-exe
   autogen-modules:
       Paths_glados
   hs-source-dirs:
-      app
+      compiler
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      HUnit
+    , base >=4.7 && <5
+    , compiler-lib
+    , directory
+    , megaparsec
+    , process >=1.6.16.0
+  default-language: Haskell2010
+
+executable vm-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_glados
+  autogen-modules:
+      Paths_glados
+  hs-source-dirs:
+      executer
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       HUnit
     , base >=4.7 && <5
     , directory
-    , glados
+    , executer-lib
     , megaparsec
     , process >=1.6.16.0
   default-language: Haskell2010
@@ -85,8 +126,8 @@ test-suite glados-test
   build-depends:
       HUnit
     , base >=4.7 && <5
+    , compiler-lib
     , directory
-    , glados
     , megaparsec
     , process >=1.6.16.0
   default-language: Haskell2010
