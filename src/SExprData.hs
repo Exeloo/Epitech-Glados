@@ -28,4 +28,3 @@ instance Eq SExpr where
   (SString str1) == (SString str2) = str1 == str2
   _ == _ = False
 
-

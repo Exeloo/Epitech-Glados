@@ -12,100 +12,77 @@ import SExprData
 import Symbol
 import AstEval
 
-type AstResult = Either String Ast
+sExpFunctionToAst :: [SExpr] -> Either String Ast
+sExpFunctionToAst (SSymbol name : SList args : body : xs) =
+  let argSymbols = map (\(SSymbol x) -> x) args
+  in case sExpToAst body of
+       Right bodyAst -> Right $ AAssignation $ VarAssignation
+         { assignationKey = name
+         , assignationValue = ADeclaration $ FuncDeclaration
+           { declareArgs = argSymbols
+           , declareBody = [bodyAst]
+           }
+         }
+       Left err -> Left err
+sExpFunctionToAst _ = Left "Invalid function"
 
-parseUnamedInstruction :: AstDeclaration -> [SExpr] -> AstResult
-parseUnamedInstruction declaration args =
-  case sExpElementsToAst args of
+sExpVarAssignationToAst :: [SExpr] -> Either String Ast
+sExpVarAssignationToAst (SSymbol name : value : xs) = case sExpInstructionToAst [value] of
+  Right valueAst -> case sExpVarAssignationToAst xs of
+    Right (AList rest) -> Right $ AList (AAssignation (VarAssignation {
+      assignationKey = name,
+      assignationValue = valueAst
+    }) : rest)
+    Right rest -> Right $ AList [AAssignation (VarAssignation {
+      assignationKey = name,
+      assignationValue = valueAst
+    }), rest]
     Left err -> Left err
-    Right (AList params) -> Right (ACall FuncCall {callFunction = FFunc declaration, callArgs = params})
-    _ -> Left "Internal Error"
-
-sExpListToAst :: [SExpr] -> AstResult
-sExpListToAst [] = Right (AList [])
-sExpListToAst (x:xs) =
-  case sExpElementToAst x of
-    Left err -> Left err
-    Right (ASymbol sym) -> parseInstruction sym xs
-    Right (ADeclaration declaration) -> parseUnamedInstruction declaration xs
-    Right r -> case sExpElementsToAst xs of
-      Left err -> Left err
-      Right (AList rs) -> Right (AList (r:rs))
-      _ -> Left "Internal Error"
-
-sExpElementToAst :: SExpr -> AstResult
-sExpElementToAst (SInt x) = Right (AInt x)
-sExpElementToAst (SString x) = Right (AString x)
-sExpElementToAst (SSymbol x) = Right (ASymbol x)
-sExpElementToAst (SList xs) = sExpListToAst xs
-
-sExpElementsToAst :: [SExpr] -> AstResult
-sExpElementsToAst [] = Right (AList [])
-sExpElementsToAst (x:xs) =
-  case sExpElementToAst x of
-    Left err -> Left err
-    Right curr -> case sExpElementsToAst xs of
-      Right (AList nexts) -> Right (AList (curr:nexts))
-      Left err -> Left err
-      _ -> Left "Internal Error"
-
-parseFuncArgs :: [SExpr] -> Either String [Symbol]
-parseFuncArgs [] = Right []
-parseFuncArgs ((SSymbol sym):xs) =
-  case parseFuncArgs xs of
-    Right nexts -> Right (sym:nexts)
-    Left err -> Left err
-parseFuncArgs _ = Left "Invalid functions params"
-
-parseDefine :: [SExpr] -> AstResult
-parseDefine ((SSymbol sym):var:[]) =
-  case sExpElementToAst var of
-    Left err -> Left err
-    Right value -> Right (AAssignation VarAssignation {assignationKey = sym, assignationValue = value})
-parseDefine ((SList ((SSymbol sym):args)):var:[]) =
-  case parseFuncArgs args of
-    Left err -> Left err
-    Right params -> case sExpElementToAst var of
-      Left err -> Left err
-      Right value -> Right (AAssignation VarAssignation {assignationKey = sym, assignationValue = (ADeclaration FuncDeclaration {declareArgs = params, declareBody = [value]})})
-parseDefine _ = Left "Invalid lisp: define takes 2 params"
-
-parseLambda :: [SExpr] -> AstResult
-parseLambda ((SList (args)):var:[]) =
-  case parseFuncArgs args of
-    Left err -> Left err
-    Right params -> case sExpElementToAst var of
-      Left err -> Left err
-      Right value -> Right (ADeclaration FuncDeclaration {declareArgs = params, declareBody = [value]})
-parseLambda _ = Left "Invalid lisp: lambda takes 2 params"
-
-parseInstruction :: Symbol -> [SExpr] -> AstResult
-parseInstruction "define" xs = parseDefine xs
-parseInstruction "lambda" xs = parseLambda xs
-parseInstruction sym [] = Right (ASymbol sym)
-parseInstruction sym xs =
-  case sExpElementsToAst xs of
-    Left err -> Left err
-    Right (AList elements) -> Right (ACall FuncCall {callFunction = FSymbol sym, callArgs = elements})
-    _ -> Left "Internal Error"
-
-sExpInstructionToAst :: [SExpr] -> AstResult
-sExpInstructionToAst (x:xs) =
-  case sExpElementToAst x of
-    Left err -> Left err
-    Right (ASymbol sym) -> parseInstruction sym xs
-    Right (ADeclaration declaration) -> parseUnamedInstruction declaration xs
-    _ -> Left "Invalid lisp: the first element must be an instruction"
-sExpInstructionToAst _ = Left "Invalid lisp: the first element must be an instruction"
-
-sExpToAst :: SExpr -> AstResult
-sExpToAst (SList xs) = case sExpInstructionToAst xs of
   Left err -> Left err
-  Right ast -> evaluateAst ast
-sExpToAst _ = Left "Invalid lisp (first value must be an array)"
+sExpVarAssignationToAst [] = Right $ AList []
+sExpVarAssignationToAst x = Left $ "Invalid assignation: " ++ show x
 
-evaluateAst :: Ast -> AstResult
-evaluateAst ast = case evalAST [[]] ast of
+sExpBuilinFunctionToAst :: String -> [SExpr] -> Either String Ast
+sExpBuilinFunctionToAst opp [arg1, arg2] = sExpInstructionToAst [arg1] >>= \arg1Ast -> sExpInstructionToAst [arg2] >>= \arg2Ast -> Right $ ACall FuncCall {
+  callFunction = FSymbol opp,
+  callArgs = [arg1Ast, arg2Ast]
+}
+sExpBuilinFunctionToAst a b = Left $ "Invalid builtin function: " ++ a ++ " with args: " ++ show b
+
+sExpIfToAst :: [SExpr] -> Either String Ast
+sExpIfToAst (cond: body: xs) = case sExpInstructionToAst [cond] of
+  Right condAst -> case sExpInstructionToAst [body] of
+    Right bodyAst -> Right $ ACall FuncCall {
+      callFunction = FSymbol "if",
+      callArgs = [condAst, bodyAst]
+    }
     Left err -> Left err
-    Right (ACall FuncCall {callFunction = declaration, callArgs = args}) -> evaluateAst (ACall FuncCall {callFunction = declaration, callArgs = args})
-    Right result -> Right result
+  Left err -> Left err
+
+sExpInstructionToAst :: [SExpr] -> Either String Ast
+sExpInstructionToAst (SSymbol "function": xs) = case sExpFunctionToAst xs of
+  Right func -> Right func
+  err -> err
+sExpInstructionToAst (SSymbol "let": xs) = case sExpVarAssignationToAst xs of
+  Right assignation -> Right assignation
+  err -> err
+sExpInstructionToAst (SSymbol "return": xs) = sExpInstructionToAst xs
+sExpInstructionToAst (arg1: SSymbol x: arg2:xs) | x `elem` ["+", "-", "*", "/", "%", "==", "<"] = case sExpBuilinFunctionToAst x [arg1, arg2] of
+  Right func -> Right func
+  err -> err
+sExpInstructionToAst (SSymbol "if": cond: body: xs) = sExpIfToAst [cond, body]
+sExpInstructionToAst (SInt x:_) = Right $ AInt x
+sExpInstructionToAst (SSymbol x:_) = Right $ ASymbol x
+sExpInstructionToAst (SString x:_) = Right $ AString x
+sExpInstructionToAst (SList x:xs) = case sExpInstructionToAst x of
+  Right ast | xs == [] -> Right ast
+            | otherwise -> case mapM sExpInstructionToAst [xs] of
+    Right asts -> Right $ AList (ast:asts)
+    Left err -> Left err
+  Left err -> Left err
+
+sExpInstructionToAst x = Left $ "Invalid instruction: " ++ show x
+
+sExpToAst :: SExpr -> Either String Ast
+sExpToAst (SList xs) = sExpInstructionToAst xs
+sExpToAst x = Left $ "Invalid SExpr: " ++ show x
