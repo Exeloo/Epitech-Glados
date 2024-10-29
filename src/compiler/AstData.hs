@@ -13,7 +13,10 @@ data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: 
 
 data AstAssignation = VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } deriving (Show, Eq)
 
-data AstCall = FuncCall { callFunction :: Ast, callArgs :: [Ast] } deriving (Show, Eq)
+data AstCall =
+  FuncCall { callFunction :: Ast, callArgs :: [Ast] }
+  ArrayAccess { accessArray :: Ast, accessArg :: Ast }
+  deriving (Show, Eq)
 
 data AstLoop =
   ForLoop { forAssignation :: [Ast], forCondition :: [Ast], forIncrementation :: [Ast], forBody :: [Ast] } |
