@@ -10,36 +10,35 @@ module AstEval (evalAST, callAST, replaceSymbol, ifAstEvaluation ,getSymbolFromL
 import Symbol
 import AstData
 import Evaluation
-import SExprToAst (evaluateAst)
 
-ifAstFunctionCall :: String -> [Ast] -> Ast -> Ast -> Either String Ast
-ifAstFunctionCall symbol args a b = case callAST symbol args of
+ifAstFunctionCall :: String -> [Ast] -> Ast -> Ast -> [[Ast]] -> Either String Ast
+ifAstFunctionCall symbol args a b var = case callAST symbol args var of
     Right (ABool True) -> Right a
     Right (ABool False) -> Right b
     _ -> Left "Invalid if statement"
 
-ifAstEvaluation :: [Ast] -> Either String Ast
-ifAstEvaluation [func, a, b] = case func of
+ifAstEvaluation :: [Ast] -> [[Ast]] -> Either String Ast
+ifAstEvaluation [func, a, b] var = case func of
   ABool True -> Right a
   ABool False -> Right b
   ASymbol "#t" -> Right a
   ASymbol "#f" -> Right b
-  ACall FuncCall { callFunction = FSymbol f, callArgs = arg } -> ifAstFunctionCall f arg a b
+  ACall FuncCall { callFunction = FSymbol f, callArgs = arg } -> ifAstFunctionCall f arg a b var
   _ -> Left "Invalid if statement"
 
-callAST :: String -> [Ast] -> Either String Ast
-callAST "+" [x, y] = Right (AInt (evalArgInt x + evalArgInt y))
-callAST "-" [x, y] = Right (AInt (evalArgInt x - evalArgInt y))
-callAST "*" [x, y] = Right (AInt (evalArgInt x * evalArgInt y))
-callAST "div" [x, y] = Right (AInt (evalArgInt x `div` evalArgInt y))
-callAST "mod" [x, y] = Right (AInt (evalArgInt x `mod` evalArgInt y))
-callAST "eq?" [x, y] = Right (ABool (x == y))
-callAST "<" [x, y] = Right (ABool (evalArgInt x < evalArgInt y))
-callAST "if" x = ifAstEvaluation x
-callAST a _ = Left $ "callAST : Invalid function: " ++ a
+callAST :: String -> [Ast] -> [[Ast]] -> Either String Ast
+callAST "+" [x, y] var = Right (AInt (evalArgInt x var + evalArgInt y var))
+callAST "-" [x, y] var = Right (AInt (evalArgInt x var - evalArgInt y var))
+callAST "*" [x, y] var = Right (AInt (evalArgInt x var * evalArgInt y var))
+callAST "div" [x, y] var = Right (AInt (evalArgInt x var `div` evalArgInt y var))
+callAST "mod" [x, y] var = Right (AInt (evalArgInt x var `mod` evalArgInt y var))
+callAST "eq?" [x, y] var = Right (ABool (x == y))
+callAST "<" [x, y] var = Right (ABool (evalArgInt x var < evalArgInt y var))
+callAST "if" x var = ifAstEvaluation x var
+callAST a _ _ = Left $ "callAST : Invalid function: " ++ a
 
-evalArgInt :: Ast -> Int
-evalArgInt ast = case evalAST [[]] ast of
+evalArgInt :: Ast -> [[Ast]] -> Int
+evalArgInt ast var = case evalAST var ast of
   Right (AInt x) -> x
   _ -> 0
 
@@ -67,7 +66,7 @@ replaceSymbol _ _ _ ast = ast
 
 evalAstFunc :: [Symbol] -> Ast -> [Ast] -> [[Ast]] -> Either String Ast
 evalAstFunc (arg:args) func (argcall:argcalls) a = evalAstFunc args (replaceSymbol arg argcall a func) argcalls a
-evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ _ | f `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = callAST f args
+evalAstFunc _ (ACall FuncCall {callFunction = FSymbol f, callArgs = args}) _ var | f `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"] = callAST f args var
 evalAstFunc _ (AList [body]) [] a = evalAstFunc [] body [] a
 evalAstFunc [] func [] _= Right (func)
 evalAstFunc _ _ [] _ = Left "Invalid function, not enough arguments"
@@ -79,18 +78,16 @@ findFunc func args var = case getElemList func var of
   Right x -> Left $ "Function not found1: " ++ show x
   Left x -> Left $ "Function not found2: " ++ x
 
-evalAssignation :: [[Ast]] -> Ast -> Either String Ast
-evalAssignation a (AAssignation var) = case addAssignation (AAssignation var) a of
-  [x] -> Right $ AString (show (head x))
-  x -> Right $ AString (show x)
-evalAssignation a b = evalAST a b
+evalAssignation :: [[Ast]] -> Ast -> Either String (IO (Ast, [[Ast]]))
+evalAssignation a (AAssignation var) = Right $ return ((AAssignation var) addAssignation (AAssignation var) a)
+evalAssignation a _ = Left "Invalid Assignation"
 
 evalSyscall :: [[Ast]] -> Symbol ->[Ast] -> Either String Ast
 evalSyscall a func args = case mapM (evalAST a) args of
     Right x -> callAST func x
     Left x -> Left x
 
-evalFunction :: [[Ast]] -> Symbol -> [Ast] -> Either String Ast
+evalFunction :: [[Ast]] -> Symbol -> [Ast] -> Either String (IO (Ast, [[Ast]]))
 evalFunction a func args = case findFunc func args a of
   Right x -> evalAST a x
   Left x -> Left x
@@ -100,23 +97,28 @@ evalFuncDeclaration  a argfunc body args = case evalAstFunc argfunc (AList body)
   Right x -> Right x
   Left x -> Left x
 
-evalList :: [[Ast]] -> [Ast] -> Either String Ast
-evalList a x = case mapM (evalAST a) x of
-  Right x' -> Right (AList x')
-  Left x' -> Left x'
+evalList :: [[Ast]] -> [Ast] -> Either String (Ast, [[Ast]])
+evalList a [] = Right ((AList []), a)
+evalList a (x:xs) = do
+                  let result = evalAST a x
+                  case result of
+                      Right (b, c) -> evalList c xs
+                      Left d -> Left d
 
-evalAST :: [[Ast]] -> Ast -> Either String [[Ast]]
-evalAST a (AInt x) = evalResult (AInt x) a
-evalAST a (ASymbol x) = evalResult (replaceSymbol x (ASymbol x) a (ASymbol x)) a
+evalAST :: [[Ast]] -> Ast -> Either String (IO (Ast, [[Ast]]))
+evalAST a (AInt x) = evalResult (Right $ AInt x) a
+evalAST a (ASymbol x) = evalResult (Right $ replaceSymbol x (ASymbol x) a (ASymbol x)) a
 evalAST a (AAssignation var) = evalAssignation a (AAssignation var)
 evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) | syscall = evalResult (evalSyscall a func args) a
             where syscall = func `elem` ["+", "-", "*", "div", "mod", "eq?", "<", "if"]
-evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) = evalResult (evalFunction a func args) a
+evalAST a (ACall (FuncCall {callFunction = FSymbol func, callArgs = args})) = evalFunction a func args
 evalAST a (ACall FuncCall {callFunction = FFunc FuncDeclaration { declareArgs = argfunc, declareBody = body }, callArgs = args}) = evalResult (evalFuncDeclaration a argfunc body args) a
-evalAST a (AList x) = evalResult (evalList a x) a
+evalAST a (AList x) = case evalList a x of
+            Right (y, z) -> evalResult (Right (AList x)) z
+            Left y -> evalResult (Left y) a
 evalAST _ _ = Left "Invalid function"
 
-evalResult :: Ast -> [[Ast]] -> Either String [[Ast]]
-evalResult (ACall (FuncCall x y)) b = evaluateAst (ACall (FuncCall x y)) b
-evalResult a b = show a >> Right b
-evalResult _ _ = Left "Invalid function"
+evalResult :: Either String Ast -> [[Ast]] -> Either String (IO (Ast, [[Ast]]))
+evalResult (Right (ACall (FuncCall x y))) b = evalAST b (ACall (FuncCall x y))
+evalResult (Right a) b = Right (return (a, b))
+evalResult (Left a) _ = Left a
