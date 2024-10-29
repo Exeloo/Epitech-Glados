@@ -3,6 +3,7 @@ module UnitTests.UnitTestAstEval (testlistAstEval) where
 import Test.HUnit
 import AstEval
 import AstData
+import Symbol
 
 testCallASTAdd :: Test
 testCallASTAdd = TestCase $ assertEqual "10 + 5 = 15" (Right (AInt 15)) (callAST "+" [AInt 10, AInt 5])

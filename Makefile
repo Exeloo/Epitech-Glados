@@ -5,7 +5,8 @@
 ## glados
 ##
 
-NAME	=	glados
+NAME_COMPILER	=	glados
+NAME_VM	=	vm
 
 SRC_TEST	=	./test/
 
@@ -13,13 +14,14 @@ TEST	=	run_tests.sh
 
 all:
 	stack build
-	cp `stack path --local-install-root`/bin/${NAME}-exe ./${NAME}
+	cp `stack path --local-install-root`/bin/${NAME_COMPILER}-exe ./${NAME_COMPILER}
+	cp `stack path --local-install-root`/bin/${NAME_VM}-exe ./${NAME_VM}
 
 clean:
 	stack clean
 
 fclean: clean
-	$(RM) ${NAME}
+	$(RM) ${NAME_COMPILER} ${NAME_VM}
 
 re:	fclean all
 

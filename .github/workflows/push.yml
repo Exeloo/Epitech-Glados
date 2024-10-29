@@ -16,8 +16,8 @@ env:
   MIRROR_URL: "git@github.com:EpitechPromo2027/B-FUN-500-PAR-5-1-glados-deniz.uzuntok-husson.git"
 
 jobs:
-  build:
-    name: Build
+  push:
+    name: Build & Tests
     runs-on: ubuntu-latest
     container:
       image: epitechcontent/epitest-docker
@@ -41,32 +41,15 @@ jobs:
               exit 1
             fi
           done
-  run_tests:
-    name: "Running Tests"
-    runs-on: ubuntu-latest
-    container:
-      image: epitechcontent/epitest-docker
-
-    needs: build
-
-    steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-      - name: Permissions bug workaround
-        run: "chown -R $(id -un):$(id -gn) ~"
-      - name: Setup
-        run: stack setup --allow-different-user
-      - name: Build
-        run: make
-        timeout-minutes: 2
       - name: Run tests
         run: make tests
+
   push_to_mirror:
     name: "Pushing To The Mirror Repository"
     runs-on: ubuntu-latest
 
-    needs: run_tests
-
+    needs: push
+    if: github.event.repository.name != 'B-FUN-500-PAR-5-1-glados-deniz.uzuntok-husson'
     steps:
       - uses: actions/checkout@v4
         with:

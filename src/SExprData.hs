@@ -27,4 +27,3 @@ instance Eq SExpr where
   (SList l1) == (SList l2) = l1 == l2
   (SString str1) == (SString str2) = str1 == str2
   _ == _ = False
-
