@@ -39,7 +39,7 @@ callAST a _ _ = Left $ "callAST : Invalid function: " ++ a
 
 evalArgInt :: Ast -> [[Ast]] -> Int
 evalArgInt ast var = case evalAST var ast of
-  Right (AInt x) -> x
+  Right ((AInt x), _) -> x
   _ -> 0
 
 getSymbolFromList :: [[Ast]] -> Symbol -> Ast
@@ -78,16 +78,16 @@ findFunc func args var = case getElemList func var of
   Right x -> Left $ "Function not found1: " ++ show x
   Left x -> Left $ "Function not found2: " ++ x
 
-evalAssignation :: [[Ast]] -> Ast -> Either String (IO (Ast, [[Ast]]))
-evalAssignation a (AAssignation var) = Right $ return ((AAssignation var) addAssignation (AAssignation var) a)
+evalAssignation :: [[Ast]] -> Ast -> Either String (Ast, [[Ast]])
+evalAssignation a (AAssignation var) = Right $ ((AAssignation var) addAssignation (AAssignation var) a)
 evalAssignation a _ = Left "Invalid Assignation"
 
-evalSyscall :: [[Ast]] -> Symbol ->[Ast] -> Either String Ast
+evalSyscall :: [[Ast]] -> Symbol -> [Ast] -> Either String Ast
 evalSyscall a func args = case mapM (evalAST a) args of
-    Right x -> callAST func x
+    Right (x, y) -> callAST func x a
     Left x -> Left x
 
-evalFunction :: [[Ast]] -> Symbol -> [Ast] -> Either String (IO (Ast, [[Ast]]))
+evalFunction :: [[Ast]] -> Symbol -> [Ast] -> Either String (Ast, [[Ast]])
 evalFunction a func args = case findFunc func args a of
   Right x -> evalAST a x
   Left x -> Left x
@@ -99,13 +99,11 @@ evalFuncDeclaration  a argfunc body args = case evalAstFunc argfunc (AList body)
 
 evalList :: [[Ast]] -> [Ast] -> Either String (Ast, [[Ast]])
 evalList a [] = Right ((AList []), a)
-evalList a (x:xs) = do
-                  let result = evalAST a x
-                  case result of
+evalList a (x:xs) = case evalAST a x of
                       Right (b, c) -> evalList c xs
                       Left d -> Left d
 
-evalAST :: [[Ast]] -> Ast -> Either String (IO (Ast, [[Ast]]))
+evalAST :: [[Ast]] -> Ast -> Either String (Ast, [[Ast]])
 evalAST a (AInt x) = evalResult (Right $ AInt x) a
 evalAST a (ASymbol x) = evalResult (Right $ replaceSymbol x (ASymbol x) a (ASymbol x)) a
 evalAST a (AAssignation var) = evalAssignation a (AAssignation var)
@@ -118,7 +116,7 @@ evalAST a (AList x) = case evalList a x of
             Left y -> evalResult (Left y) a
 evalAST _ _ = Left "Invalid function"
 
-evalResult :: Either String Ast -> [[Ast]] -> Either String (IO (Ast, [[Ast]]))
+evalResult :: Either String Ast -> [[Ast]] -> Either String (Ast, [[Ast]])
 evalResult (Right (ACall (FuncCall x y))) b = evalAST b (ACall (FuncCall x y))
-evalResult (Right a) b = Right (return (a, b))
+evalResult (Right a) b = Right (a, b)
 evalResult (Left a) _ = Left a
