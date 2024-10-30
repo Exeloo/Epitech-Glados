@@ -6,9 +6,9 @@ import System.Exit
 import System.Environment
 
 help :: IO ()
-help = putStrLn "USAGE: ./glados [file/line]\n" >>
-       putStrLn "       file       path of the file used" >>
-       putStrLn "       line       line of code used" >>
+help = putStrLn "USAGE: ./glados [-f file] [-c]\n" >>
+       putStrLn "       -f         path of the file used" >>
+       putStrLn "       -c         to compile the program" >>
        exitSuccess
 
 main :: IO ()
