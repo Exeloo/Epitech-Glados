@@ -32,51 +32,100 @@ captureOutput action = do
                       (\_ -> action)
     return result
 
+suppressOutput :: IO (Maybe Info) -> IO (Maybe Info)
+suppressOutput action = do
+    (readEnd, writeEnd) <- createPipe
+    originalStdout <- hDuplicate stdout
+    hDuplicateTo writeEnd stdout
 
-paramsFileNotExist :: Test
-paramsFileNotExist = TestCase $ do
-    res <- fileExist "notExist1"
-    assertEqual "no files exist" Nothing res
+    result <- bracket (return ())
+                      (const $ hDuplicateTo originalStdout stdout >> hClose writeEnd >> hClose readEnd)
+                      (\_ -> action)
+    return result
 
-paramsFileExist :: Test
-paramsFileExist = TestCase $ do
-    res <- fileExist ".gitignore"
-    assertEqual "file exist" (Just ".gitignore") res
 
-launchTooMany :: Test
-launchTooMany = TestCase $ do
-    res <- launch ["too", "many"]
-    assertEqual "too many arguments" False res
+paramsTooMany :: Test
+paramsTooMany = TestCase $ do
+    res <- suppressOutput $ errorHandling ["où", "est", "la", "pierre"]
+    assertEqual "too many arguments" Nothing res
 
-launchFileNotGood :: Test
-launchFileNotGood = TestCase $ do
-    res <- captureOutput $ launch ["test/files_tests/lisp_test_error"]
-    assertEqual "file not good" False res
+paramsEqualWithoutFlag :: Test
+paramsEqualWithoutFlag = TestCase $ do
+    res <- suppressOutput $ errorHandling ["-f", "file", "wrong"]
+    assertEqual "3 arguments but not with flag -c" Nothing res
 
-launchFileGood :: Test
-launchFileGood = TestCase $ do
-    res <- captureOutput $ launch ["test/files_tests/lisp_test"]
-    assertEqual "file good" True res
+paramsErrorFlagC :: Test
+paramsErrorFlagC = TestCase $ do
+    res <- suppressOutput $ errorHandling ["-c", "wrong"]
+    assertEqual "2 arguments with flag -c" Nothing res
 
-launchParamsLineGood :: Test
-launchParamsLineGood = TestCase $ do
-    res <- captureOutput $ launch ["(define foo 42)"]
-    assertEqual "Simple line" True res
+paramsErrorFlagF :: Test
+paramsErrorFlagF = TestCase $ do
+    res <- suppressOutput $ errorHandling ["-f"]
+    assertEqual "Forgot File" Nothing res
+
+paramsErrorWithoutFlag :: Test
+paramsErrorWithoutFlag = TestCase $ do
+    res <- suppressOutput $ errorHandling ["file"]
+    assertEqual "1 argument without any flag" Nothing res
+
+paramsErrorFile :: Test
+paramsErrorFile = TestCase $ do
+    res <- suppressOutput $ errorHandling ["-f", "wrong"]
+    assertEqual "File doesn't exist" Nothing res
+
+paramsNotFindFile :: Test
+paramsNotFindFile = TestCase $ assertEqual "doesn't have path in arguments" Nothing (getFilePath ["-f", "-c"])
+
+paramsfileExist :: Test
+paramsfileExist = TestCase $ do
+    res <- fileExist "test/files_tests/language_test"
+    assertEqual "file exist" (Just "test/files_tests/language_test") res
+
+paramsErrorLaunch :: Test
+paramsErrorLaunch = TestCase $ do
+    res <- captureOutput $ launch ["-f", "wrong"]
+    assertEqual "Error in launch" False res
+
+paramsSuccess :: Test
+paramsSuccess = TestCase $ do
+    res <- captureOutput $ launch ["-f", "test/files_tests/language_test"]
+    assertEqual "Successful launch" True res
+
+paramsArgWithoutFAndC :: Test
+paramsArgWithoutFAndC = TestCase $ do
+    res <- errorHandling []
+    assertEqual "doesn't have any flags" (Just ((False, False), "")) res
+
+paramsArgCWithoutF :: Test
+paramsArgCWithoutF = TestCase $ do
+    res <- errorHandling ["-c"]
+    assertEqual "use flag c" (Just ((False, True), "")) res
+
+paramsArgFWithoutC :: Test
+paramsArgFWithoutC = TestCase $ do
+    res <- errorHandling ["-f", "test/files_tests/language_test"]
+    assertEqual "use flag f" (Just ((True, False), "test/files_tests/language_test")) res
+
+paramsArgWithFAndC :: Test
+paramsArgWithFAndC = TestCase $ do
+    res <- errorHandling ["-f", "test/files_tests/language_test", "-c"]
+    assertEqual "use flag f and c" (Just ((True, True), "test/files_tests/language_test")) res
+
+launchErrorInteractiveCompile :: Test
+launchErrorInteractiveCompile = TestCase $ do
+    res <-  captureOutput $ (launch ["-c"])
+    assertEqual "Launch interactive shell with flag compile return an error" False res
 
 launchFileStdout :: Test
 launchFileStdout = TestCase $ do
-    res <-  captureOutput $ fileInput "test/files_tests/lisp_test" (launch [])
-    assertEqual "Launch with lisp_test input" True res
+    res <-  captureOutput $ fileInput "test/files_tests/language_test" (launch [])
+    assertEqual "Launch with test file in standard output" True res
 
-launchFileStdoutError :: Test
-launchFileStdoutError = TestCase $ do
-    res <-  captureOutput $ fileInput "test/files_tests/lisp_test_error" (launch [])
-    assertEqual "Launch with lisp_test_error input" False res
-
-launchParamsLineInvalid :: Test
-launchParamsLineInvalid = TestCase $ do
-    res <- captureOutput $ launch ["(42)"]
-    assertEqual "Simple line but Invalid lisp" False res
+launchFileStdoutCompile :: Test
+launchFileStdoutCompile = TestCase $ do
+    res <-  captureOutput $ fileInput "test/files_tests/language_test" (launch ["-c"])
+    assertEqual "Launch with test file in standard output and compile" True res
 
 handleCtrlEOF :: Test
 handleCtrlEOF = TestCase $ do
@@ -90,15 +139,23 @@ handleCtrlOther = TestCase $ do
 
 testlistLaunch :: Test
 testlistLaunch = TestList [
-    TestLabel "paramsFileNotExist" paramsFileNotExist,
-    TestLabel "paramsFileExist" paramsFileExist,
-    TestLabel "launchTooMany" launchTooMany,
-    TestLabel "launchFileNotGood" launchFileNotGood,
-    TestLabel "launchFileGood" launchFileGood,
-    TestLabel "launchParamsLineGood" launchParamsLineGood,
+    TestLabel "paramsTooMany" paramsTooMany,
+    TestLabel "paramsEqualWithoutFlag" paramsEqualWithoutFlag,
+    TestLabel "paramsErrorFlagC" paramsErrorFlagC,
+    TestLabel "paramsErrorFlagF" paramsErrorFlagF,
+    TestLabel "paramsErrorWithoutFlag" paramsErrorWithoutFlag,
+    TestLabel "paramsErrorFile" paramsErrorFile,
+    TestLabel "paramsNotFindFile" paramsNotFindFile,
+    TestLabel "paramsfileExist" paramsfileExist,
+    TestLabel "paramsErrorLaunch" paramsErrorLaunch,
+    TestLabel "paramsSuccess" paramsSuccess,
+    TestLabel "paramsArgWithoutFAndC" paramsArgWithoutFAndC,
+    TestLabel "paramsArgCWithoutF" paramsArgCWithoutF,
+    TestLabel "paramsArgFWithoutC" paramsArgFWithoutC,
+    TestLabel "paramsArgWithFAndC" paramsArgWithFAndC,
+    TestLabel "launchErrorInteractiveCompile" launchErrorInteractiveCompile,
     TestLabel "launchFileStdout" launchFileStdout,
-    TestLabel "launchFileStdoutError" launchFileStdoutError,
-    TestLabel "launchParamsLineInvalid" launchParamsLineInvalid,
+    TestLabel "launchFileStdoutCompile" launchFileStdoutCompile,
     TestLabel "handleCtrlEOF" handleCtrlEOF,
     TestLabel "handleCtrlOther" handleCtrlOther
     ]
