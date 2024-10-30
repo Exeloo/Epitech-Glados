@@ -26,17 +26,11 @@ sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket [SLine body] : xs
 sExpFunctionToAst _ = Left "Invalid function"
 
 sExpVarAssignationToAst :: [SExpr] -> Either String Ast
-sExpVarAssignationToAst (SSymbol name : value : xs) = case sExpInstructionToAst [value] of
-  Right valueAst -> case sExpVarAssignationToAst xs of
-    Right (AList rest) -> Right $ AList (AAssignation (VarAssignation {
+sExpVarAssignationToAst (SSymbol name: SSymbol "=" : value : xs) = case sExpInstructionToAst [value] of
+  Right valueAst -> Right $ AAssignation (VarAssignation {
       assignationKey = name,
       assignationValue = valueAst
-    }) : rest)
-    Right rest -> Right $ AList [AAssignation (VarAssignation {
-      assignationKey = name,
-      assignationValue = valueAst
-    }), rest]
-    Left err -> Left err
+    })
   Left err -> Left err
 sExpVarAssignationToAst [] = Right $ AList []
 sExpVarAssignationToAst x = Left $ "Invalid assignation: " ++ show x
@@ -58,12 +52,42 @@ sExpIfToAst (cond: body: xs) = case sExpInstructionToAst [cond] of
     Left err -> Left err
   Left err -> Left err
 
+sExpWhileToAst :: [SExpr] -> Either String Ast
+sExpWhileToAst (cond: body: xs) = case sExpInstructionToAst [cond] of
+  Right condAst -> case sExpInstructionToAst [body] of
+    Right bodyAst -> Right $ ALoop $ WhileLoop {
+      whileCondition = condAst,
+      whileBody = [bodyAst]
+    }
+    Left err -> Left err
+  Left err -> Left err
+sExpWhileToAst x = Left $ "Invalid while: " ++ show x
+
+sExpForToAst :: [SExpr] -> Either String Ast
+sExpForToAst (SParenthesis [init, cond, inc]: SBracket [SLine body]:_) = case sExpInstructionToAst [init] of
+  Right initAst -> case sExpInstructionToAst [cond] of
+    Right condAst -> case sExpInstructionToAst [inc] of
+      Right incAst -> case sExpInstructionToAst [body] of
+        Right bodyAst -> Right $ ALoop $ ForLoop {
+          forAssignation = [initAst],
+          forCondition = [condAst],
+          forIncrementation = [incAst],
+          forBody = [bodyAst]
+        }
+        Left err -> Left err
+      Left err -> Left err
+    Left err -> Left err
+  Left err -> Left err
+sExpForToAst x = Left $ "Invalid for: " ++ show x
+
 sExpInstructionToAst :: [SExpr] -> Either String Ast
 sExpInstructionToAst (SSymbol "function": xs) = sExpFunctionToAst xs
 sExpInstructionToAst (SSymbol "let": xs) = sExpVarAssignationToAst xs
 sExpInstructionToAst (SSymbol "return": xs) = sExpInstructionToAst xs
-sExpInstructionToAst (arg1: SSymbol x: arg2:xs) | x `elem` ["+", "-", "*", "/", "%", "==", "<"] = sExpBuilinFunctionToAst x [arg1, arg2]
-sExpInstructionToAst (SSymbol "if": cond: body: xs) = sExpIfToAst [cond, body]
+sExpInstructionToAst (arg1: SSymbol x: arg2:_) | x `elem` ["+", "-", "*", "/", "%", "==", "<"] = sExpBuilinFunctionToAst x [arg1, arg2]
+sExpInstructionToAst (SSymbol "if": cond: body: _) = sExpIfToAst [cond, body]
+sExpInstructionToAst (SSymbol "while": SParenthesis [cond]: SBracket [SLine body]:_) = sExpWhileToAst [cond, body]
+sExpInstructionToAst (SSymbol "for": xs) = sExpForToAst xs
 sExpInstructionToAst (SInt x:_) = Right $ AInt x
 sExpInstructionToAst (SBool x:_) = Right $ ABool x
 sExpInstructionToAst (SFloat x:_) = Right $ AFloat x
