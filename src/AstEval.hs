@@ -79,7 +79,7 @@ findFunc func args var = case getElemList func var of
   Left x -> Left $ "Function not found2: " ++ x
 
 evalAssignation :: [[Ast]] -> Ast -> Either String (Ast, [[Ast]])
-evalAssignation a (AAssignation var) = Right $ ((AAssignation var) addAssignation (AAssignation var) a)
+evalAssignation a (AAssignation var) = Right $ ((AAssignation var), addAssignation (AAssignation var) a)
 evalAssignation a _ = Left "Invalid Assignation"
 
 evalSyscall :: [[Ast]] -> Symbol -> [Ast] -> Either String Ast
