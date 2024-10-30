@@ -1,7 +1,0 @@
-a = 2;
-function test() {
-    return a + 1;
-}
-printf(test());
-a = 3;
-printf(test());
