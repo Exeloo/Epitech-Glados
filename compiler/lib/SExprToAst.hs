@@ -73,10 +73,6 @@ sExpInstructionToAst (SArray x:_) = case mapM sExpInstructionToAst [x] of
   Right asts -> Right $ AList asts
   Left err -> Left err
 sExpInstructionToAst (SParenthesis x:_) = mapM sExpInstructionToAst [x] >>= \asts -> Right $ AList asts
-sExpInstructionToAst (SStruct x:_) = mapM sExpInstructionToAst x >>= \asts -> Right $ AObject $ map (\ast -> ObjectElement {
-  objectKey = "key",
-  objectValue = ast
-}) asts
 sExpInstructionToAst (SLine x:xs) = case sExpInstructionToAst x of
   Right ast | xs == [] -> Right ast
             | otherwise -> case mapM sExpInstructionToAst [xs] of
