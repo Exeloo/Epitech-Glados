@@ -80,6 +80,12 @@ sExpForToAst (SParenthesis [init, cond, inc]: SBracket [SLine body]:_) = case sE
   Left err -> Left err
 sExpForToAst x = Left $ "Invalid for: " ++ show x
 
+sExpStructToAst :: [SExpr] -> Either String Ast
+sExpStructToAst (SSymbol key: SSymbol ":" : value: xs) = sExpInstructionToAst [value] >>= \valueAst -> case sExpStructToAst xs of
+  Right structAst -> Right $ AObject [ObjectElement {objectKey = key, objectValue = valueAst}] : structAst
+  Left err -> Left err
+sExpStructToAst x = Left $ "Invalid struct: " ++ show x
+
 sExpInstructionToAst :: [SExpr] -> Either String Ast
 sExpInstructionToAst (SSymbol "function": xs) = sExpFunctionToAst xs
 sExpInstructionToAst (SSymbol "let": xs) = sExpVarAssignationToAst xs
@@ -88,6 +94,8 @@ sExpInstructionToAst (arg1: SSymbol x: arg2:_) | x `elem` ["+", "-", "*", "/", "
 sExpInstructionToAst (SSymbol "if": cond: body: _) = sExpIfToAst [cond, body]
 sExpInstructionToAst (SSymbol "while": SParenthesis [cond]: SBracket [SLine body]:_) = sExpWhileToAst [cond, body]
 sExpInstructionToAst (SSymbol "for": xs) = sExpForToAst xs
+sExpInstructionToAst (SSymbol x: SArray i: xs) = sExpInstructionToAst i >>= idx -> Right $ ACall ArrayAccess {accessArray = ASymbol x, accessArg = idx}
+sExpInstructionToAst (SStruct x: _) = sExpStructToAst x
 sExpInstructionToAst (SInt x:_) = Right $ AInt x
 sExpInstructionToAst (SBool x:_) = Right $ ABool x
 sExpInstructionToAst (SFloat x:_) = Right $ AFloat x
