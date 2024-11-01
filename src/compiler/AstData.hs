@@ -9,7 +9,7 @@ module AstData (Ast(..), AstDeclaration(..), AstAssignation(..), AstCall(..), As
 
 import Symbol
 
-data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: [Ast] } deriving (Show, Eq)
+data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: Ast } deriving (Show, Eq)
 
 data AstAssignation = VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } deriving (Show, Eq)
 
@@ -19,8 +19,8 @@ data AstCall =
   deriving (Show, Eq)
 
 data AstLoop =
-  ForLoop { forAssignation :: [Ast], forCondition :: [Ast], forIncrementation :: [Ast], forBody :: [Ast] } |
-  WhileLoop { whileCondition :: Ast, whileBody :: [Ast] }
+  ForLoop { forAssignation :: Ast, forCondition :: Ast, forIncrementation :: Ast, forBody :: Ast } |
+  WhileLoop { whileCondition :: Ast, whileBody :: Ast }
   deriving (Show, Eq)
 
 data AstObjectElement = ObjectElement { objectKey :: Symbol, objectValue :: Ast} deriving (Show, Eq)
