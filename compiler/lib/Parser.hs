@@ -6,7 +6,7 @@
 -}
 
 
-module Parser(parseSExpr, parseSString, parseSSymbol, parseSInt, parseSList) where
+module Parser(parseSExpr, parseSString, parseSSymbol, parseSInt, parseSLine) where
 
 import Text.Megaparsec
 import Text.Megaparsec.Char
@@ -47,8 +47,11 @@ parseSArray = SArray <$> (char '[' *> spaces *> parseElems <* spaces <* char ']'
 parseSStruct :: SexprParser SExpr
 parseSStruct = SStruct <$> (spaces *> char '{' *> spaces *> sepBy parseKeyValue (spaces *> char ',' *> spaces) <* spaces <* char '}' <* spaces)
 
-parseSList :: SexprParser SExpr
-parseSList = SList <$> (spaces *> char '(' *> some (spaces *> parseSExpr <* spaces) <* char ')' <* spaces)
+parseSParenthesis :: SexprParser SExpr
+parseSParenthesis = SParenthesis <$> (spaces *> char '(' *> some (spaces *> parseSExpr <* spaces) <* char ')' <* spaces)
+
+parseSLine :: SexprParser SExpr
+parseSLine = SLine <$> (spaces *> some (spaces *> parseSExpr <* spaces) <* char ';' <* spaces)
 
 parseSExpr :: SexprParser SExpr
-parseSExpr = parseSInt <|> parseSFloat <|> parseSBool <|> parseSArray <|> parseSString <|> parseSSymbol <|> parseSStruct <|> parseSList
+parseSExpr = parseSInt <|> parseSFloat <|> parseSBool <|> parseSArray <|> parseSString <|> parseSSymbol <|> parseSStruct <|> parseSParenthesis <|> parseSLine
