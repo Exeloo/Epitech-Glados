@@ -19,7 +19,7 @@ sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket [SLine body] : xs
          { assignationKey = name
          , assignationValue = ADeclaration $ FuncDeclaration
            { declareArgs = argSymbols
-           , declareBody = [bodyAst]
+           , declareBody = bodyAst
            }
          }
        Left err -> Left err
@@ -57,7 +57,7 @@ sExpWhileToAst (cond: body: xs) = case sExpInstructionToAst [cond] of
   Right condAst -> case sExpInstructionToAst [body] of
     Right bodyAst -> Right $ ALoop $ WhileLoop {
       whileCondition = condAst,
-      whileBody = [bodyAst]
+      whileBody = bodyAst
     }
     Left err -> Left err
   Left err -> Left err
@@ -69,10 +69,10 @@ sExpForToAst (SParenthesis [init, cond, inc]: SBracket [SLine body]:_) = case sE
     Right condAst -> case sExpInstructionToAst [inc] of
       Right incAst -> case sExpInstructionToAst body of
         Right bodyAst -> Right $ ALoop $ ForLoop {
-          forAssignation = [initAst],
-          forCondition = [condAst],
-          forIncrementation = [incAst],
-          forBody = [bodyAst]
+          forAssignation = initAst,
+          forCondition = condAst,
+          forIncrementation = incAst,
+          forBody = bodyAst
         }
         Left err -> Left err
       Left err -> Left err
