@@ -34,4 +34,6 @@ Jump loop
 .end:
 PushArgOnStack 0
 PopArg
+Push Print
+Call
 Ret

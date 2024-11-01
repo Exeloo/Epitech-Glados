@@ -3,7 +3,7 @@ module Parser (parseSExpr) where
 import Data.Void
 import Data.Char
 import Data.Functor
-import SExprData (SInstCall(..), SValue(..), SInst(..), SAsm(..), SExpr)
+import SExprData (SSysCall(..), SValue(..), SInst(..), SAsm(..), SExpr)
 import Text.Megaparsec
 import Text.Megaparsec.Char
 import Text.Megaparsec.Char.Lexer
@@ -51,10 +51,18 @@ parseSValueCall = SValueCall <$> ((parseCaseString "Add" $> SAdd) <|>
     (parseCaseString "Mul" $> SMul) <|>
     (parseCaseString "Div" $> SDiv) <|>
     (parseCaseString "Eq" $> SEq) <|>
-    (parseCaseString "Less" $> SLess))
+    (parseCaseString "Less" $> SLess) <|>
+    (parseCaseString "Not" $> SNot) <|>
+    (parseCaseString "Or" $> SOr) <|>
+    (parseCaseString "And" $> SAnd) <|>
+    (parseCaseString "AccessArray" $> SAccessArray) <|>
+    (parseCaseString "ModifyArray" $> SModifyArray) <|>
+    (parseCaseString "AccessObject" $> SAccessObject) <|>
+    (parseCaseString "ModifyObject" $> SModifyObject) <|>
+    (parseCaseString "Print" $> SPrint))
 
 parseSValue :: SExprParser SValue
-parseSValue = parseSInt <|> parseSBool <|> parseSDouble <|> parseSString <|> parseSArray <|> parseSValueCall
+parseSValue = parseSInt <|> parseSBool <|> parseSDouble <|> parseSString <|> parseSArray <|> parseSValueCall <|> (parseCaseString "undefined" $> SUndefined)
 
 parseInstruction :: SExprParser SAsm
 parseInstruction = (SInstruction <$> ((SPushStackOnArg <$ parseCaseString "PushStackOnArg") <|>
