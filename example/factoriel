@@ -1,42 +1,37 @@
 Push 5
 
-.start:
 PushStackOnArg
-PushArgOnStack 0
-PushArgOnStack 0
-PopArg
 Push 1
 PushStackOnArg
 
 .loop:
-
-PushStackOnArg
-PushArgOnStack 0
+PushArgOnStack 1
 Push 1
 Push Less
 Call
 JumpIfFalse end
-
-PushArgOnStack 0
-
 PushArgOnStack 0
 PushArgOnStack 1
-
 Push Mul
 Call
-
 PopArg
-PopArg
-
 PushStackOnArg
-
 Push 1
+PushArgOnStack 1
 Push Sub
 Call
-
-PushStackOnArg
-
 PushArgOnStack 0
+PushStackOnArg
+PushStackOnArg
+PushArgOnStack 1
+PushArgOnStack 0
+PopArg
+PopArg
+PushStackOnArg
+PushStackOnArg
+Jump loop
 
 .end:
+PushArgOnStack 0
+PopArg
 Ret

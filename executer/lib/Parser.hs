@@ -10,6 +10,11 @@ import Text.Megaparsec.Char.Lexer
 
 type SExprParser = Parsec Void String
 
+parseJsonArray :: SExprParser a -> SExprParser [a]
+parseJsonArray p = char '[' *> many (spacesOrNewLine *>
+    p <* spacesOrNewLine <* skipMany (char ',') <* spacesOrNewLine)
+    <* spacesOrNewLine <* char ']'
+
 parseCaseString :: String -> SExprParser String
 parseCaseString s = try $ traverse (\c -> char (toLower c) <|> char (toUpper c)) s
 
@@ -38,7 +43,7 @@ parseSString :: SExprParser SValue
 parseSString = SString <$> ((char '"' *> someTill charLiteral (char '"')) <|> (char '\'' *> someTill charLiteral (char '\'')))
 
 parseSArray :: SExprParser SValue
-parseSArray = SArray <$> (spaces *> char '[' *> some (spaces *> parseSValue <* spaces) <* char ']' <* spaces)
+parseSArray = SArray <$> parseJsonArray parseSValue
 
 parseSValueCall :: SExprParser SValue
 parseSValueCall = SValueCall <$> ((parseCaseString "Add" $> SAdd) <|>
