@@ -8,17 +8,24 @@
 NAME_COMPILER	=	glados
 NAME_VM	=	vm
 
-SRC_TEST	=	./test/
+SRC_TEST	=	./compiler/test/
 
 TEST	=	run_tests.sh
 
-all:
-	stack build
+
+all: compiler_exe executer_exe
+
+compiler:
+	stack build :${NAME_COMPILER}-exe
 	cp `stack path --local-install-root`/bin/${NAME_COMPILER}-exe ./${NAME_COMPILER}
+
+executer:
+	stack build :${NAME_VM}-exe
 	cp `stack path --local-install-root`/bin/${NAME_VM}-exe ./${NAME_VM}
 
 clean:
 	stack clean
+	$(RM) -r .stack-work/ .stack-work/executer/ .stack-work/compiler/
 
 fclean: clean
 	$(RM) ${NAME_COMPILER} ${NAME_VM}
@@ -44,6 +51,7 @@ coverage:
 	fi
 
 lint:
-	hlint src
+	hlint compiler/lib
+	hlint executer/lib
 
-.PHONY:	all clean fclean re unit functional tests
+.PHONY:	all clean fclean re unit functional tests compiler executer coverage lint
