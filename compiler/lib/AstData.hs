@@ -5,22 +5,22 @@
 -- AstData
 -}
 
-module AstData (Ast(..), AstDeclaration(..), AstAssignation(..), AstFuncArg(..), AstCall(..)) where
+module AstData (Ast(..), AstDeclaration(..), AstAssignation(..), AstCall(..), AstLoop(..), AstObjectElement(..)) where
 
 import Symbol
 
-data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: [Ast] } deriving (Show, Eq)
+data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: Ast } deriving (Show, Eq)
 
 data AstAssignation = VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } deriving (Show, Eq)
 
 data AstCall =
-  FuncCall { callFunction :: Ast, callArgs :: [Ast] }
+  FuncCall { callFunction :: Ast, callArgs :: [Ast] } |
   ArrayAccess { accessArray :: Ast, accessArg :: Ast }
   deriving (Show, Eq)
 
 data AstLoop =
-  ForLoop { forAssignation :: [Ast], forCondition :: [Ast], forIncrementation :: [Ast], forBody :: [Ast] } |
-  WhileLoop { whileCondition :: Ast, whileBody :: [Ast] }
+  ForLoop { forAssignation :: Ast, forCondition :: Ast, forIncrementation :: Ast, forBody :: Ast } |
+  WhileLoop { whileCondition :: Ast, whileBody :: Ast }
   deriving (Show, Eq)
 
 data AstObjectElement = ObjectElement { objectKey :: Symbol, objectValue :: Ast} deriving (Show, Eq)
@@ -45,9 +45,6 @@ instance Eq Ast where
   (ASymbol x) == (ASymbol y) = x == y
   (AString x) == (AString y) = x == y
   (AList xs) == (AList ys) = xs == ys
-  (ACall FuncCall { callFunction = FSymbol f1, callArgs = arg1 }) == (ACall FuncCall { callFunction = FSymbol f2, callArgs = arg2 }) = f1 == f2 && arg1 == arg2
-  (ACall FuncCall { callFunction = FFunc f1, callArgs = arg1 }) == (ACall FuncCall { callFunction = FFunc f2, callArgs = arg2 }) = f1 == f2 && arg1 == arg2
-  (AAssignation VarAssignation { assignationKey = k1, assignationValue = v1 }) == (AAssignation VarAssignation { assignationKey = k2, assignationValue = v2 }) = k1 == k2 && v1 == v2
   _ == _ = False
 
 instance Show Ast where
