@@ -11,9 +11,8 @@ import Text.Megaparsec.Char.Lexer
 type SExprParser = Parsec Void String
 
 parseJsonArray :: SExprParser a -> SExprParser [a]
-parseJsonArray p = char '[' *> many (spacesOrNewLine *>
-    p <* spacesOrNewLine <* skipMany (char ',') <* spacesOrNewLine)
-    <* spacesOrNewLine <* char ']'
+parseJsonArray p = char '[' *> sepBy  (spacesOrNewLine *>
+    p <* spacesOrNewLine <* spacesOrNewLine) (char ',') <* char ']'
 
 parseCaseString :: String -> SExprParser String
 parseCaseString s = try $ traverse (\c -> char (toLower c) <|> char (toUpper c)) s
