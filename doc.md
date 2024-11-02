@@ -120,39 +120,39 @@ let result = add(10, 20);
 The grammar (using EBNF) for the glados part-2 language is defined as follows:
 
 ```
-program         ::= { statement }
+program              = { statement } ;
 
-statement       ::= variable-declaration | expression | if-statement | while-statement | for-statement | function-declaration
+statement            = variable declaration | expression | if statement | while statement | for statement | function declaration ;
 
-variable-declaration ::= "let" identifier "=" expression
+variable declaration = "let" , identifier , "=" , expression ;
 
-expression      ::= term { operator term }
+expression           = term , { operator , term } ;
 
-term            ::= identifier | number | function-call
+term                 = identifier | number | function call ;
 
-operator        ::= "+" | "-" | "*" | "/" | "%" | "<" | "=="
+operator             = "+" | "-" | "*" | "/" | "%" | "<" | "==" ;
 
-if-statement    ::= "if" "(" expression ")" "{" program "}"
+if statement         = "if" , "(" , expression , ")" , "{" , program , "}" ;
 
-while-statement ::= "while" "(" expression ")" "{" program "}"
+while statement      = "while" , "(" , expression , ")" , "{" , program , "}" ;
 
-for-statement   ::= "for" "(" variable-declaration ";" expression ";" expression ")" "{" program "}"
+for statement        = "for" , "(" , variable declaration , ";" , expression , ";" , expression , ")" , "{" , program , "}" ;
 
-function-declaration ::= "function" identifier "(" [ parameters ] ")" "{" program "}"
+function declaration = "function" , identifier , "(" , [ parameters ] , ")" , "{" , program , "}" ;
 
-parameters      ::= identifier { "," identifier }
+parameters           = identifier , { "," , identifier } ;
 
-function-call   ::= identifier "(" [ arguments ] ")"
+function call        = identifier , "(" , [ arguments ] , ")" ;
 
-arguments       ::= expression { "," expression }
+arguments            = expression , { "," , expression } ;
 
-identifier      ::= letter { letter | digit | "_" }
+identifier           = letter , { letter | digit | "_" } ;
 
-number          ::= digit { digit }
+number               = [ "-" ], digit , { digit } ;
 
-letter          ::= "a" | ... | "z" | "A" | ... | "Z"
+letter               = "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" ;
 
-digit           ::= "0" | ... | "9"
+digit                = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" ;
 ```
 
 ## Compilation Process
