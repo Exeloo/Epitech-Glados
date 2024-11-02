@@ -1,4 +1,4 @@
-module SExprToInstructions(sExprToInsts, mapSArrayToVArray, sValToValueData) where
+module SExprToInstructions(sExprToInsts, mapSArrayToVArray, sValToValueData, getLabelIndexInInst) where
 
 import SExprData
 import InstructionData

@@ -64,6 +64,7 @@ test-suite vm-test
   type: exitcode-stdio-1.0
   main-is: UnitTests.hs
   other-modules:
+      UnitTests.UnitTestsExecInstruction
       UnitTests.UnitTestsSExprToInstruction
       Paths_vm
   autogen-modules:
