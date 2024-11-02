@@ -43,7 +43,12 @@ testSValToValueData16 :: Test
 testSValToValueData16 = TestCase $ assertEqual "check result for modify array" (VCall ModifyArray) (sValToValueData (SValueCall SModifyArray))
 testSValToValueData17 :: Test
 testSValToValueData17 = TestCase $ assertEqual "check result for acces object" (VCall AccessObject) (sValToValueData (SValueCall SAccessObject))
-
+testSValToValueData18 :: Test
+testSValToValueData18 = TestCase $ assertEqual "check result for acces object" (VCall ModifyObject) (sValToValueData (SValueCall SModifyObject))
+testSValToValueData19 :: Test
+testSValToValueData19 = TestCase $ assertEqual "check result for acces object" (VCall Print) (sValToValueData (SValueCall SPrint))
+testSValToValueData20 :: Test
+testSValToValueData20 = TestCase $ assertEqual "check result for acces object" (VUndefined) (sValToValueData (SUndefined))
 
 
 testListSExprToInstruction :: Test
@@ -66,5 +71,8 @@ testListSExprToInstruction =
         TestLabel "testSValToValueData14" testSValToValueData14,
         TestLabel "testSValToValueData15" testSValToValueData15,
         TestLabel "testSValToValueData16" testSValToValueData16,
-        TestLabel "testSValToValueData17" testSValToValueData17
+        TestLabel "testSValToValueData17" testSValToValueData17,
+        TestLabel "testSValToValueData18" testSValToValueData18,
+        TestLabel "testSValToValueData19" testSValToValueData19,
+        TestLabel "testSValToValueData20" testSValToValueData20
     ]
