@@ -59,3 +59,23 @@ executable vm-exe
     , megaparsec
     , process >=1.6.16.0
   default-language: Haskell2010
+
+test-suite vm-test
+  type: exitcode-stdio-1.0
+  main-is: UnitTests.hs
+  other-modules:
+      UnitTests.UnitTestsSExprToInstruction
+      Paths_vm
+  autogen-modules:
+      Paths_vm
+  hs-source-dirs:
+      test
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      HUnit
+    , base >=4.7 && <5
+    , directory
+    , lib
+    , megaparsec
+    , process >=1.6.16.0
+  default-language: Haskell2010
