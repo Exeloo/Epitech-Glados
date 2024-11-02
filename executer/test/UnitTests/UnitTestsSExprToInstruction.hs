@@ -51,6 +51,12 @@ testSValToValueData20 :: Test
 testSValToValueData20 = TestCase $ assertEqual "check result for acces object" (VUndefined) (sValToValueData (SUndefined))
 
 
+testGetLabelIndexInInst1 :: Test
+testGetLabelIndexInInst1 = TestCase $ assertEqual "check result for a SInstruction" (Nothing) (getLabelIndexInInst ([(SInstruction (SPushOnStack (SInt 5)))]) "here")
+testGetLabelIndexInInst2 :: Test
+testGetLabelIndexInInst2 = TestCase $ assertEqual "check result for int" (Just 0) (getLabelIndexInInst ([(SLabel "test"), (SLabel "here")]) "here")
+
+
 testListSExprToInstruction :: Test
 testListSExprToInstruction =
     TestList [
@@ -74,5 +80,7 @@ testListSExprToInstruction =
         TestLabel "testSValToValueData17" testSValToValueData17,
         TestLabel "testSValToValueData18" testSValToValueData18,
         TestLabel "testSValToValueData19" testSValToValueData19,
-        TestLabel "testSValToValueData20" testSValToValueData20
+        TestLabel "testSValToValueData20" testSValToValueData20,
+        TestLabel "testGetLabelIndexInInst1" testGetLabelIndexInInst1,
+        TestLabel "testGetLabelIndexInInst2" testGetLabelIndexInInst2
     ]
