@@ -1,9 +1,9 @@
-module InstructionData (InstructionData(..), Insts, ValueData(..), Stack, InstCall(..), Args) where
+module InstructionData (InstructionData(..), Insts, ValueData(..), Stack, SysCall(..), Args) where
 
-data InstCall = Add | Sub | Mul | Div | Eq | Less
+data SysCall = Add | Sub | Mul | Div | Eq | Less | Not | Or | And | AccessArray | ModifyArray | AccessObject | ModifyObject | Print
     deriving (Show, Eq)
 
-data ValueData = VInt Int | VBool Bool | VDouble Double | VString String | VArray [ValueData] | VCall InstCall
+data ValueData = VInt Int | VBool Bool | VDouble Double | VString String | VArray [(Int, ValueData)] | VObject [(String, ValueData)] | VCall SysCall | VUndefined
     deriving (Show, Eq)
 
 type Stack = [ValueData]

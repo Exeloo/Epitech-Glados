@@ -11,9 +11,9 @@ import InstructionData (Insts)
 
 execFile :: Insts -> IO Bool
 execFile insts =
-    case exec insts [] insts [] of
+    case exec "" insts [] insts [] of
         Left err -> hPutStrLn stderr ("Exec error: " ++ err) >> return False
-        Right res -> print res >> return True
+        Right res -> putStr res >> return True
 
 parseFile :: String -> IO Bool
 parseFile file =

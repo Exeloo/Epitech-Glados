@@ -13,7 +13,7 @@ SRC_TEST	=	./compiler/test/
 TEST	=	run_tests.sh
 
 
-all: compiler_exe executer_exe
+all: compiler executer
 
 compiler:
 	stack build :${NAME_COMPILER}-exe
