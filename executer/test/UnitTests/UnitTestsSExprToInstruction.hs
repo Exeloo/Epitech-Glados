@@ -37,14 +37,10 @@ testSValToValueData13 :: Test
 testSValToValueData13 = TestCase $ assertEqual "check result for or" (VCall Or) (sValToValueData (SValueCall SOr))
 testSValToValueData14 :: Test
 testSValToValueData14 = TestCase $ assertEqual "check result for not" (VCall And) (sValToValueData (SValueCall SAnd))
-testSValToValueData15 :: Test
-testSValToValueData15 = TestCase $ assertEqual "check result for acces array" (VCall AccessArray) (sValToValueData (SValueCall SAccessArray))
-testSValToValueData16 :: Test
-testSValToValueData16 = TestCase $ assertEqual "check result for modify array" (VCall ModifyArray) (sValToValueData (SValueCall SModifyArray))
 testSValToValueData17 :: Test
-testSValToValueData17 = TestCase $ assertEqual "check result for acces object" (VCall AccessObject) (sValToValueData (SValueCall SAccessObject))
+testSValToValueData17 = TestCase $ assertEqual "check result for acces object" (VCall Access) (sValToValueData (SValueCall SAccess))
 testSValToValueData18 :: Test
-testSValToValueData18 = TestCase $ assertEqual "check result for acces object" (VCall ModifyObject) (sValToValueData (SValueCall SModifyObject))
+testSValToValueData18 = TestCase $ assertEqual "check result for acces object" (VCall Modify) (sValToValueData (SValueCall SModify))
 testSValToValueData19 :: Test
 testSValToValueData19 = TestCase $ assertEqual "check result for acces object" (VCall Print) (sValToValueData (SValueCall SPrint))
 testSValToValueData20 :: Test
@@ -103,8 +99,6 @@ testListSExprToInstruction =
         TestLabel "testSValToValueData12" testSValToValueData12,
         TestLabel "testSValToValueData13" testSValToValueData13,
         TestLabel "testSValToValueData14" testSValToValueData14,
-        TestLabel "testSValToValueData15" testSValToValueData15,
-        TestLabel "testSValToValueData16" testSValToValueData16,
         TestLabel "testSValToValueData17" testSValToValueData17,
         TestLabel "testSValToValueData18" testSValToValueData18,
         TestLabel "testSValToValueData19" testSValToValueData19,

@@ -1,4 +1,4 @@
-module ExecInstructions (exec, takeListEnd) where
+module ExecInstructions (exec, takeListEnd, insertOrUpdate) where
 
 import InstructionData (InstructionData(..), Insts, ValueData(..), Stack, SysCall(..), Args)
 import Data.Fixed (mod')

@@ -104,6 +104,10 @@ testExec43 :: Test
 testExec43 = TestCase $ assertEqual "check result for and undefined call" (Right "False") (exec "" ([(Push (VInt 5))]) ([(VBool True)]) ([(Call), (Push (VCall (Print))), (Call), (Ret)]) ([(VCall And), (VBool True), (VBool False)]))
 
 
+testInsertOrUpdate :: Test
+testInsertOrUpdate = TestCase $ assertEqual "check result normal list" ([(1,"A")]) (insertOrUpdate 1 "A" [])
+
+
 testListExecInstruction :: Test
 testListExecInstruction =
     TestList [
@@ -151,5 +155,6 @@ testListExecInstruction =
         TestLabel "testExec40" testExec40,
         TestLabel "testExec41" testExec41,
         TestLabel "testExec42" testExec42,
-        TestLabel "testExec43" testExec43
+        TestLabel "testExec43" testExec43,
+        TestLabel "testInsertOrUpdate" testInsertOrUpdate
     ]

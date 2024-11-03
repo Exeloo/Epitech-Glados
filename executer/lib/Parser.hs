@@ -62,7 +62,7 @@ parseSValueCall = SValueCall <$> ((parseCaseString "Add" $> SAdd) <|>
     (parseCaseString "Print" $> SPrint))
 
 parseSValue :: SExprParser SValue
-parseSValue = parseSInt <|> parseSBool <|> parseSDouble <|> parseSString <|> parseSArray <|> parseSValueCall <|> parseSObject <|> (parseCaseString "undefined" $> SUndefined)
+parseSValue = parseSInt <|> parseSDouble <|> parseSBool <|> parseSString <|> parseSArray <|> parseSValueCall <|> parseSObject <|> (parseCaseString "undefined" $> SUndefined)
 
 parseInstruction :: SExprParser SAsm
 parseInstruction = (SInstruction <$> ((SPushStackOnArg <$ parseCaseString "PushStackOnArg") <|>
