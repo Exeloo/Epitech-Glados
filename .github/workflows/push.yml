@@ -12,7 +12,7 @@ on:
 
 env:
   # All binaries separated by ' '
-  EXECUTABLES: "glados"
+  EXECUTABLES: "glados vm"
   MIRROR_URL: "git@github.com:EpitechPromo2027/B-FUN-500-PAR-5-1-glados-deniz.uzuntok-husson.git"
 
 jobs:
@@ -26,8 +26,10 @@ jobs:
         uses: actions/checkout@v4
       - name: Permissions bug workaround
         run: "chown -R $(id -un):$(id -gn) ~"
-      - name: Setup
-        run: stack setup --allow-different-user
+      - name: Setup Compiler
+        run: cd compiler && stack setup --allow-different-user; cd ..
+      - name: Setup Executer
+        run: cd executer && stack setup --allow-different-user; cd ..
       - name: Build
         run: make
         timeout-minutes: 2
