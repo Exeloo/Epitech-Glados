@@ -11,7 +11,10 @@ import Symbol
 
 data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: Ast } deriving (Show, Eq)
 
-data AstAssignation = VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } deriving (Show, Eq)
+data AstAssignation =
+  VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } |
+  AccessAssignation { assignationAccessArray :: Ast, assignationAccessArg :: Ast, assignationAccessValue :: Ast }
+  deriving (Show, Eq)
 
 data AstCall =
   FuncCall { callFunction :: Ast, callArgs :: [Ast] } |
@@ -19,7 +22,7 @@ data AstCall =
   deriving (Show, Eq)
 
 data AstLoop =
-  ForLoop { forAssignation :: Ast, forCondition :: Ast, forIncrementation :: Ast, forBody :: Ast } |
+  ForLoop { forAssignation :: [Ast], forCondition :: Ast, forIncrementation :: [Ast], forBody :: Ast } |
   WhileLoop { whileCondition :: Ast, whileBody :: Ast }
   deriving (Show, Eq)
 
