@@ -6,6 +6,7 @@
 -}
 
 module ScopeUtils (
+  modifyArg,
   hasVarInScopes,
   getVar,
   hasArgInScopes,
@@ -23,6 +24,28 @@ import AstData
 import Symbol (Symbol)
 import BytecodeOperations
 import BytecodeTypes
+
+modifyArg :: String -> (BParams -> BResult) -> BParams -> PBResult
+modifyArg sym cb (path, (args, index), vars, labels) = ((path, (args, index), vars, labels), modifyArgInScopes sym cb args index (path, (args, index), vars, labels))
+
+modifyArgInScopes :: String -> (BParams -> BResult) -> [[(Symbol, Int)]] -> Int -> BParams -> BResult
+modifyArgInScopes sym _ [] _ _ = Left ("Invalid argument: variable " ++ sym ++ " does not exist. Please check if it is available in the current scope.")
+modifyArgInScopes sym cb (arg:args) index (path, eArgs, vars, labels) =
+  if found
+  then getInstructionsForModify left right cb (path, (tArgs:args, nIndex), vars, labels)
+  else modifyArgInScopes sym cb args nIndex (path, eArgs, vars, labels)
+    where
+      (found, left, right, tArgs, nIndex) = modifyArgInScope sym arg nIndex
+
+getInstructionsForModify :: String -> String -> (BParams -> BResult) -> BParams -> BResult
+getInstructionsForModify left right cb p = (++) <$> ((++) <$> Right left <*> (cb p)) <*> Right right
+
+modifyArgInScope :: String -> [(Symbol, Int)] -> Int -> (Bool, String, String, [(Symbol, Int)], Int)
+modifyArgInScope name [] _ = (False, "", "", [], 0)
+modifyArgInScope name ((sym, index):args) i | name == sym = (True, "", getPushStackOnArg, (sym, index):args, i)
+modifyArgInScope name ((_, index):xs) i = (found, getPushArgOnStack index ++ getPopArg ++ left, right ++ getPushStackOnArg, nArgs, nIndex)
+  where
+      (found, left, right, nArgs, nIndex) = modifyArgInScope name xs (i - 1)
 
 hasVarInScopes :: String -> BParams -> Bool
 hasVarInScopes var (_, _, vars, _) = checkVarInScopes var vars

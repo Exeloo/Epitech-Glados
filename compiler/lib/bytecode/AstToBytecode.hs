@@ -154,6 +154,8 @@ parseAssignation (VarAssignation { assignationKey = key, assignationValue = valu
   if hasArgInScopes key params
   then parseNewAssignation key value params
   else parseOldAssignation key value params
+parseAssignation (AccessAssignation { assignationAccessArray = (ASymbol arr), assignationAccessArg = arg, assignationAccessValue = value }) params = modifyArg arr (modifyArray (ASymbol arr) arg value) params
+parseAssignation (AccessAssignation { assignationAccessArray = arr, assignationAccessArg = arg, assignationAccessValue = value }) params = (params, modifyArray arr arg value params)
 
 parseNewAssignation :: String -> Ast -> BParams -> PBResult
 parseNewAssignation key value params = (n2Params, (++) <$> r1 <*> Right r2)
@@ -162,7 +164,17 @@ parseNewAssignation key value params = (n2Params, (++) <$> r1 <*> Right r2)
     (n2Params, r2) = addArgToScope key n1Params
 
 parseOldAssignation :: String -> Ast -> BParams -> PBResult
-parseOldAssignation key value params = (n2Params, (++) <$> r1 <*> Right r2)
+parseOldAssignation key value params = modifyArg key (modifyVar value) params
+
+modifyVar :: Ast -> BParams -> BResult
+modifyVar value p = (++) <$> ((++) <$> Right getPopArg <*> r1) <*> Right getPushStackOnArg
   where
-    (n1Params, r1) = pushValueOnStack value params
-    (n2Params, r2) = addArgToScope key n1Params
+    (p1, r1) = pushValueOnStack value p
+
+modifyArray :: Ast -> Ast -> Ast -> BParams -> BResult
+modifyArray arr arg value params =
+  (++) <$> ((++) <$> ((++) <$> r1 <*> r2) <*> r3) <*> Right syscallModifyArray
+    where
+      (p1, r1) = pushValueOnStack arr params
+      (p2, r2) = pushValueOnStack arg p1
+      (_, r3) = pushValueOnStack value p2
