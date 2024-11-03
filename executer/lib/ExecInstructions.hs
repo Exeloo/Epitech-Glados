@@ -1,11 +1,17 @@
 module ExecInstructions (exec) where
 
 import InstructionData (InstructionData(..), Insts, ValueData(..), Stack, SysCall(..), Args)
+import Data.Fixed (mod')
+import Data.Maybe (fromMaybe)
 
 takeListEnd :: [a] -> Int -> [a]
 takeListEnd [] _ = []
 takeListEnd list 0 = list
 takeListEnd (_:as) idx = takeListEnd as (idx - 1)
+
+insertOrUpdate :: Eq a => a -> b -> [(a, b)] -> [(a, b)]
+insertOrUpdate key new arr = (key, new) : arrWithoutKey
+    where arrWithoutKey = filter ((/= key) . fst) arr
 
 exec :: String -> Insts -> Args -> Insts -> Stack -> Either String String
 exec res _ _ (Ret:_) _ = Right res
@@ -23,6 +29,10 @@ exec _ _ _ (Call:_) ((VCall Div):(VInt _):(VInt 0):_) = Left "Division by 0"
 exec _ _ _ (Call:_) ((VCall Div):(VDouble _):(VDouble 0):_) = Left "Division by 0"
 exec res insts args (Call:as) ((VCall Div):(VInt a):(VInt b):s) = exec res insts args as (VInt (div a b):s)
 exec res insts args (Call:as) ((VCall Div):(VDouble a):(VDouble b):s) = exec res insts args as (VDouble (a / b):s)
+exec _ _ _ (Call:_) ((VCall Mod):(VInt _):(VInt 0):_) = Left "Modulo by 0"
+exec _ _ _ (Call:_) ((VCall Mod):(VDouble _):(VDouble 0):_) = Left "Modulo by 0"
+exec res insts args (Call:as) ((VCall Mod):(VInt a):(VInt b):s) = exec res insts args as (VInt (mod a b):s)
+exec res insts args (Call:as) ((VCall Mod):(VDouble a):(VDouble b):s) = exec res insts args as (VDouble (mod' a b):s)
 exec _ _ _ (Call:_) ((VCall Div):_) = Left "Div need two numbers"
 exec res insts args (Call:as) ((VCall Eq):a:b:s) = exec res insts args as (VBool (a == b):s)
 exec _ _ _ (Call:_) ((VCall Eq):_) = Left "Eq need two value to compare"
@@ -41,6 +51,10 @@ exec res insts args (Call:as) ((VCall Or):(VBool a):(VBool b):s) = exec res inst
 exec _ _ _ (Call:_) ((VCall Or):_) = Left "Or need two bool to compare"
 exec res insts args (Call:as) ((VCall And):(VBool a):(VBool b):s) = exec res insts args as (VBool (a && b):s)
 exec _ _ _ (Call:_) ((VCall And):_) = Left "And need two bool to compare"
+exec res insts args (Call:as) ((VCall Access):VInt idx:VArray arr:s) = exec res insts args as (fromMaybe VUndefined (lookup idx arr):s)
+exec res insts args (Call:as) ((VCall Access):VString str:VObject obj:s) = exec res insts args as (fromMaybe VUndefined (lookup str obj):s)
+exec res insts args (Call:as) ((VCall Modify):new:VInt idx:VArray arr:s) = exec res insts args as (VArray (insertOrUpdate idx new arr):s)
+exec res insts args (Call:as) ((VCall Modify):new:VString str:VObject obj:s) = exec res insts args as (VObject (insertOrUpdate str new obj):s)
 exec res insts args (Call:as) ((VCall Print):(VInt a):s) = exec (res ++ show a) insts args as s
 exec res insts args (Call:as) ((VCall Print):(VBool a):s) = exec (res ++ show a) insts args as s
 exec res insts args (Call:as) ((VCall Print):(VDouble a):s) = exec (res ++ show a) insts args as s

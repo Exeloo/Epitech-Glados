@@ -10,16 +10,14 @@ import Text.Megaparsec.Char.Lexer
 
 type SExprParser = Parsec Void String
 
-parseJsonArray :: SExprParser a -> SExprParser [a]
-parseJsonArray p = char '[' *> many (spacesOrNewLine *>
-    p <* spacesOrNewLine <* skipMany (char ',') <* spacesOrNewLine)
-    <* spacesOrNewLine <* char ']'
-
 parseCaseString :: String -> SExprParser String
 parseCaseString s = try $ traverse (\c -> char (toLower c) <|> char (toUpper c)) s
 
 spacesOrNewLine :: SExprParser ()
 spacesOrNewLine = skipMany spaceChar
+
+parseKeyValue :: SExprParser (String, SValue)
+parseKeyValue = (,) <$> someTill charLiteral spaces <*> (spacesOrNewLine *> char ':' *> spacesOrNewLine *> parseSValue)
 
 spaces :: SExprParser ()
 spaces = skipSome hspace1
@@ -43,26 +41,28 @@ parseSString :: SExprParser SValue
 parseSString = SString <$> ((char '"' *> someTill charLiteral (char '"')) <|> (char '\'' *> someTill charLiteral (char '\'')))
 
 parseSArray :: SExprParser SValue
-parseSArray = SArray <$> parseJsonArray parseSValue
+parseSArray = SArray <$> (char '[' *> sepBy (spacesOrNewLine *> parseSValue <* spacesOrNewLine) (char ',') <* char ']')
+
+parseSObject :: SExprParser SValue
+parseSObject = SObject <$> (char '{' *> sepBy (spacesOrNewLine *> parseKeyValue <* spacesOrNewLine) (char ',') <* char '}')
 
 parseSValueCall :: SExprParser SValue
 parseSValueCall = SValueCall <$> ((parseCaseString "Add" $> SAdd) <|>
     (parseCaseString "Sub" $> SSub) <|>
     (parseCaseString "Mul" $> SMul) <|>
     (parseCaseString "Div" $> SDiv) <|>
+    (parseCaseString "Mod" $> SMod) <|>
     (parseCaseString "Eq" $> SEq) <|>
     (parseCaseString "Less" $> SLess) <|>
     (parseCaseString "Not" $> SNot) <|>
     (parseCaseString "Or" $> SOr) <|>
     (parseCaseString "And" $> SAnd) <|>
-    (parseCaseString "AccessArray" $> SAccessArray) <|>
-    (parseCaseString "ModifyArray" $> SModifyArray) <|>
-    (parseCaseString "AccessObject" $> SAccessObject) <|>
-    (parseCaseString "ModifyObject" $> SModifyObject) <|>
+    (parseCaseString "Access" $> SAccess) <|>
+    (parseCaseString "Modify" $> SModify) <|>
     (parseCaseString "Print" $> SPrint))
 
 parseSValue :: SExprParser SValue
-parseSValue = parseSInt <|> parseSBool <|> parseSDouble <|> parseSString <|> parseSArray <|> parseSValueCall <|> (parseCaseString "undefined" $> SUndefined)
+parseSValue = parseSInt <|> parseSBool <|> parseSDouble <|> parseSString <|> parseSArray <|> parseSValueCall <|> parseSObject <|> (parseCaseString "undefined" $> SUndefined)
 
 parseInstruction :: SExprParser SAsm
 parseInstruction = (SInstruction <$> ((SPushStackOnArg <$ parseCaseString "PushStackOnArg") <|>
