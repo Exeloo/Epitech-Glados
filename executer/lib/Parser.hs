@@ -1,4 +1,4 @@
-module Parser (parseSExpr) where
+module Parser (parseSExpr, parseSValue) where
 
 import Data.Void
 import Data.Char

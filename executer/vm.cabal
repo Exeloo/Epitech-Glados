@@ -66,6 +66,7 @@ test-suite vm-test
   other-modules:
       UnitTests.UnitTestsExecInstruction
       UnitTests.UnitTestsInstructionData
+      UnitTests.UnitTestsParser
       UnitTests.UnitTestsSExprData
       UnitTests.UnitTestsSExprToInstruction
       Paths_vm
