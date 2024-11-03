@@ -7,7 +7,7 @@ on:
 
 env:
   # All binaries separated by ' '
-  EXECUTABLES: "glados"
+  EXECUTABLES: "glados vm"
   MIRROR_URL: "git@github.com:EpitechPromo2027/B-FUN-500-PAR-5-1-glados-deniz.uzuntok-husson.git"
 
 jobs:
