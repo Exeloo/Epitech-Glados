@@ -1,0 +1,6 @@
+function hello(let a) {
+    for (let i = a; 0 < i; i = i + 1) {
+        a = a + i;
+    }
+}
+hello({a : b, c : d});

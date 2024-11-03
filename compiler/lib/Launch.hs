@@ -73,7 +73,6 @@ errorHandling args | length args > 3 = putStrLn "Too many arguments, please refe
 
 checkParse :: String -> Bool -> IO Bool
 checkParse content compile =
-    putStrLn "here" >>
     case parse parseSBlock "" content of
         Left err -> putStrLn ("Parse error: " ++ errorBundlePretty err) >> return False
         Right res -> putStrLn (show res) >> return True
@@ -82,7 +81,6 @@ getInputLine :: Bool -> IO Bool
 getInputLine compile =
     getLine >>= \line ->
     checkParse line compile
-    -- putStrLn line >> return True -- remove when parser finish
 
 launchFileInput :: Bool -> String -> IO Bool
 launchFileInput compile finalInput =
@@ -90,7 +88,6 @@ launchFileInput compile finalInput =
     if isEnd
         then if compile
                 then checkParse finalInput compile
-                -- then putStr finalInput >> return True -- remove when parser finish
              else return True
         else if compile
                 then getLine >>= launchFileInput compile . (finalInput ++) . (++ "\n")
@@ -119,7 +116,6 @@ launchFile :: String -> Bool -> IO Bool
 launchFile file compile =
     readFile file >>= \content ->
     checkParse content compile
-    -- putStrLn content >> return True -- remove when parser finish
 
 chooseMode :: Info -> IO Bool
 chooseMode ((False, compile), _) = getInput True compile
