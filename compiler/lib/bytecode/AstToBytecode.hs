@@ -125,18 +125,43 @@ parseForLoop :: [Ast] -> Ast -> [Ast] -> Ast -> BParams -> PBResult
 parseForLoop ass cond inc body p = handleForLoopLabels ass cond inc body p
 
 handleForLoopLabels :: [Ast] -> Ast -> [Ast] -> Ast -> BParams -> PBResult
-handleForLoopLabels ((AAssignation ass):_) cond ((AAssignation inc):_) body (path, args, vars, labels) =
-  (p4, (++) <$> ((++) <$> ((++) <$> ((++) <$> ((++) <$> ((++) <$> r1 <*> Right (getLabel inLabel)) <*> r2) <*> r3) <*> Right (getJump inLabel)) <*> Right (getLabel outLabel)) <*> Right r4)
+handleForLoopLabels ass cond inc body (path, args, vars, labels) =
+  handleForLoopAssignation ass cond inc body inLabel outLabel p
     where
       (label, labels2) = getWhileLabel labels
       p = createScope label (path, args, vars, labels2)
       inLabel = getLabelWithIO label 0
       outLabel = getLabelWithIO label 1
+
+handleForLoopAssignation :: [Ast] -> Ast -> [Ast] -> Ast -> String -> String -> BParams -> PBResult
+handleForLoopAssignation [] cond inc body inLabel outLabel p =
+  (p1, (++) <$> Right (getLabel inLabel) <*> r1)
+    where
+      (p1, r1) = handleForLoopBody cond inc body inLabel outLabel p
+handleForLoopAssignation ((AAssignation ass):_) cond inc body inLabel outLabel p =
+  (p2, (++) <$> ((++) <$> r1 <*> Right (getLabel inLabel)) <*> r2)
+    where
       (p1, r1) = parseAssignation ass p
-      (p2, r2) = handleLoopCondition cond outLabel body p1
-      (p3, r3) = parseAssignation inc p2
-      (p4, r4) = clearScope p3
-handleForLoopLabels ass _ inc _ p = (p, Left ("Invalid for loop: Assignation and Incrementation must be assignations but is " ++ show ass ++ " and " ++ show inc))
+      (p2, r2) = handleForLoopBody cond inc body inLabel outLabel p1
+handleForLoopAssignation ass _ _ _ _ _ p = (p, Left ("Invalid for loop: Assignation must be an assignation but is " ++ show ass))
+
+handleForLoopBody :: Ast -> [Ast] -> Ast -> String -> String -> BParams -> PBResult
+handleForLoopBody cond inc body inLabel outLabel p = (p2, (++) <$> r1 <*> r2)
+  where
+    (p1, r1) = handleLoopCondition cond outLabel body p
+    (p2, r2) = handleForLoopIncrementation inc inLabel outLabel p1
+
+handleForLoopIncrementation :: [Ast] -> String -> String -> BParams -> PBResult
+handleForLoopIncrementation [] inLabel outLabel p =
+  (p1, (++) <$> ((++) <$> Right (getJump inLabel) <*> Right (getLabel outLabel)) <*> Right r1)
+    where
+      (p1, r1) = clearScope p
+handleForLoopIncrementation ((AAssignation inc):_) inLabel outLabel p =
+  (p2, (++) <$> ((++) <$> ((++) <$> r1 <*> Right (getJump inLabel)) <*> Right (getLabel outLabel)) <*> Right r2)
+    where
+      (p1, r1) = parseAssignation inc p
+      (p2, r2) = clearScope p1
+handleForLoopIncrementation inc _ _ p = (p, Left ("Invalid for loop: Incrementation must be an assignation but is " ++ show inc))
 
 parseWhileLoop :: Ast -> Ast -> BParams -> PBResult
 parseWhileLoop cond body p = handleWhileLoopLabels cond body p
