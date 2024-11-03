@@ -167,8 +167,8 @@ parseAssignation :: AstAssignation -> BParams -> PBResult
 parseAssignation (VarAssignation { assignationKey = key, assignationValue = (ADeclaration value) }) params = parseDeclaration value key params
 parseAssignation (VarAssignation { assignationKey = key, assignationValue = value }) params =
   if hasArgInScopes key params
-  then parseNewAssignation key value params
-  else parseOldAssignation key value params
+  then parseOldAssignation key value params
+  else parseNewAssignation key value params
 parseAssignation (AccessAssignation { assignationAccessArray = (ASymbol arr), assignationAccessArg = arg, assignationAccessValue = value }) params = modifyArg arr (modifyArray (ASymbol arr) arg value) params
 parseAssignation (AccessAssignation { assignationAccessArray = arr, assignationAccessArg = arg, assignationAccessValue = value }) params = (params, modifyArray arr arg value params)
 
