@@ -64,9 +64,7 @@ test-suite glados-test
   type: exitcode-stdio-1.0
   main-is: UnitTests.hs
   other-modules:
-      UnitTests.EvalUnitTests
       UnitTests.LaunchUnitTests
-      UnitTests.UnitTestAstEval
       UnitTests.UnitTestsParser
       UnitTests.UnitTestsSExprData
       UnitTests.UnitTestsSExprToAst
