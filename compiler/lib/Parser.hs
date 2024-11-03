@@ -38,7 +38,7 @@ parseSString :: SexprParser SExpr
 parseSString = SString <$> ((char '"' *> someTill charLiteral (char '"')) <|> (char '\'' *> someTill charLiteral (char '\'')))
 
 parseSSymbol :: SexprParser SExpr
-parseSSymbol = SSymbol <$> some (alphaNumChar <|> oneOf "+-/*<?=%")
+parseSSymbol = SSymbol <$> some (alphaNumChar <|> oneOf "+-/*<>?=%&|\\")
 
 parseSArray :: SexprParser SExpr
 parseSArray = SArray <$> (char '[' *> spaces *> parseElems <* spaces <* char ']' <* spaces)
