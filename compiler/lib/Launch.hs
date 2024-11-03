@@ -78,7 +78,7 @@ checkParse :: String -> Bool -> IO Bool
 checkParse content compile =
     case parse parseSBlock "" content of
         Left err -> putStrLn ("Parse error: " ++ errorBundlePretty err) >> return False
-        Right res -> print res >> getAst res True
+        Right res -> getAst res True
 
 getInputLine :: Bool -> IO Bool
 getInputLine compile =
