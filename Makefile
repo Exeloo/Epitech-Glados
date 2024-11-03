@@ -25,7 +25,6 @@ executer:
 
 clean:
 	stack clean
-	$(RM) -r .stack-work/ .stack-work/executer/ .stack-work/compiler/
 
 fclean: clean
 	$(RM) ${NAME_COMPILER} ${NAME_VM}
