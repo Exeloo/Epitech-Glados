@@ -61,6 +61,18 @@ let x = 10;
 y = 20;
 ```
 
+#### Arrays
+
+Arrays can be declared and initialized with values, then accessed using an index and modified.
+
+```glados
+let numbers = [1, 2, 3, 4, 5];
+
+let first = numbers[0];
+
+numbers[1] = 10;
+```
+
 #### Arithmetic Operations
 
 The language supports basic arithmetic operations such as addition(+), subtraction(-), multiplication(*), division(/) and modulus(%). The result of an operation can be stored in a variable.
@@ -142,7 +154,7 @@ if statement         = "if" , "(" , expression , ")" , "{" , program , "}" ;
 
 while statement      = "while" , "(" , expression , ")" , "{" , program , "}" ;
 
-for statement        = "for" , "(" , variable declaration , ";" , expression , ";" , expression , ")" , "{" , program , "}" ;
+for statement        = "for" , "(" , [ variable declaration ] , ";" , expression , ";" , [ expression ] , ")" , "{" , program , "}" ;
 
 function declaration = "function" , identifier , "(" , [ parameters ] , ")" , "{" , program , "}" ;
 
