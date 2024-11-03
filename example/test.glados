@@ -1,6 +1,6 @@
 function hello(a) {
-    for (i = a; 0 < i; i = i + 1) {
-        a = a + i;
+    for (i = 0; i < a; i = i + 1) {
+        print(i);
     }
 }
-hello({a : b, c : d});
+hello(4);

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TEST_DIR="./test/functional"
+TEST_DIR="./compiler/test/functional"
 EXEC="./glados"
 
 passed=0

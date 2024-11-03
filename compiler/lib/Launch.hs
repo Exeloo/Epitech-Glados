@@ -13,16 +13,17 @@ import System.IO.Error (isEOFError)
 import System.IO (hFlush, stdout, hIsTerminalDevice, stdin, isEOF)
 import Data.Maybe (fromJust)
 import Parser
+import SExprToAst
+import SExprData
+import AstData
+import AstToBytecode
 import Text.Megaparsec (parse, errorBundlePretty)
-import AstData (Ast)
-import SExprData (SExpr)
-import SExprToAst (sExpToAst)
 
 type Info = ((Bool, Bool), String)
 
-handleCtrl :: IOException -> Bool -> IO Bool
-handleCtrl e res | isEOFError e = return res
-                 | otherwise = return res
+handleCtrl :: IOException -> String -> Bool -> IO Bool
+handleCtrl e res compile | isEOFError e = checkParse res compile
+                         | otherwise = checkParse res compile
 
 
 getFilePath :: [String] -> Maybe String
@@ -57,62 +58,43 @@ errorHandling args | length args > 3 = putStrLn "Too many arguments, please refe
                    | length args == 1 && not ("-c" `elem` args) = putStrLn "Incorrect use, please refer to the --help" >> return Nothing
                    | otherwise = checkFile args
 
--- evaluateAst :: Ast -> IO Bool
--- evaluateAst resAst = case evalAst [[]] resAst of
-    -- Left error -> putStrLn error >> return False
-    -- Right res -> putStrLn res >> return True
-
--- compileAst :: Ast -> IO Bool
--- compileAst resAst = case ByteAst resAst of
-    -- Left error -> putStrLn error >> return False
-    -- Right res -> putStrLn res >> return True
+compileAst :: Ast -> IO Bool
+compileAst resAst = case astToBytecode resAst of
+    Left err -> putStrLn err >> return False
+    Right res -> putStrLn res >> return True
 
 getAst :: SExpr -> Bool -> IO Bool
-getAst sExp compile = case sExpToAst sExp of
-    Left error -> putStrLn error >> return False
-    Right res -> print res >> return True -- if compile
-                    --  then compileAst res
-                --  else evaluateAst res
+getAst sExp _ = case sExpToAst sExp of
+    Left err -> putStrLn err >> return False
+    Right res -> compileAst res
 
 checkParse :: String -> Bool -> IO Bool
 checkParse content compile =
     case parse parseSBlock "" content of
         Left err -> putStrLn ("Parse error: " ++ errorBundlePretty err) >> return False
-        Right res -> getAst res True
-
-getInputLine :: Bool -> IO Bool
-getInputLine compile =
-    getLine >>= \line -> checkParse line compile
+        Right res -> getAst res compile
 
 launchFileInput :: Bool -> String -> IO Bool
 launchFileInput compile finalInput =
     isEOF >>= \isEnd ->
     if isEnd
-        then if compile
-                then checkParse finalInput compile
-             else return True
-        else if compile
-                then getLine >>= launchFileInput compile . (finalInput ++) . (++ "\n")
-             else getInputLine compile >>= \res ->
-                if res
-                    then launchFileInput compile ""
-                else return False
+        then checkParse (init finalInput) compile
+    else
+        getLine >>= launchFileInput compile . (finalInput ++) . (++ "\n")
 
-promptInput :: Bool -> Bool -> IO Bool
-promptInput res compile =
+promptInput :: Bool -> String -> IO Bool
+promptInput compile res =
     (putStr "> " >>
     hFlush stdout >>
-    getInputLine compile >>= \resLine ->
-    getInput resLine compile) `catch` (\e -> handleCtrl e res)
+    getLine >>= promptInput compile . (res ++) . (++ "\n")) `catch` (\e -> handleCtrl e res compile)
 
-getInput :: Bool -> Bool -> IO Bool
-getInput res compile =
+getInput :: Bool -> IO Bool
+getInput compile =
     hIsTerminalDevice stdin >>= \isTerminal ->
     if not isTerminal
         then launchFileInput compile ""
-    else if compile
-            then putStrLn "We cannot compile with the interactive shell, please refer to the --help" >> return False
-         else promptInput res compile
+    else
+        promptInput compile ""
 
 launchFile :: String -> Bool -> IO Bool
 launchFile file compile =
@@ -120,7 +102,7 @@ launchFile file compile =
     checkParse content compile
 
 chooseMode :: Info -> IO Bool
-chooseMode ((False, compile), _) = getInput True compile
+chooseMode ((False, compile), _) = getInput compile
 chooseMode ((True, compile), file) = launchFile file compile
 
 
