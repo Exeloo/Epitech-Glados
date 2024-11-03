@@ -102,6 +102,7 @@ sExpInstructionToAst (arg1: SSymbol x: arg2:_) | x `elem` ["+", "-", "*", "/", "
 sExpInstructionToAst (SSymbol "if": cond: body: _) = sExpIfToAst [cond, body]
 sExpInstructionToAst (SSymbol "while": SParenthesis [cond]: SBracket [SLine body]:_) = sExpWhileToAst [cond, SLine body]
 sExpInstructionToAst (SSymbol "for": xs) = sExpForToAst xs
+sExpInstructionToAst (SSymbol x: SArray i: SSymbol "=" : value: xs) = sExpInstructionToAst [value] >>= \valueAst -> sExpInstructionToAst [SArray i] >>= \arrayAst -> Right $ AAssignation (VarAssignation { assignationKey = x, assignationValue = ACall ArrayAccess { accessArray = arrayAst, accessArg = valueAst}})
 sExpInstructionToAst (SSymbol x: SArray i: xs) = sExpInstructionToAst i >>= \idx -> Right $ ACall ArrayAccess {accessArray = ASymbol x, accessArg = idx}
 sExpInstructionToAst (SStruct x: _) = sExpStructToAst x
 sExpInstructionToAst (SInt x:_) = Right $ AInt x
@@ -109,10 +110,8 @@ sExpInstructionToAst (SBool x:_) = Right $ ABool x
 sExpInstructionToAst (SFloat x:_) = Right $ AFloat x
 sExpInstructionToAst (SSymbol x:_) = Right $ ASymbol x
 sExpInstructionToAst (SString x:_) = Right $ AString x
-sExpInstructionToAst (SArray x:_) = case mapM sExpInstructionToAst [x] of
-  Right asts -> Right $ AList asts
-  Left err -> Left err
-sExpInstructionToAst (SParenthesis x:_) = mapM sExpInstructionToAst [x] >>= \asts -> Right $ AList asts
+sExpInstructionToAst (SArray x:_) = AList <$> mapM sExpInstructionToAst [x]
+sExpInstructionToAst (SParenthesis x:_) = AList <$> mapM sExpInstructionToAst [x]
 sExpInstructionToAst (SLine x:xs) = case sExpInstructionToAst x of
   Right ast | xs == [] -> Right ast
             | otherwise -> case mapM sExpInstructionToAst [xs] of
