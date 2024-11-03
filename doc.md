@@ -12,6 +12,8 @@ JavadosScript is compiled to a custom assembly-like code that can be executed on
 
 The grammar of JavadosScript is inspired by javascript.
 
+All instructions are written in the form of a statement, which is a sequence of characters that ends with a semicolon.
+
 ### Getting Started
 
 #### Data Types
@@ -87,11 +89,39 @@ let remainder = x % y;
 
 #### Comparison Operators
 
-The language supports comparison operators such as less than(<) and equal to(==). The result of a comparison can be used in conditional statements.
+The language supports comparison operators such as less than(<), more than(>), equal to(==), not equal to(!=), less than or equal to(<=), and more than or equal to(>=).
+The result of a comparison can be used in conditional statements.
 
 ```glados
 let isLess = x < y;
 let isEqual = x == y;
+let isNotEqual = x != y;
+let isLessOrEqual = x <= y;
+let isMoreOrEqual = x >= y;
+```
+
+#### Logical Operators
+
+The language supports logical operators such as not(!), or(||), and(&&). The result of a logical operation can be used in conditional statements.
+
+```glados
+let isNot = !x;
+let isOr = x || y;
+let isAnd = x && y;
+```
+
+#### Statements
+
+Statements can be used to perform actions such as printing to the console, returning a value, breaking out of a loop, and continuing to the next iteration of a loop.
+
+```glados
+print("Hello, World!");
+
+return 42;
+
+break;
+
+continue;
 ```
 
 #### Conditional Statements
@@ -111,13 +141,13 @@ The language supports while and for loops.
 ```glados
 let i = 0;
 while i < 10 {
-    // body
+  i = i + 1;
 }
 ```
 
 ```glados
 for (let j = 0; j < 10; j = j + 1) {
-  // body
+  print(j);
 }
 ```
 
@@ -140,15 +170,19 @@ The grammar (using EBNF) for the glados part-2 language is defined as follows:
 ```
 program              = { statement } ;
 
-statement            = variable declaration | expression | if statement | while statement | for statement | function declaration ;
+statement            = variable declaration | expression | if statement | while statement | for statement | function declaration | statement loop ;
 
 variable declaration = [ "let" ] , identifier , "=" , expression ;
 
-expression           = term , { operator , term } ;
+expression           = [ statement arguments ] , term , [ operator , term ] ;
 
 term                 = identifier | number | function call ;
 
-operator             = "+" | "-" | "*" | "/" | "%" | "<" | "==" ;
+operator             = "+" | "-" | "*" | "/" | "%" | "<" | "==" | "!=" | "<=" | ">=" | ">" | "&&" | "||" ;
+
+statement arguments  = "!" | "return" | "print" ;
+
+statement loop       = "break" | "continue" ;
 
 if statement         = "if" , "(" , expression , ")" , "{" , program , "}" ;
 
