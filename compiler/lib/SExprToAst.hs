@@ -11,7 +11,7 @@ import AstData
 import SExprData
 
 sExpFunctionToAst :: [SExpr] -> Either String Ast
-sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket [SLine body] : _) = mapM sExpFunctionToAstSymbol args >>= \argSymbols -> case sExpToAst (SLine body) of
+sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket body : _) = mapM sExpFunctionToAstSymbol args >>= \argSymbols -> case sExpToAst [SLine body] of
        Right bodyAst -> Right $ AAssignation $ VarAssignation
          { assignationKey = name
          , assignationValue = ADeclaration $ FuncDeclaration
@@ -23,7 +23,7 @@ sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket [SLine body] : _)
 sExpFunctionToAst _ = Left "Invalid function"
 
 sExpFunctionToAstSymbol :: SExpr -> Either String String
-sExpFunctionToAstSymbol (SSymbol x) = Right x
+sExpFunctionToAstSymbol (SLine [SSymbol x]) = Right x
 sExpFunctionToAstSymbol x = Left $ "Invalid function symbol: " ++ show x
 
 sExpVarAssignationToAst :: [SExpr] -> Either String Ast
