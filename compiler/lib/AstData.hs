@@ -61,8 +61,33 @@ instance Eq Ast where
 
 instance Show Ast where
   show (AInt x) = show x
-  show (ABool x) = if x then "#t" else "#f"
+  show (AFloat x) = show x
+  show (ABool x) = if x then "true" else "false"
   show (ASymbol x) = x
-  show (AString x) = x
-  show (AList x) = "[" ++ foldl (\a b -> a ++ (if null a then "" else ", ") ++ show b) [] x ++ "]"
+  show (AString x) = "\"" ++ x ++ "\""
+  show (AList x) = "[ " ++ foldl (\a b -> a ++ (if null a then "" else ", ") ++ show b) [] x ++ " ]"
+  show (AObject x) = "{ " ++ foldl (\a b -> a ++ (if null a then "" else ", ") ++ show b) [] x ++ " }"
+  show (ALine _) = "#\\<code block\\>"
+  show (ADeclaration x) = "#\\<declaration\\>" ++ show x
+  show (AAssignation x) = "#\\<assignation\\>" ++ show x
+  show (ACall x) = "#\\<call\\>" ++ show x
+  show (ALoop x) = "#\\<loop\\>" ++ show x
   show _ = "#\\<procedure\\>"
+
+
+instance Show AstDeclaration where
+  show (FuncDeclaration _) = " [type=function]"
+
+instance Show AstAssignation where
+  show (VarAssignation {assignationKey = key, assignationValue = _}) = " [type=variable]: assign '" ++ key ++ "'"
+
+instance Show AstCall where
+  show (FuncCall _) = " [type=function]"
+  show (ArrayAccess {accessArray = arr, accessArg = arg}) = " [type=array]: " ++ show arr ++ "[" ++ show arg ++ "]"
+
+instance Show AstLoop where
+  show (ForLoop _) = " [type=for]"
+  show (WhileLoop _) = " [type=while]"
+
+instance Show AstObjectElement where
+  show (ObjectElement {objectKey = key, objectValue = value}) = key ++ ": " ++ show value
