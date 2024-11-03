@@ -7,12 +7,13 @@ on:
 
 env:
   # All binaries separated by ' '
-  EXECUTABLES: "glados"
+  EXECUTABLES: "glados vm"
   MIRROR_URL: "git@github.com:EpitechPromo2027/B-FUN-500-PAR-5-1-glados-deniz.uzuntok-husson.git"
 
 jobs:
-  build:
-    name: Build
+  release:
+    name: Build & Test & Upload Artifacts
+
     runs-on: ubuntu-latest
     container:
       image: epitechcontent/epitest-docker
@@ -36,51 +37,16 @@ jobs:
               exit 1
             fi
           done
-
-  run_tests:
-    name: "Running Tests"
-    runs-on: ubuntu-latest
-    container:
-      image: epitechcontent/epitest-docker
-
-    needs: build
-
-    steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-      - name: Permissions bug workaround
-        run: "chown -R $(id -un):$(id -gn) ~"
-      - name: Setup
-        run: stack setup --allow-different-user
-      - name: Build
-        run: make
-        timeout-minutes: 2
       - name: Run tests
         run: make tests
-
-  upload_artifacts:
-    name: "Upload Artifacts"
-    runs-on: ubuntu-latest
-    container:
-      image: epitechcontent/epitest-docker
-
-    needs: run_tests
-
-    steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-      - name: Permissions bug workaround
-        run: "chown -R $(id -un):$(id -gn) ~"
-      - name: Setup
-        run: stack setup --allow-different-user
-      - name: Build
-        run: make
-        timeout-minutes: 2
       - name: Upload Assets
-        uses: actions/upload-release-asset@v1
+        uses: dream-encode/upload-release-asset-node16@v2
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_SSH_PRIVATE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
+          repo_owner: ${{ github.event.repository.owner.login }}
+          repo_name: ${{ github.event.repository.name }}
+          release_id: ${{ github.event.release.id }}
           upload_url: ${{ github.event.release.upload_url }}
           asset_path: ./glados
           asset_name: glados

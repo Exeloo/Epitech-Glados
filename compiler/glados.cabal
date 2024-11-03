@@ -13,21 +13,15 @@ author:         Author name here
 maintainer:     example@example.com
 copyright:      2024 Author name here
 license:        BSD-3-Clause
-license-file:   LICENSE
 build-type:     Simple
-extra-source-files:
-    README.md
-    CHANGELOG.md
 
 source-repository head
   type: git
   location: https://github.com/githubuser/glados
 
-library
+library lib
   exposed-modules:
       AstData
-      AstEval
-      Evaluation
       Launch
       Parser
       SExprData
@@ -38,13 +32,14 @@ library
   autogen-modules:
       Paths_glados
   hs-source-dirs:
-      src
+      lib/
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       HUnit
     , base >=4.7 && <5
     , directory
     , megaparsec
+    , process >=1.6.16.0
   default-language: Haskell2010
 
 executable glados-exe
@@ -54,24 +49,24 @@ executable glados-exe
   autogen-modules:
       Paths_glados
   hs-source-dirs:
-      app
+      main/
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       HUnit
     , base >=4.7 && <5
     , directory
-    , glados
+    , lib
     , megaparsec
+    , process >=1.6.16.0
   default-language: Haskell2010
 
 test-suite glados-test
   type: exitcode-stdio-1.0
   main-is: UnitTests.hs
   other-modules:
-      UnitTests.EvalUnitTests
       UnitTests.LaunchUnitTests
-      UnitTests.UnitTestAstEval
       UnitTests.UnitTestsParser
+      UnitTests.UnitTestsSExprData
       UnitTests.UnitTestsSExprToAst
       Paths_glados
   autogen-modules:
@@ -83,6 +78,7 @@ test-suite glados-test
       HUnit
     , base >=4.7 && <5
     , directory
-    , glados
+    , lib
     , megaparsec
+    , process >=1.6.16.0
   default-language: Haskell2010

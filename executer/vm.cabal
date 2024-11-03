@@ -1,0 +1,61 @@
+cabal-version: 2.2
+
+-- This file has been generated from package.yaml by hpack version 0.37.0.
+--
+-- see: https://github.com/sol/hpack
+
+name:           vm
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/glados#readme>
+homepage:       https://github.com/githubuser/glados#readme
+bug-reports:    https://github.com/githubuser/glados/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2024 Author name here
+license:        BSD-3-Clause
+build-type:     Simple
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/glados
+
+library lib
+  exposed-modules:
+      ExecInstructions
+      InstructionData
+      Launch
+      Parser
+      SExprData
+      SExprToInstructions
+  other-modules:
+      Paths_vm
+  autogen-modules:
+      Paths_vm
+  hs-source-dirs:
+      lib/
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
+  build-depends:
+      HUnit
+    , base >=4.7 && <5
+    , directory
+    , megaparsec
+    , process >=1.6.16.0
+  default-language: Haskell2010
+
+executable vm-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_vm
+  autogen-modules:
+      Paths_vm
+  hs-source-dirs:
+      main/
+  ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      HUnit
+    , base >=4.7 && <5
+    , directory
+    , lib
+    , megaparsec
+    , process >=1.6.16.0
+  default-language: Haskell2010
