@@ -6,6 +6,7 @@
 -}
 
 module LabelUtils (
+  isInFunction,
   goToFunctionInLabel,
   goToFunctionOutLabel,
   goToLoopInLabel,
@@ -28,20 +29,34 @@ import BytecodeTypes
 
 -- Resolve label in current path
 
-goToFunctionInLabel :: BParams -> PBResult
-goToFunctionInLabel (path, args, vars, labels) = ((path, args, vars, labels), getJump <$> label)
-  where
-    (_, label) = resolveFunctionLabel path 0
+goToFunctionInLabel :: BParams -> (String, PBResult)
+goToFunctionInLabel (path, args, vars, labels) = case findFunctionLabel path of
+  Nothing -> ("", ((path, args, vars, labels), Left "Invalid call: Not in a function but try to recursive it"))
+  Just label -> (label, ((path, args, vars, labels), Right (getJump label)))
 
 goToFunctionOutLabel :: BParams -> PBResult
 goToFunctionOutLabel (path, args, vars, labels) = ((nPath, args, vars, labels), getJump <$> label)
   where
     (nPath, label) = resolveFunctionLabel path 1
 
+isInFunction :: String -> BPath -> Bool
+isInFunction _ [] = False
+isInFunction name (x:xs) =
+  if isRightLabel "function" x
+  then isRightLabel ("function_" ++ (map toLower name)) x
+  else isInFunction name xs
+
+findFunctionLabel :: BPath -> Maybe String
+findFunctionLabel [] = Nothing
+findFunctionLabel (x:xs) =
+  if isRightLabel "function" x
+  then Just x
+  else findFunctionLabel xs
+
 resolveFunctionLabel :: BPath -> Int -> (BPath, Either String String)
 resolveFunctionLabel [] _ = ([], Left "Invalid label: not inside a function")
 resolveFunctionLabel (x:xs) io =
-  if isRightLabel x"function"
+  if isRightLabel x "function"
   then (xs, Right (getLabelWithIO x io))
   else resolveFunctionLabel xs io
 

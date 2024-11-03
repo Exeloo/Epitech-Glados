@@ -72,9 +72,29 @@ handleCallFunction :: Symbol -> [Ast] -> BParams -> PBResult
 --handleCallFunction "break" args p = builtinBreak args p
 --handleCallFunction "continue" args p = builtinContinue args p
 --handleCallFunction "print" args p = builtinPrint args p
-handleCallFunction name args p = case getVar name p of
-  Just var -> handleFunctionDeclaration name var args p
-  Nothing -> (p, Left ("Invalid call: function \"" ++ name ++ "\" does not exist."))
+handleCallFunction name a (path, args, vars, labels) = case getVar name (path, args, vars, labels) of
+  Just var ->
+    if isInFunction name path
+    then handleRecursiveFunction var a (path, args, vars, labels)
+    else handleFunctionDeclaration name var a (path, args, vars, labels)
+  Nothing -> ((path, args, vars, labels), Left ("Invalid call: function \"" ++ name ++ "\" does not exist."))
+
+handleRecursiveFunction :: Ast -> [Ast] -> BParams -> PBResult
+handleRecursiveFunction (ADeclaration (FuncDeclaration { declareArgs = dArgs })) args p =
+  handleRecursiveFunctionParams dArgs args p
+handleRecursiveFunction value _ p = (p, Left ("Invalid call: " ++ show value ++ " is not callable."))
+
+handleRecursiveFunctionParams :: [Symbol] -> [Ast] -> BParams -> PBResult
+handleRecursiveFunctionParams [] [] p = (p2, r1)
+  where
+    (label, (p1, r1)) = goToFunctionInLabel p
+    p2 = createScope label p1
+handleRecursiveFunctionParams (sym:syms) (arg:args) p = (p4, (++) <$> ((++) <$> r1 <*> Right r2) <*> r3)
+  where
+      (p2, r1) = pushValueOnStack arg p
+      (p3, r2) = addArgToScope sym p2
+      (p4, r3) = handleRecursiveFunctionParams syms args p3
+handleRecursiveFunctionParams _ _ p = (p, Left "Invalid call: Invalid number of argument")
 
 handleFunctionDeclaration :: Symbol -> Ast -> [Ast] -> BParams -> PBResult
 handleFunctionDeclaration name (ADeclaration (FuncDeclaration { declareArgs = dArgs, declareBody = dBody })) args p = handleFunctionLabels name dArgs args dBody p

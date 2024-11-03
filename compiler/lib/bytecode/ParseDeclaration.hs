@@ -16,7 +16,5 @@ import ScopeUtils (hasVarInScopes, addVarToScope)
 parseDeclaration :: AstDeclaration -> String -> BParams -> PBResult
 parseDeclaration dec name params =
   if hasVarInScopes name params
-  then (nParams, Right "")
-  else (params, Left ("Invalid declaration name: \"" ++ name ++ "\" already exist."))
-    where
-      nParams = addVarToScope (name, (ADeclaration dec)) params
+  then (params, Left ("Invalid declaration name: \"" ++ name ++ "\" already exist."))
+  else ((addVarToScope (name, ADeclaration (dec)) params), Right "")

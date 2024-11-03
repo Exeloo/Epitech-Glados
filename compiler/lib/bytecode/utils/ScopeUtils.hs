@@ -68,15 +68,13 @@ getVarFromScope arg (x:xs) = getVarFromScope arg xs
 checkVarInScopes :: String -> [[(Symbol, Ast)]] -> Bool
 checkVarInScopes _ [] = False
 checkVarInScopes arg (x:xs) =
-  if r
-  then r
+  if checkVarInScope arg x
+  then True
   else checkVarInScopes arg xs
-    where
-      r = checkVarInScope arg x
 
 checkVarInScope :: String -> [(Symbol, Ast)] -> Bool
 checkVarInScope _ [] = False
-checkVarInScope arg ((key, index):_) | arg == key = True
+checkVarInScope arg ((key, _):_) | arg == key = True
 checkVarInScope arg (x:xs) = checkVarInScope arg xs
 
 hasArgInScopes :: String -> BParams -> Bool
