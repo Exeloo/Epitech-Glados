@@ -109,6 +109,7 @@ sExpInstructionToAst (SStruct x: _) = sExpStructToAst x
 sExpInstructionToAst (SInt x:_) = Right $ AInt x
 sExpInstructionToAst (SBool x:_) = Right $ ABool x
 sExpInstructionToAst (SFloat x:_) = Right $ AFloat x
+sExpInstructionToAst (SSymbol "undefined":_) = Right AUndefined
 sExpInstructionToAst (SSymbol x:_) = Right $ ASymbol x
 sExpInstructionToAst (SString x:_) = Right $ AString x
 sExpInstructionToAst (SArray x:_) = AList <$> mapM sExpInstructionToAst [x]
