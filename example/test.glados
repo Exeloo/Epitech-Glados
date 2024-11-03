@@ -1,5 +1,5 @@
-function hello(let a) {
-    for (let i = a; 0 < i; i = i + 1) {
+function hello(a) {
+    for (i = a; 0 < i; i = i + 1) {
         a = a + i;
     }
 }

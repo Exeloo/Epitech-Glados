@@ -14,6 +14,9 @@ import System.IO (hFlush, stdout, hIsTerminalDevice, stdin, isEOF)
 import Data.Maybe (fromJust)
 import Parser
 import Text.Megaparsec (parse, errorBundlePretty)
+import AstData (Ast)
+import SExprData (SExpr)
+import SExprToAst (sExpToAst)
 
 type Info = ((Bool, Bool), String)
 
@@ -56,31 +59,30 @@ errorHandling args | length args > 3 = putStrLn "Too many arguments, please refe
 
 -- evaluateAst :: Ast -> IO Bool
 -- evaluateAst resAst = case evalAst [[]] resAst of
---     Left error -> putStrLn (error) >> return False
---     Right res -> putStrLn (res) >> return True
+    -- Left error -> putStrLn error >> return False
+    -- Right res -> putStrLn res >> return True
 
 -- compileAst :: Ast -> IO Bool
 -- compileAst resAst = case ByteAst resAst of
---     Left error -> putStrLn (error) >> return False
---     Right res -> putStrLn (res) >> return True
+    -- Left error -> putStrLn error >> return False
+    -- Right res -> putStrLn res >> return True
 
--- getAst :: SExpr -> Bool -> IO Bool
--- getAst sExp compile = case sExpToAst sExp of
---     Left error -> putStrLn (error) >> return False
---     Right res -> if compile
---                      then compileAst res
---                  else evaluateAst res
+getAst :: SExpr -> Bool -> IO Bool
+getAst sExp compile = case sExpToAst sExp of
+    Left error -> putStrLn error >> return False
+    Right res -> print res >> return True -- if compile
+                    --  then compileAst res
+                --  else evaluateAst res
 
 checkParse :: String -> Bool -> IO Bool
 checkParse content compile =
     case parse parseSBlock "" content of
         Left err -> putStrLn ("Parse error: " ++ errorBundlePretty err) >> return False
-        Right res -> putStrLn (show res) >> return True
+        Right res -> getAst res True
 
 getInputLine :: Bool -> IO Bool
 getInputLine compile =
-    getLine >>= \line ->
-    checkParse line compile
+    getLine >>= \line -> checkParse line compile
 
 launchFileInput :: Bool -> String -> IO Bool
 launchFileInput compile finalInput =

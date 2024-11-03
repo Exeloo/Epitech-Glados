@@ -21,9 +21,10 @@ spaces = skipMany spaceChar
 
 parseKeyValue :: SexprParser [SExpr]
 parseKeyValue =
-    (\key value -> [key, value])
+    (\key sym value -> [key, sym, value])
     <$> parseSSymbol
-    <*> (spaces *> char ':' *> spaces *> parseSExpr)
+    <*> (SSymbol ":" <$ (spaces *> char ':'))
+    <*> (spaces *> parseSExpr)
 
 parseSInt :: SexprParser SExpr
 parseSInt = SInt . read <$> some digitChar <* notFollowedBy alphaNumChar
