@@ -1,0 +1,15 @@
+Push 2
+Push 1
+Push Less
+Call
+Push 2
+Push 1
+Push Eq
+Call
+Push Or
+Call
+Push Not
+Call
+Push Print
+Call
+Ret

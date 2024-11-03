@@ -6,7 +6,7 @@ data SSysCall = SAdd | SSub | SMul | SDiv | SMod | SEq | SLess | SNot | SOr | SA
 data SValue = SInt Int | SBool Bool | SDouble Double | SString String | SArray [SValue] | SObject [(String, SValue)] | SValueCall SSysCall | SUndefined
     deriving (Show, Eq)
 
-data SInst = SPushOnStack SValue | SCall | SRet | SJumpIfFalse String | SPushArgOnStack Int | SPushStackOnArg | SPopArg | SPopStack | SJump String
+data SInst = SPushOnStack SValue | SCall | SRet | SJumpIfFalse String | SPushArgOnStack Int | SPushStackOnArg | SPopArg | SPopStack | SJump String | SModifyArg Int 
     deriving (Show, Eq)
 
 data SAsm = SInstruction SInst | SLabel String

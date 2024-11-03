@@ -51,6 +51,7 @@ sInstToInst insts (SJump val) =
         Nothing -> Left ("Jump label not found: " ++ val)
         Just idx -> Right (Jump idx)
 sInstToInst _ (SPushArgOnStack val) = Right (PushArgOnStack val)
+sInstToInst _ (SModifyArg val) = Right (ModifyArg val)
 sInstToInst _ SPushStackOnArg = Right PushStackOnArg
 sInstToInst _ SPopArg = Right PopArg
 sInstToInst _ SPopStack = Right PopStack
