@@ -28,5 +28,5 @@ launch :: [String] -> IO Bool
 launch [path] = doesFileExist path >>= \exist ->
     if exist
         then readFile path >>= \file -> parseFile file
-        else putStrLn ("File" ++ path ++ "do not exist") >> return False
+        else hPutStrLn stderr ("File " ++ path ++ " do not exist") >> return False
 launch _ = hPutStrLn stderr "Invalid args" >> return False
