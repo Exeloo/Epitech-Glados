@@ -65,6 +65,8 @@ test-suite vm-test
   main-is: UnitTests.hs
   other-modules:
       UnitTests.UnitTestsExecInstruction
+      UnitTests.UnitTestsInstructionData
+      UnitTests.UnitTestsSExprData
       UnitTests.UnitTestsSExprToInstruction
       Paths_vm
   autogen-modules:
