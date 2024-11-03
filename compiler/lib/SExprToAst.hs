@@ -125,3 +125,5 @@ sExpInstructionToAst x = Left $ "Invalid instruction: " ++ show x
 sExpToAst :: SExpr -> Either String Ast
 sExpToAst (SLine xs) = sExpInstructionToAst xs
 sExpToAst x = Left $ "Invalid SExpr: " ++ show x
+
+-- sExpInstructionToAst [SIInt 1, SISymbol "+", SIInt 2, SISymbol "*", SIInt 3]
