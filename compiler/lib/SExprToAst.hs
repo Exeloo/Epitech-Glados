@@ -77,9 +77,9 @@ sExpForToAst x = Left $ "Invalid for: " ++ show x
 
 sExpForToAstArgs :: [SExpr] -> Either String ([Ast], Ast, [Ast])
 sExpForToAstArgs [SLine [], cond, SLine []] = sExpInstructionToAst [cond] >>= \condAst -> Right ([], condAst, [])
-sExpForToAstArgs [SLine [int], cond, SLine []] = sExpInstructionToAst [int] >>= \initAst -> sExpInstructionToAst [cond] >>= \condAst -> Right ([initAst], condAst, [])
-sExpForToAstArgs [SLine [], cond, SLine [inc]] = sExpInstructionToAst [cond] >>= \condAst -> sExpInstructionToAst [inc] >>= \incAst -> Right ([], condAst, [incAst])
-sExpForToAstArgs [SLine [int], cond, SLine [inc]] = sExpInstructionToAst [int] >>= \initAst -> sExpInstructionToAst [cond] >>= \condAst -> sExpInstructionToAst [inc] >>= \incAst -> Right ([initAst], condAst, [incAst])
+sExpForToAstArgs [SLine int, cond, SLine []] = sExpInstructionToAst int >>= \initAst -> sExpInstructionToAst [cond] >>= \condAst -> Right ([initAst], condAst, [])
+sExpForToAstArgs [SLine [], cond, SLine inc] = sExpInstructionToAst [cond] >>= \condAst -> sExpInstructionToAst inc >>= \incAst -> Right ([], condAst, [incAst])
+sExpForToAstArgs [SLine int, cond, SLine inc] = sExpInstructionToAst int >>= \initAst -> sExpInstructionToAst [cond] >>= \condAst -> sExpInstructionToAst inc >>= \incAst -> Right ([initAst], condAst, [incAst])
 sExpForToAstArgs x = Left $ "Invalid for args: " ++ show x
 
 sExpStructToAst :: [[SExpr]] -> Either String Ast
@@ -109,6 +109,7 @@ sExpInstructionToAst (SSymbol "for": xs) = sExpForToAst xs
 sExpInstructionToAst (SSymbol x: SArray i: SSymbol "=" : value) = sExpInstructionToAst value >>= \valueAst -> sExpInstructionToAst [SArray i] >>= \arrayAst -> Right $ AAssignation (VarAssignation { assignationKey = x, assignationValue = ACall ArrayAccess { accessArray = arrayAst, accessArg = valueAst}})
 sExpInstructionToAst (SSymbol x: SArray i: _) = sExpInstructionToAst i >>= \idx -> Right $ ACall ArrayAccess {accessArray = ASymbol x, accessArg = idx}
 sExpInstructionToAst (SStruct x: _) = sExpStructToAst x
+sExpInstructionToAst (SSymbol call: SParenthesis args:_) = mapM sExpInstructionToAst [args] >>= \argsAst -> Right $ ACall FuncCall {callFunction = ASymbol call, callArgs = argsAst}
 sExpInstructionToAst (SInt x:_) = Right $ AInt x
 sExpInstructionToAst (SBool x:_) = Right $ ABool x
 sExpInstructionToAst (SFloat x:_) = Right $ AFloat x
