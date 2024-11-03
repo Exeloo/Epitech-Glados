@@ -29,6 +29,7 @@ data AstLoop =
 data AstObjectElement = ObjectElement { objectKey :: Symbol, objectValue :: Ast} deriving (Show, Eq)
 
 data Ast =
+  AUndefined |
   ASymbol Symbol |
   ABool Bool |
   AInt Int |
