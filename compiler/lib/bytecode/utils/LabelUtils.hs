@@ -7,6 +7,7 @@
 
 module LabelUtils (
   isInFunction,
+  findFunctionLabel,
   goToFunctionInLabel,
   goToFunctionOutLabel,
   goToLoopInLabel,
