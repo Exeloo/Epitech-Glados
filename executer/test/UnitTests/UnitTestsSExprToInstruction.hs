@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Redundant bracket" #-}
 module UnitTests.UnitTestsSExprToInstruction(testListSExprToInstruction) where
 
 import Test.HUnit
@@ -6,7 +8,7 @@ import InstructionData
 import SExprToInstructions
 
 testMapSArrayToVArray :: Test
-testMapSArrayToVArray = TestCase $ assertEqual "check if working" ([(0, (VString "A")), (1, (VString "B")), (2, (VString "C"))]) (mapSArrayToVArray [(SString "A"), (SString "B"), (SString "C")] 0)
+testMapSArrayToVArray = TestCase $ assertEqual "check if working" [(0, VString "A"), (1, VString "B"), (2, VString "C")] (mapSArrayToVArray [SString "A", SString "B", SString "C"] 0)
 
 
 testSValToValueData1 :: Test
@@ -16,9 +18,9 @@ testSValToValueData2 = TestCase $ assertEqual "check result for bool" (VBool Tru
 testSValToValueData3 :: Test
 testSValToValueData3 = TestCase $ assertEqual "check result for double" (VDouble 42) (sValToValueData (SDouble 42))
 testSValToValueData4 :: Test
-testSValToValueData4 = TestCase $ assertEqual "check result for array" (VArray [(0,(VInt 5))]) (sValToValueData (SArray [(SInt 5)]))
+testSValToValueData4 = TestCase $ assertEqual "check result for array" (VArray [(0,VInt 5)]) (sValToValueData (SArray [SInt 5]))
 testSValToValueData5 :: Test
-testSValToValueData5 = TestCase $ assertEqual "check result for object" (VObject [("here", VInt 5)]) (sValToValueData (SObject [("here", (SInt 5))]))
+testSValToValueData5 = TestCase $ assertEqual "check result for object" (VObject [("here", VInt 5)]) (sValToValueData (SObject [("here", SInt 5)]))
 testSValToValueData6 :: Test
 testSValToValueData6 = TestCase $ assertEqual "check result for add" (VCall Add) (sValToValueData (SValueCall SAdd))
 testSValToValueData7 :: Test
@@ -44,21 +46,21 @@ testSValToValueData18 = TestCase $ assertEqual "check result for acces object" (
 testSValToValueData19 :: Test
 testSValToValueData19 = TestCase $ assertEqual "check result for acces object" (VCall Print) (sValToValueData (SValueCall SPrint))
 testSValToValueData20 :: Test
-testSValToValueData20 = TestCase $ assertEqual "check result for acces object" (VUndefined) (sValToValueData (SUndefined))
+testSValToValueData20 = TestCase $ assertEqual "check result for acces object" VUndefined (sValToValueData SUndefined)
 
 
 testGetLabelIndexInInst1 :: Test
-testGetLabelIndexInInst1 = TestCase $ assertEqual "check result for a SInstruction" (Nothing) (getLabelIndexInInst ([(SInstruction (SPushOnStack (SInt 5)))]) "here")
+testGetLabelIndexInInst1 = TestCase $ assertEqual "check result for a SInstruction" Nothing (getLabelIndexInInst [SInstruction (SPushOnStack (SInt 5))] "here")
 testGetLabelIndexInInst2 :: Test
-testGetLabelIndexInInst2 = TestCase $ assertEqual "check result for int" (Just 0) (getLabelIndexInInst ([(SLabel "test"), (SLabel "here")]) "here")
+testGetLabelIndexInInst2 = TestCase $ assertEqual "check result for int" (Just 0) (getLabelIndexInInst [SLabel "test", SLabel "here"] "here")
 
 
 testSInstToInst1 :: Test
-testSInstToInst1 = TestCase $ assertEqual "check result for push on stack" (Right (Push (VInt 5))) (sInstToInst ([(SLabel "here")]) (SPushOnStack (SInt 5)))
+testSInstToInst1 = TestCase $ assertEqual "check result for push on stack" (Right (Push (VInt 5))) (sInstToInst [SLabel "here"] (SPushOnStack (SInt 5)))
 testSInstToInst2 :: Test
-testSInstToInst2 = TestCase $ assertEqual "check result for sCall" (Right Call) (sInstToInst ([(SLabel "here")]) (SCall))
+testSInstToInst2 = TestCase $ assertEqual "check result for sCall" (Right Call) (sInstToInst [SLabel "here"] SCall)
 testSInstToInst3 :: Test
-testSInstToInst3 = TestCase $ assertEqual "check result for sRet" (Right Ret) (sInstToInst ([(SLabel "here")]) (SRet))
+testSInstToInst3 = TestCase $ assertEqual "check result for sRet" (Right Ret) (sInstToInst [SLabel "here"] (SRet))
 testSInstToInst4 :: Test
 testSInstToInst4 = TestCase $ assertEqual "check result for Push arg on stack" (Right (PushArgOnStack 5)) (sInstToInst ([(SLabel "here")]) (SPushArgOnStack 5))
 testSInstToInst5 :: Test
@@ -72,7 +74,7 @@ testSInstToInst8 = TestCase $ assertEqual "check result for jump" (Left ("Jump l
 testSInstToInst9 :: Test
 testSInstToInst9 = TestCase $ assertEqual "check result for jump if false" (Right (JumpIfFalse 0)) (sInstToInst ([(SLabel "here")]) (SJumpIfFalse "here"))
 testSInstToInst10 :: Test
-testSInstToInst10 = TestCase $ assertEqual "check result for jump if false" (Left ("JumpIfFalse label not found: test")) (sInstToInst ([(SLabel "here")]) (SJumpIfFalse"test"))
+testSInstToInst10 = TestCase $ assertEqual "check result for jump if false" (Left ("JumpIfFalse label not found: test")) (sInstToInst ([(SLabel "here")]) (SJumpIfFalse "test"))
 testSInstToInst11 :: Test
 testSInstToInst11 = TestCase $ assertEqual "check result for Push stack on arg" (Right (PushStackOnArg)) (sInstToInst ([(SLabel "here")]) (SPushStackOnArg))
 

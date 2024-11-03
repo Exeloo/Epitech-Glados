@@ -4,6 +4,7 @@ import UnitTests.UnitTestsExecInstruction
 import UnitTests.UnitTestsInstructionData
 import UnitTests.UnitTestsSExprData
 import UnitTests.UnitTestsParser
+import UnitTests.UnitTestsLaunch
 
 main :: IO ()
 main = do
@@ -12,4 +13,5 @@ main = do
     _ <- runTestTT testListInstructionData
     _ <- runTestTT testListSExprData
     _ <- runTestTT testListParser
+    _ <- runTestTT testListLaunch
     return ()

@@ -4,25 +4,25 @@ import Test.HUnit
 import SExprData
 
 testShowSysCall :: Test
-testShowSysCall = TestCase $ assertEqual "test show a syscall" ("SAdd") (show (SAdd))
+testShowSysCall = TestCase $ assertEqual "test show a syscall" "SAdd" (show SAdd)
 testEqSysCall :: Test
-testEqSysCall = TestCase $ assertEqual "test eq a syscall" (True) ((SAdd) == (SAdd))
+testEqSysCall = TestCase $ assertEqual "test eq a syscall" True (SAdd == SAdd)
 
 testShowSValue :: Test
-testShowSValue = TestCase $ assertEqual "test show a SValue" ("SInt 5") (show (SInt 5))
+testShowSValue = TestCase $ assertEqual "test show a SValue" "SInt 5" (show (SInt 5))
 testEqSValue :: Test
-testEqSValue= TestCase $ assertEqual "test eq a SValue" (True) ((SInt 5) == (SInt 5))
+testEqSValue= TestCase $ assertEqual "test eq a SValue" True (SInt 5 == SInt 5)
 
 testShowSInst:: Test
-testShowSInst = TestCase $ assertEqual "test show a SInst" ("SCall") (show (SCall))
+testShowSInst = TestCase $ assertEqual "test show a SInst" "SCall" (show SCall)
 testEqSInst :: Test
-testEqSInst= TestCase $ assertEqual "test eq a SInst" (True) ((SCall) == (SCall))
+testEqSInst= TestCase $ assertEqual "test eq a SInst" True (SCall == SCall)
 
 testShowSAsm :: Test
-testShowSAsm = TestCase $ assertEqual "test show a SAsm" ("SLabel \"here\"") (show (SLabel "here"))
-testEqSAsm :: Test
-testEqSAsm = TestCase $ assertEqual "test eq a SASm" (True) ((SLabel "here") == (SLabel "here"))
+testShowSAsm = TestCase $ assertEqual "test show a SAsm" "SLabel \"here\"" (show (SLabel "here"))
 
+testEqSAsm :: Test
+testEqSAsm = TestCase $ assertEqual "test eq a SASm" True (SLabel "here" == SLabel "here")
 
 testListSExprData :: Test
 testListSExprData =

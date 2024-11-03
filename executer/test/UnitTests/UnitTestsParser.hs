@@ -7,13 +7,13 @@ import SExprData
 
 
 testParseSExpr :: Test
-testParseSExpr = TestCase $ assertEqual "test simple parse" (Right [(SInstruction (SCall))]) (parse parseSExpr "" "Call")
+testParseSExpr = TestCase $ assertEqual "test simple parse" (Right [SInstruction SCall]) (parse parseSExpr "" "Call")
 testParseSExpr2 :: Test
-testParseSExpr2 = TestCase $ assertEqual "test simple parse" (Right [(SInstruction (SPushStackOnArg))]) (parse parseSExpr "" "PushStackOnArg")
+testParseSExpr2 = TestCase $ assertEqual "test simple parse" (Right [SInstruction SPushStackOnArg]) (parse parseSExpr "" "PushStackOnArg")
 testParseSExpr3 :: Test
-testParseSExpr3 = TestCase $ assertEqual "test simple parse" (Right [(SInstruction (SJump "here"))]) (parse parseSExpr "" "Jump here")
+testParseSExpr3 = TestCase $ assertEqual "test simple parse" (Right [SInstruction (SJump "here")]) (parse parseSExpr "" "Jump here")
 testParseSExpr4 :: Test
-testParseSExpr4 = TestCase $ assertEqual "test simple parse" (Right [(SInstruction (SJumpIfFalse "+"))]) (parse parseSExpr "" "JumpIfFalse +")
+testParseSExpr4 = TestCase $ assertEqual "test simple parse" (Right [SInstruction (SJumpIfFalse "+")]) (parse parseSExpr "" "JumpIfFalse +")
 
 
 testParseSExpr5 :: Test
@@ -23,11 +23,11 @@ testParseSExpr6 = TestCase $ assertEqual "test simple parse" (Right (SBool True)
 testParseSExpr7 :: Test
 testParseSExpr7 = TestCase $ assertEqual "test simple parse" (Right (SString "here")) (parse parseSValue "" "\"here\"")
 testParseSExpr8 :: Test
-testParseSExpr8 = TestCase $ assertEqual "test simple parse" (Right (SArray [(SString "here"), (SInt 5)])) (parse parseSValue "" "[\"here\",5]")
+testParseSExpr8 = TestCase $ assertEqual "test simple parse" (Right (SArray [SString "here", SInt 5])) (parse parseSValue "" "[\"here\",5]")
 testParseSExpr9 :: Test
-testParseSExpr9 = TestCase $ assertEqual "test simple parse" (Right (SUndefined)) (parse parseSValue "" "undefined")
+testParseSExpr9 = TestCase $ assertEqual "test simple parse" (Right SUndefined) (parse parseSValue "" "undefined")
 testParseSExpr10 :: Test
-testParseSExpr10 = TestCase $ assertEqual "test simple parse" (Right (SValueCall (SAdd))) (parse parseSValue "" "Add")
+testParseSExpr10 = TestCase $ assertEqual "test simple parse" (Right (SValueCall SAdd)) (parse parseSValue "" "Add")
 testParseSExpr11 :: Test
 testParseSExpr11 = TestCase $ assertEqual "test simple parse" (Right (SObject [("here", SInt 5)])) (parse parseSValue "" "{here : 5}")
 

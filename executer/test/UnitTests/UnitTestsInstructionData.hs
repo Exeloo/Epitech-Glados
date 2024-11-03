@@ -4,12 +4,13 @@ import Test.HUnit
 import InstructionData
 
 testShowSysCall :: Test
-testShowSysCall = TestCase $ assertEqual "test show a syscall" ("Add") (show (Add))
+testShowSysCall = TestCase $ assertEqual "test show a syscall" "Add" (show Add)
 
 testShowInstructionData :: Test
-testShowInstructionData = TestCase $ assertEqual "test show an instruction data" ("Call") (show (Call))
+testShowInstructionData = TestCase $ assertEqual "test show an instruction data" "Call" (show Call)
+ 
 testEqInstructionData :: Test
-testEqInstructionData = TestCase $ assertEqual "test show an instruction data" (True) ((Ret) == (Ret))
+testEqInstructionData = TestCase $ assertEqual "test show an instruction data" True (Ret == Ret)
 
 
 testListInstructionData :: Test
