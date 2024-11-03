@@ -11,7 +11,7 @@ import AstData
 import SExprData
 
 sExpFunctionToAst :: [SExpr] -> Either String Ast
-sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket body : _) = mapM sExpFunctionToAstSymbol args >>= \argSymbols -> case sExpToAst [SLine body] of
+sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket body : _) = mapM sExpFunctionToAstSymbol args >>= \argSymbols -> case sExpInstructionToAst body of
        Right bodyAst -> Right $ AAssignation $ VarAssignation
          { assignationKey = name
          , assignationValue = ADeclaration $ FuncDeclaration
