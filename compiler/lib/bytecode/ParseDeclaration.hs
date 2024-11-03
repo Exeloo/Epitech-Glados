@@ -8,7 +8,6 @@
 module ParseDeclaration (parseDeclaration) where
 
 import AstData
-import BytecodeOperations
 import BytecodeTypes
 
 import ScopeUtils (hasVarInScopes, addVarToScope)

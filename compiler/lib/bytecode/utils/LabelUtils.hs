@@ -23,8 +23,6 @@ module LabelUtils (
 import Data.List (isPrefixOf)
 import Data.Char (toLower)
 
-import Symbol (Symbol)
-
 import BytecodeOperations
 import BytecodeTypes
 

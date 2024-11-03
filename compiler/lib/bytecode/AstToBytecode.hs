@@ -98,7 +98,7 @@ handleRecursiveFunctionParams _ _ p = (p, Left "Invalid call: Invalid number of 
 
 handleFunctionDeclaration :: Symbol -> Ast -> [Ast] -> BParams -> PBResult
 handleFunctionDeclaration name (ADeclaration (FuncDeclaration { declareArgs = dArgs, declareBody = dBody })) args p = handleFunctionLabels name dArgs args dBody p
-handleFunctionDeclaration name value _ p = (p, Left ("Invalid call: " ++ show value ++ " is not callable."))
+handleFunctionDeclaration _ value _ p = (p, Left ("Invalid call: " ++ show value ++ " is not callable."))
 
 handleFunctionLabels :: Symbol -> [Symbol] -> [Ast] -> Ast -> BParams -> PBResult
 handleFunctionLabels name argNames argValues body (path, args, vars, labels) =
@@ -229,7 +229,7 @@ parseOldAssignation key value params = modifyArg key (modifyVar value) params
 modifyVar :: Ast -> BParams -> BResult
 modifyVar value p = (++) <$> ((++) <$> Right getPopArg <*> r1) <*> Right getPushStackOnArg
   where
-    (p1, r1) = pushValueOnStack value p
+    (_, r1) = pushValueOnStack value p
 
 modifyArray :: Ast -> Ast -> Ast -> BParams -> BResult
 modifyArray arr arg value params =
@@ -251,7 +251,7 @@ handleIfLabels cond body (path, args, vars, labels) =
     (label, labels2) = getIfLabel labels
     p = createScope label (path, args, vars, labels2)
     outLabel = getLabelWithIO label 1
-    (p1, r1) = handleLoopCondition cond outLabel body p
+    (p1, r1) = handleIfCondition cond outLabel body p
     (p2, r2) = clearScope p1
 
 handleIfCondition :: Ast -> String -> Ast -> BParams -> PBResult
@@ -328,7 +328,7 @@ builtinIf _ p = (p, Left "Invalid Builtin call: If require 2 params")
 
 builtinReturn :: [Ast] -> BParams -> PBResult
 builtinReturn [] p = callReturnBuiltin p
-builtinReturn [a] p = (p1, (++) <$> r1 <*> r2)
+builtinReturn [a] p = (p2, (++) <$> r1 <*> r2)
   where
     (p1, r1) = pushValueOnStack a p
     (p2, r2) = callReturnBuiltin p1

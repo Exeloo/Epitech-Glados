@@ -10,6 +10,7 @@ module BytecodeSyscall (
   syscallSub,
   syscallMul,
   syscallDiv,
+  syscallMod,
   syscallEq,
   syscallLess,
   syscallNot,

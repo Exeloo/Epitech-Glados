@@ -35,13 +35,13 @@ modifyArgInScopes sym cb (arg:args) index (path, eArgs, vars, labels) =
   then getInstructionsForModify left right cb (path, (tArgs:args, nIndex), vars, labels)
   else modifyArgInScopes sym cb args nIndex (path, eArgs, vars, labels)
     where
-      (found, left, right, tArgs, nIndex) = modifyArgInScope sym arg nIndex
+      (found, left, right, tArgs, nIndex) = modifyArgInScope sym arg index
 
 getInstructionsForModify :: String -> String -> (BParams -> BResult) -> BParams -> BResult
 getInstructionsForModify left right cb p = (++) <$> ((++) <$> Right left <*> (cb p)) <*> Right right
 
 modifyArgInScope :: String -> [(Symbol, Int)] -> Int -> (Bool, String, String, [(Symbol, Int)], Int)
-modifyArgInScope name [] _ = (False, "", "", [], 0)
+modifyArgInScope _ [] _ = (False, "", "", [], 0)
 modifyArgInScope name ((sym, index):args) i | name == sym = (True, "", getPushStackOnArg, (sym, index):args, i)
 modifyArgInScope name ((_, index):xs) i = (found, getPushArgOnStack index ++ getPopArg ++ left, right ++ getPushStackOnArg, nArgs, nIndex)
   where
@@ -63,7 +63,7 @@ getVarFromScopes arg (x:xs) =
 getVarFromScope :: String -> [(Symbol, Ast)] -> Maybe Ast
 getVarFromScope _ [] = Nothing
 getVarFromScope arg ((key, index):_) | arg == key = Just index
-getVarFromScope arg (x:xs) = getVarFromScope arg xs
+getVarFromScope arg (_:xs) = getVarFromScope arg xs
 
 checkVarInScopes :: String -> [[(Symbol, Ast)]] -> Bool
 checkVarInScopes _ [] = False
@@ -75,7 +75,7 @@ checkVarInScopes arg (x:xs) =
 checkVarInScope :: String -> [(Symbol, Ast)] -> Bool
 checkVarInScope _ [] = False
 checkVarInScope arg ((key, _):_) | arg == key = True
-checkVarInScope arg (x:xs) = checkVarInScope arg xs
+checkVarInScope arg (_:xs) = checkVarInScope arg xs
 
 hasArgInScopes :: String -> BParams -> Bool
 hasArgInScopes arg (_, (args, _), _, _) = (getArgIndexFromScopes arg args) /= -1
@@ -92,7 +92,7 @@ getArgIndexFromScopes arg (x:xs) =
 getArgIndexFromScope :: String -> [(Symbol, Int)] -> Int
 getArgIndexFromScope _ [] = -1
 getArgIndexFromScope arg ((key, index):_) | arg == key = index
-getArgIndexFromScope arg (x:xs) = getArgIndexFromScope arg xs
+getArgIndexFromScope arg (_:xs) = getArgIndexFromScope arg xs
 
 createScope :: String -> BParams -> BParams
 createScope label (path, (args, index), vars, labels) = (label:path, ([]:args, index), []:vars, labels)
@@ -106,6 +106,7 @@ addArgsToScope (x:xs) params = (rParams, r1 ++ r2)
 
 addArgToScope :: String -> BParams -> (BParams, String)
 addArgToScope arg (path, ((scope:args), index), vars, labels) = ((path, (((arg, index):scope):args, index + 1), vars, labels), getPushStackOnArg)
+addArgToScope _ p = (p, "")
 
 addVarsToScope :: [(Symbol, Ast)] -> BParams -> BParams
 addVarsToScope [] params = params
@@ -115,12 +116,14 @@ addVarsToScope (x:xs) params = addVarsToScope xs nParams
 
 addVarToScope :: (Symbol, Ast) -> BParams -> BParams
 addVarToScope x (path, args, (scope:vars), labels) = (path, args, ((x:scope):vars), labels)
+addVarToScope _ p = p
 
 clearScope :: BParams -> (BParams, String)
 clearScope ((_:path), args, vars, labels) = ((path, nArgs, nVars, labels), result)
   where
     (nArgs, result) = clearArgsScope args
     nVars = clearVarsScope vars
+clearScope p = (p, "")
 
 clearArgsScope :: BArgs -> (BArgs, String)
 clearArgsScope ([], _) = (([], 0), "")
