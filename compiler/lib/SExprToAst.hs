@@ -64,21 +64,21 @@ sExpWhileToAst (cond: body: xs) = case sExpInstructionToAst [cond] of
 sExpWhileToAst x = Left $ "Invalid while: " ++ show x
 
 sExpForToAst :: [SExpr] -> Either String Ast
-sExpForToAst (SParenthesis [init, cond, inc]: SBracket [SLine body]:_) = case sExpInstructionToAst [init] of
-  Right initAst -> case sExpInstructionToAst [cond] of
-    Right condAst -> case sExpInstructionToAst [inc] of
-      Right incAst -> case sExpInstructionToAst body of
-        Right bodyAst -> Right $ ALoop $ ForLoop {
-          forAssignation = initAst,
-          forCondition = condAst,
-          forIncrementation = incAst,
-          forBody = bodyAst
-        }
-        Left err -> Left err
-      Left err -> Left err
-    Left err -> Left err
-  Left err -> Left err
+sExpForToAst (SParenthesis args: SBracket [SLine body]:_) = sExpForToAstArgs args >>= \(init, cond, inc) -> case sExpInstructionToAst [SLine body] of
+  Right bodyAst -> Right $ ALoop $ ForLoop {
+    forAssignation = init,
+    forCondition = cond,
+    forIncrementation = inc,
+    forBody = bodyAst
+  }
 sExpForToAst x = Left $ "Invalid for: " ++ show x
+
+sExpForToAstArgs :: [SExpr] -> Either String ([Ast], Ast, [Ast])
+sExpForToAstArgs [SLine [], cond, SLine []] = sExpInstructionToAst [cond] >>= \condAst -> Right ([], condAst, [])
+sExpForToAstArgs [SLine [init], cond, SLine []] = sExpInstructionToAst [init] >>= \initAst -> sExpInstructionToAst [cond] >>= \condAst -> Right ([initAst], condAst, [])
+sExpForToAstArgs [SLine [], cond, SLine [inc]] = sExpInstructionToAst [cond] >>= \condAst -> sExpInstructionToAst [inc] >>= \incAst -> Right ([], condAst, [incAst])
+sExpForToAstArgs [SLine [init], cond, SLine [inc]] = sExpInstructionToAst [init] >>= \initAst -> sExpInstructionToAst [cond] >>= \condAst -> sExpInstructionToAst [inc] >>= \incAst -> Right ([initAst], condAst, [incAst])
+sExpForToAstArgs x = Left $ "Invalid for args: " ++ show x
 
 sExpStructToAst :: [[SExpr]] -> Either String Ast
 sExpStructToAst [] = Right $ AList []
@@ -119,7 +119,6 @@ sExpInstructionToAst (SLine x:xs) = case sExpInstructionToAst x of
     Right asts -> Right $ ALine (ast:asts)
     Left err -> Left err
   Left err -> Left err
-
 sExpInstructionToAst x = Left $ "Invalid instruction: " ++ show x
 
 sExpToAst :: SExpr -> Either String Ast
