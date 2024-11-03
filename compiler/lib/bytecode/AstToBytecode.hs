@@ -53,10 +53,25 @@ parseCall (FuncCall { callFunction = (ASymbol name), callArgs = args }) p = hand
 parseCall value p = (p, Left ("Invalid call: trying to call " ++ show value))
 
 handleCallFunction :: Symbol -> [Ast] -> BParams -> PBResult
---handleCallFunction "+" (n1:n2:_) p =
---handleCallFunction "-" (n1:n2:_) p =
---handleCallFunction "*" (n1:n2:_) p =
---handleCallFunction "/" (n1:n2:_) p =
+--handleCallFunction "+" args p = builtinAdd args p
+--handleCallFunction "-" args p = builtinSub args p
+--handleCallFunction "*" args p = builtinMul args p
+--handleCallFunction "/" args p = builtinDiv args p
+--handleCallFunction "%" args p = builtinMod args p
+--handleCallFunction "!" args p = builtinNot args p
+--handleCallFunction "&&" args p = builtinAnd args p
+--handleCallFunction "||" args p = builtinOr args p
+--handleCallFunction "==" args p = builtinEq args p
+--handleCallFunction "!=" args p = builtinNotEq args p
+--handleCallFunction "<" args p = builtinLess args p
+--handleCallFunction ">" args p = builtinMore args p
+--handleCallFunction "<=" args p = builtinLessEq args p
+--handleCallFunction ">=" args p = builtinMoreEq args p
+--handleCallFunction "if" args p = builtinIf args p
+--handleCallFunction "return" args p = builtinReturn args p
+--handleCallFunction "break" args p = builtinBreak args p
+--handleCallFunction "continue" args p = builtinContinue args p
+--handleCallFunction "print" args p = builtinPrint args p
 handleCallFunction name args p = case getVar name p of
   Just var -> handleFunctionDeclaration name var args p
   Nothing -> (p, Left ("Invalid call: function \"" ++ name ++ "\" does not exist."))
@@ -67,7 +82,7 @@ handleFunctionDeclaration name value _ p = (p, Left ("Invalid call: " ++ show va
 
 handleFunctionLabels :: Symbol -> [Symbol] -> [Ast] -> Ast -> BParams -> PBResult
 handleFunctionLabels name argNames argValues body (path, args, vars, labels) =
-  (p4, (++) <$> ((++) <$> ((++) <$> Right (getLabel inLabel) <*> r1) <*> Right outLabel) <*> Right r2)
+  (p4, (++) <$> ((++) <$> ((++) <$> Right (getLabel inLabel) <*> r1) <*> Right (getLabel outLabel)) <*> Right r2)
     where
       (label, labels2) = getFunctionLabel name labels
       p = createScope label (path, args, vars, labels2)
@@ -111,7 +126,7 @@ parseForLoop ass cond inc body p = handleForLoopLabels ass cond inc body p
 
 handleForLoopLabels :: [Ast] -> Ast -> [Ast] -> Ast -> BParams -> PBResult
 handleForLoopLabels ((AAssignation ass):_) cond ((AAssignation inc):_) body (path, args, vars, labels) =
-  (p4, (++) <$> ((++) <$> ((++) <$> ((++) <$> ((++) <$> r1 <*> Right (getLabel inLabel)) <*> r2) <*> r3) <*> Right outLabel) <*> Right r4)
+  (p4, (++) <$> ((++) <$> ((++) <$> ((++) <$> ((++) <$> ((++) <$> r1 <*> Right (getLabel inLabel)) <*> r2) <*> r3) <*> Right (getJump inLabel)) <*> Right (getLabel outLabel)) <*> Right r4)
     where
       (label, labels2) = getWhileLabel labels
       p = createScope label (path, args, vars, labels2)
@@ -127,7 +142,7 @@ parseWhileLoop :: Ast -> Ast -> BParams -> PBResult
 parseWhileLoop cond body p = handleWhileLoopLabels cond body p
 
 handleWhileLoopLabels :: Ast -> Ast -> BParams -> PBResult
-handleWhileLoopLabels cond body (path, args, vars, labels) = (p4, (++) <$> ((++) <$> ((++) <$> Right (getLabel inLabel) <*> r1) <*> Right outLabel) <*> Right r2)
+handleWhileLoopLabels cond body (path, args, vars, labels) = (p4, (++) <$> ((++) <$> ((++) <$> ((++) <$> Right (getLabel inLabel) <*> r1) <*> Right (getJump inLabel)) <*> Right (getLabel outLabel)) <*> Right r2)
   where
     (label, labels2) = getWhileLabel labels
     p = createScope label (path, args, vars, labels2)
