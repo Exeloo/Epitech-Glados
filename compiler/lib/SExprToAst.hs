@@ -96,6 +96,7 @@ sExpStructToAst' x = Left $ "Invalid struct: " ++ show x
 sExpInstructionToAst :: [SExpr] -> Either String Ast
 sExpInstructionToAst (SSymbol "function": xs) = sExpFunctionToAst xs
 sExpInstructionToAst (SSymbol "let": xs) = sExpVarAssignationToAst xs
+sExpInstructionToAst (var: SSymbol "=" : value: xs) = sExpVarAssignationToAst [var, SSymbol "=", value]
 sExpInstructionToAst (SSymbol "return": xs) = sExpInstructionToAst xs
 sExpInstructionToAst (arg1: SSymbol x: arg2:_) | x `elem` ["+", "-", "*", "/", "%", "==", "<"] = sExpBuilinFunctionToAst x [arg1, arg2]
 sExpInstructionToAst (SSymbol "if": cond: body: _) = sExpIfToAst [cond, body]
