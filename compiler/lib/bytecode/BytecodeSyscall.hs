@@ -16,9 +16,7 @@ module BytecodeSyscall (
   syscallOr,
   syscallAnd,
   syscallAccessArray,
-  syscallModifyArray,
-  syscallAccessObject,
-  syscallModifyObject
+  syscallModifyArray
 ) where
 
 import BytecodeOperations (getPush, getCall)
@@ -34,6 +32,9 @@ syscallMul = (getPush "Mul") ++ getCall
 
 syscallDiv :: String
 syscallDiv = (getPush "Div") ++ getCall
+
+syscallMod :: String
+syscallMod = (getPush "Mod") ++ getCall
 
 syscallEq :: String
 syscallEq = (getPush "Eq") ++ getCall
@@ -51,13 +52,7 @@ syscallAnd :: String
 syscallAnd = (getPush "And") ++ getCall
 
 syscallAccessArray :: String
-syscallAccessArray = (getPush "AccessArray") ++ getCall
+syscallAccessArray = (getPush "Access") ++ getCall
 
 syscallModifyArray :: String
-syscallModifyArray = (getPush "ModifyArray") ++ getCall
-
-syscallAccessObject :: String
-syscallAccessObject = (getPush "AccessObject") ++ getCall
-
-syscallModifyObject :: String
-syscallModifyObject = (getPush "ModifyObject") ++ getCall
+syscallModifyArray = (getPush "Modify") ++ getCall

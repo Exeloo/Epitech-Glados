@@ -7,6 +7,7 @@
 
 module BytecodeTypes (
   BPath,
+  BArgs,
   BVars,
   BLabels,
   BParams,
@@ -15,9 +16,10 @@ module BytecodeTypes (
 ) where
 
 import AstData
+import Symbol (Symbol)
 
 type BPath = [String]
-type BArgs = { bArgs :: [[(Symbol, Int)]], bIndex :: Int }
+type BArgs = ([[(Symbol, Int)]], Int)
 type BVars = [[(Symbol, Ast)]]
 type BLabels = [(String, Int)]
 type BParams = (BPath, BArgs, BVars, BLabels)

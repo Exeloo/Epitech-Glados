@@ -28,7 +28,10 @@ ghc-options:
 
 internal-libraries:
   lib:
-    source-dirs: lib/
+    source-dirs:
+    - lib/
+    - lib/bytecode/
+    - lib/bytecode/utils/
     dependencies:
     - base >= 4.7 && < 5
     - megaparsec

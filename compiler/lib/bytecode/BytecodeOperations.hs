@@ -39,7 +39,7 @@ getJumpIfFalse :: String -> String
 getJumpIfFalse x = "JumpIfFalse " ++ x ++ "\n"
 
 getCall :: String
-getPopArg = "Call\n"
+getCall = "Call\n"
 
 getRet :: String
 getRet = "Ret\n"

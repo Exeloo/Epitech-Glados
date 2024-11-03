@@ -8,15 +8,15 @@
 module ParseDeclaration (parseDeclaration) where
 
 import AstData
-import BytcodeOperations
+import BytecodeOperations
 import BytecodeTypes
 
 import ScopeUtils (hasVarInScopes, addVarToScope)
 
-parseDeclaration :: AstDeclaration -> String -> BytecodeParams -> PBResult
+parseDeclaration :: AstDeclaration -> String -> BParams -> PBResult
 parseDeclaration dec name params =
   if hasVarInScopes name params
   then (nParams, Right "")
-  else (params, Left "Invalid declaration name: \"" ++ name ++ "\" already exist.")
+  else (params, Left ("Invalid declaration name: \"" ++ name ++ "\" already exist."))
     where
       nParams = addVarToScope (name, (ADeclaration dec)) params

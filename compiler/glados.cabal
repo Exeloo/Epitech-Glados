@@ -23,7 +23,6 @@ library lib
   exposed-modules:
       AstData
       Launch
-      Parser
       SExprData
       SExprToAst
       Symbol
