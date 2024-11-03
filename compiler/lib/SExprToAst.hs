@@ -9,12 +9,9 @@ module SExprToAst (sExpFunctionToAst, sExpVarAssignationToAst, sExpBuilinFunctio
 
 import AstData
 import SExprData
-import Symbol
 
 sExpFunctionToAst :: [SExpr] -> Either String Ast
-sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket [SLine body] : xs) =
-  let argSymbols = map (\(SSymbol x) -> x) args
-  in case sExpToAst (SLine body) of
+sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket [SLine body] : _) = mapM sExpFunctionToAstSymbol args >>= \argSymbols -> case sExpToAst (SLine body) of
        Right bodyAst -> Right $ AAssignation $ VarAssignation
          { assignationKey = name
          , assignationValue = ADeclaration $ FuncDeclaration
@@ -25,8 +22,12 @@ sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket [SLine body] : xs
        Left err -> Left err
 sExpFunctionToAst _ = Left "Invalid function"
 
+sExpFunctionToAstSymbol :: SExpr -> Either String String
+sExpFunctionToAstSymbol (SSymbol x) = Right x
+sExpFunctionToAstSymbol x = Left $ "Invalid function symbol: " ++ show x
+
 sExpVarAssignationToAst :: [SExpr] -> Either String Ast
-sExpVarAssignationToAst (SSymbol name: SSymbol "=" : value : xs) = case sExpInstructionToAst [value] of
+sExpVarAssignationToAst (SSymbol name: SSymbol "=" : value) = case sExpInstructionToAst value of
   Right valueAst -> Right $ AAssignation (VarAssignation {
       assignationKey = name,
       assignationValue = valueAst
@@ -43,7 +44,7 @@ sExpBuilinFunctionToAst opp [arg1, arg2] = sExpInstructionToAst [arg1] >>= \arg1
 sExpBuilinFunctionToAst a b = Left $ "Invalid builtin function: " ++ a ++ " with args: " ++ show b
 
 sExpIfToAst :: [SExpr] -> Either String Ast
-sExpIfToAst (cond: body: xs) = case sExpInstructionToAst [cond] of
+sExpIfToAst (cond: body: _) = case sExpInstructionToAst [cond] of
   Right condAst -> case sExpInstructionToAst [body] of
     Right bodyAst -> Right $ ACall FuncCall {
       callFunction = ASymbol "if",
@@ -51,9 +52,10 @@ sExpIfToAst (cond: body: xs) = case sExpInstructionToAst [cond] of
     }
     Left err -> Left err
   Left err -> Left err
+sExpIfToAst x = Left $ "Invalid if: " ++ show x
 
 sExpWhileToAst :: [SExpr] -> Either String Ast
-sExpWhileToAst (cond: body: xs) = case sExpInstructionToAst [cond] of
+sExpWhileToAst (cond: body: _) = case sExpInstructionToAst [cond] of
   Right condAst -> case sExpInstructionToAst [body] of
     Right bodyAst -> Right $ ALoop $ WhileLoop {
       whileCondition = condAst,
@@ -64,20 +66,21 @@ sExpWhileToAst (cond: body: xs) = case sExpInstructionToAst [cond] of
 sExpWhileToAst x = Left $ "Invalid while: " ++ show x
 
 sExpForToAst :: [SExpr] -> Either String Ast
-sExpForToAst (SParenthesis args: SBracket [SLine body]:_) = sExpForToAstArgs args >>= \(init, cond, inc) -> case sExpInstructionToAst [SLine body] of
+sExpForToAst (SParenthesis args: SBracket [SLine body]:_) = sExpForToAstArgs args >>= \(int, cond, inc) -> case sExpInstructionToAst [SLine body] of
   Right bodyAst -> Right $ ALoop $ ForLoop {
-    forAssignation = init,
+    forAssignation = int,
     forCondition = cond,
     forIncrementation = inc,
     forBody = bodyAst
   }
+  Left err -> Left err
 sExpForToAst x = Left $ "Invalid for: " ++ show x
 
 sExpForToAstArgs :: [SExpr] -> Either String ([Ast], Ast, [Ast])
 sExpForToAstArgs [SLine [], cond, SLine []] = sExpInstructionToAst [cond] >>= \condAst -> Right ([], condAst, [])
-sExpForToAstArgs [SLine [init], cond, SLine []] = sExpInstructionToAst [init] >>= \initAst -> sExpInstructionToAst [cond] >>= \condAst -> Right ([initAst], condAst, [])
+sExpForToAstArgs [SLine [int], cond, SLine []] = sExpInstructionToAst [int] >>= \initAst -> sExpInstructionToAst [cond] >>= \condAst -> Right ([initAst], condAst, [])
 sExpForToAstArgs [SLine [], cond, SLine [inc]] = sExpInstructionToAst [cond] >>= \condAst -> sExpInstructionToAst [inc] >>= \incAst -> Right ([], condAst, [incAst])
-sExpForToAstArgs [SLine [init], cond, SLine [inc]] = sExpInstructionToAst [init] >>= \initAst -> sExpInstructionToAst [cond] >>= \condAst -> sExpInstructionToAst [inc] >>= \incAst -> Right ([initAst], condAst, [incAst])
+sExpForToAstArgs [SLine [int], cond, SLine [inc]] = sExpInstructionToAst [int] >>= \initAst -> sExpInstructionToAst [cond] >>= \condAst -> sExpInstructionToAst [inc] >>= \incAst -> Right ([initAst], condAst, [incAst])
 sExpForToAstArgs x = Left $ "Invalid for args: " ++ show x
 
 sExpStructToAst :: [[SExpr]] -> Either String Ast
@@ -86,6 +89,7 @@ sExpStructToAst (x:xs) = case sExpStructToAst' x of
   Right astElem -> case sExpStructToAst xs of
     Right (AList []) -> Right $ AObject [astElem]
     Right (AObject elems) -> Right $ AObject (astElem : elems)
+    Right y -> Left $ "Invalid struct: " ++ show y
     Left err -> Left err
   Left err -> Left err
 
@@ -96,15 +100,15 @@ sExpStructToAst' x = Left $ "Invalid struct: " ++ show x
 sExpInstructionToAst :: [SExpr] -> Either String Ast
 sExpInstructionToAst (SSymbol "function": xs) = sExpFunctionToAst xs
 sExpInstructionToAst (SSymbol "let": xs) = sExpVarAssignationToAst xs
-sExpInstructionToAst (var: SSymbol "=" : value: xs) = sExpVarAssignationToAst [var, SSymbol "=", value]
+sExpInstructionToAst (var: SSymbol "=" : value) = sExpVarAssignationToAst [var, SSymbol "=", SArray value]
 sExpInstructionToAst (SSymbol x: _) | x `elem` ["break", "continue"] = Right $ ACall FuncCall {callFunction = ASymbol x, callArgs = []}
 sExpInstructionToAst (SSymbol x: xs) | x `elem` ["!", "return", "print"] = sExpInstructionToAst xs >>= \ast -> Right $ ACall FuncCall {callFunction = ASymbol x, callArgs = [ast]}
-sExpInstructionToAst (arg1: SSymbol x: arg2:_) | x `elem` ["+", "-", "*", "/", "%", "==", "<", ">", "<=", ">=", "&&", "||", "!="] = sExpBuilinFunctionToAst x [arg1, arg2]
+sExpInstructionToAst (arg1: SSymbol x: arg2) | x `elem` ["+", "-", "*", "/", "%", "==", "<", ">", "<=", ">=", "&&", "||", "!="] = sExpBuilinFunctionToAst x [arg1, SArray arg2]
 sExpInstructionToAst (SSymbol "if": cond: body: _) = sExpIfToAst [cond, body]
 sExpInstructionToAst (SSymbol "while": SParenthesis [cond]: SBracket [SLine body]:_) = sExpWhileToAst [cond, SLine body]
 sExpInstructionToAst (SSymbol "for": xs) = sExpForToAst xs
-sExpInstructionToAst (SSymbol x: SArray i: SSymbol "=" : value: xs) = sExpInstructionToAst [value] >>= \valueAst -> sExpInstructionToAst [SArray i] >>= \arrayAst -> Right $ AAssignation (VarAssignation { assignationKey = x, assignationValue = ACall ArrayAccess { accessArray = arrayAst, accessArg = valueAst}})
-sExpInstructionToAst (SSymbol x: SArray i: xs) = sExpInstructionToAst i >>= \idx -> Right $ ACall ArrayAccess {accessArray = ASymbol x, accessArg = idx}
+sExpInstructionToAst (SSymbol x: SArray i: SSymbol "=" : value) = sExpInstructionToAst value >>= \valueAst -> sExpInstructionToAst [SArray i] >>= \arrayAst -> Right $ AAssignation (VarAssignation { assignationKey = x, assignationValue = ACall ArrayAccess { accessArray = arrayAst, accessArg = valueAst}})
+sExpInstructionToAst (SSymbol x: SArray i: _) = sExpInstructionToAst i >>= \idx -> Right $ ACall ArrayAccess {accessArray = ASymbol x, accessArg = idx}
 sExpInstructionToAst (SStruct x: _) = sExpStructToAst x
 sExpInstructionToAst (SInt x:_) = Right $ AInt x
 sExpInstructionToAst (SBool x:_) = Right $ ABool x
