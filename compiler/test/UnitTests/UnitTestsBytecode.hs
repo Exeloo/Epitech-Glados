@@ -2,6 +2,7 @@ module UnitTests.UnitTestsBytecode(testListBytecode) where
 
 import Test.HUnit
 import AstToBytecode
+import ParseDeclaration
 import AstData
 
 testsastToBytecodeAssignation :: Test
@@ -28,6 +29,9 @@ testsastToBytecodeReAssignation = TestCase $ assertEqual "test astToBytecode re-
 testsastToBytecodeModifyingArray :: Test
 testsastToBytecodeModifyingArray = TestCase $ assertEqual "test astToBytecode modifying array" (Right "Push [ 5 ]\nPushStackOnArg\nPushArgOnStack 0\nPush 0\nPush 6\nPush Modify\nCall\nPushStackOnArg\n") (astToBytecode (ALine [    AAssignation $ VarAssignation { assignationKey = "foo", assignationValue = AList [AInt 5] },    AAssignation $ AccessAssignation { assignationAccessArray = ASymbol "foo", assignationAccessArg = AInt 0, assignationAccessValue = AInt 6 }]))
 
+testParseDeclaration :: Test
+testParseDeclaration = TestCase $ assertEqual "test parseDeclaration" "(([],([[]],0),[[]],[]),Left \"Invalid declaration name: \\\"testFunc\\\" already exist.\")" (show (parseDeclaration FuncDeclaration { declareArgs = ["arg1"], declareBody = ASymbol "body" } "testFunc" ([], ([[]], 0), [[]], [])))
+
 testListBytecode :: Test
 testListBytecode = TestList [
   testsastToBytecodeAssignation,
@@ -37,5 +41,6 @@ testListBytecode = TestList [
   testsastToBytecodeWhileLoop,
   testsastToBytecodeWhileLoopError,
   testsastToBytecodeReAssignation,
-  testsastToBytecodeModifyingArray
+  testsastToBytecodeModifyingArray,
+  testParseDeclaration
   ]
