@@ -65,7 +65,6 @@ test-suite glados-test
   main-is: UnitTests.hs
   other-modules:
       UnitTests.LaunchUnitTests
-      UnitTests.UnitTestsParser
       UnitTests.UnitTestsSExprData
       UnitTests.UnitTestsSExprToAst
       Paths_glados
