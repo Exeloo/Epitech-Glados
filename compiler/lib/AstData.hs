@@ -9,24 +9,21 @@ module AstData (Ast(..), AstDeclaration(..), AstAssignation(..), AstCall(..), As
 
 import Symbol
 
-data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: Ast } deriving (Eq)
+data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: Ast }
 
 data AstAssignation =
   VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } |
   AccessAssignation { assignationAccessArray :: Ast, assignationAccessArg :: Ast, assignationAccessValue :: Ast }
-  deriving (Eq)
 
 data AstCall =
   FuncCall { callFunction :: Ast, callArgs :: [Ast] } |
   ArrayAccess { accessArray :: Ast, accessArg :: Ast }
-  deriving (Eq)
 
 data AstLoop =
   ForLoop { forAssignation :: [Ast], forCondition :: Ast, forIncrementation :: [Ast], forBody :: Ast } |
   WhileLoop { whileCondition :: Ast, whileBody :: Ast }
-  deriving (Eq)
 
-data AstObjectElement = ObjectElement { objectKey :: Symbol, objectValue :: Ast} deriving (Eq)
+data AstObjectElement = ObjectElement { objectKey :: Symbol, objectValue :: Ast}
 
 data Ast =
   AUndefined |
@@ -42,22 +39,6 @@ data Ast =
   AAssignation AstAssignation |
   ACall AstCall |
   ALoop AstLoop
-
-instance Eq Ast where
-  (AInt x) == (AInt y) = x == y
-  (AFloat x) == (AFloat y) = x == y
-  (ABool x) == (ABool y) = x == y
-  (ASymbol x) == (ASymbol y) = x == y
-  (AString x) == (AString y) = x == y
-  (AList xs) == (AList ys) = xs == ys
-  (AAssignation (VarAssignation x y)) == (AAssignation (VarAssignation x' y')) = x == x' && y == y'
-  (ADeclaration (FuncDeclaration x y)) == (ADeclaration (FuncDeclaration x' y')) = x == x' && y == y'
-  (ACall (FuncCall x y)) == (ACall (FuncCall x' y')) = x == x' && y == y'
-  (ACall (ArrayAccess x y)) == (ACall (ArrayAccess x' y')) = x == x' && y == y'
-  (ALoop (ForLoop x y z w)) == (ALoop (ForLoop x' y' z' w')) = x == x' && y == y' && z == z' && w == w'
-  (ALoop (WhileLoop x y)) == (ALoop (WhileLoop x' y')) = x == x' && y == y'
-  (AObject x) == (AObject y) = x == y
-  _ == _ = False
 
 instance Show Ast where
   show (AUndefined) = "undefined"
