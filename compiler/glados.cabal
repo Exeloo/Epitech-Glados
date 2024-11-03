@@ -22,7 +22,6 @@ source-repository head
 library lib
   exposed-modules:
       AstData
-      AstEval
       Evaluation
       Launch
       Parser
