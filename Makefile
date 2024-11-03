@@ -13,7 +13,7 @@ SRC_TEST	=	./compiler/test/
 TEST	=	run_tests.sh
 
 
-all: compiler_exe executer_exe
+all: compiler executer
 
 compiler:
 	stack build :${NAME_COMPILER}-exe
@@ -41,9 +41,8 @@ functional: re
 tests: unit functional
 
 coverage:
-	cabal configure --enable-coverage
-	cabal test
-	@file_path=$$(find "./dist-newstyle/build" -path "*/glados-*/hpc/vanilla/html/glados-*/hpc_index.html" | head -n 1); \
+	stack test --coverage
+	@file_path=$$(find ".stack-work/install" -path "*/hpc/combined/all/hpc_index.html" | head -n 1); \
 	if [ -n "$$file_path" ]; then \
 		xdg-open "$$file_path"; \
 	else \
