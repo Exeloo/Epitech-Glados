@@ -1,4 +1,4 @@
-module ExecInstructions (exec) where
+module ExecInstructions (exec, takeListEnd) where
 
 import InstructionData (InstructionData(..), Insts, ValueData(..), Stack, SysCall(..), Args)
 
