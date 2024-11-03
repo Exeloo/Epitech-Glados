@@ -1,10 +1,16 @@
-# glados part-2 languge documentation
+# JavadosScript documentation
 
 ## User Manual
 
 ### Introduction
 
-This document is a user manual for the glados part-2 language. It provides a brief overview of the language and its features.
+This document is a user manual for the glados part-2 language, JavadosScript. It provides a brief overview of the language and its features.
+
+JavadosScript is imperative and supports basic arithmetic operations, conditional statements, loops, functions, and data types.
+
+JavadosScript is compiled to a custom assembly-like code that can be executed on a virtual machine.
+
+The grammar of JavadosScript is inspired by javascript.
 
 ### Getting Started
 
@@ -48,11 +54,11 @@ The glados part-2 language supports various data types, both simple and complex.
 
 #### Variables
 
-Variables can be declared and assigned values using the let keyword.
+Variables can be declared and assigned values using the let keyword or directly with a "=" sign.
 
 ```glados
 let x = 10;
-let y = 20;
+y = 20;
 ```
 
 #### Arithmetic Operations
@@ -124,7 +130,7 @@ program              = { statement } ;
 
 statement            = variable declaration | expression | if statement | while statement | for statement | function declaration ;
 
-variable declaration = "let" , identifier , "=" , expression ;
+variable declaration = [ "let" ] , identifier , "=" , expression ;
 
 expression           = term , { operator , term } ;
 
