@@ -23,15 +23,26 @@ library lib
   exposed-modules:
       AstData
       Launch
+      Parser
       SExprData
       SExprToAst
       Symbol
+      AstToBytecode
+      BytecodeOperations
+      BytecodeSyscall
+      BytecodeTypes
+      ParseDeclaration
+      LabelUtils
+      ScopeUtils
+      StackUtils
   other-modules:
       Paths_glados
   autogen-modules:
       Paths_glados
   hs-source-dirs:
       lib/
+      lib/bytecode/
+      lib/bytecode/utils/
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       HUnit
@@ -64,6 +75,7 @@ test-suite glados-test
   main-is: UnitTests.hs
   other-modules:
       UnitTests.LaunchUnitTests
+      UnitTests.UnitTestsBytecode
       UnitTests.UnitTestsSExprData
       UnitTests.UnitTestsSExprToAst
       Paths_glados
