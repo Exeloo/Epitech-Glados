@@ -17,7 +17,7 @@ spacesOrNewLine :: SExprParser ()
 spacesOrNewLine = skipMany spaceChar
 
 parseKeyValue :: SExprParser (String, SValue)
-parseKeyValue = (,) <$> someTill charLiteral spaces <*> (spacesOrNewLine *> char ':' *> spacesOrNewLine *> parseSValue)
+parseKeyValue = (,) <$> parseStringAlphaNum <*> (spacesOrNewLine *> char ':' *> spacesOrNewLine *> parseSValue)
 
 spaces :: SExprParser ()
 spaces = skipSome hspace1
@@ -62,7 +62,7 @@ parseSValueCall = SValueCall <$> ((parseCaseString "Add" $> SAdd) <|>
     (parseCaseString "Print" $> SPrint))
 
 parseSValue :: SExprParser SValue
-parseSValue = parseSInt <|> parseSBool <|> parseSDouble <|> parseSString <|> parseSArray <|> parseSValueCall <|> parseSObject <|> (parseCaseString "undefined" $> SUndefined)
+parseSValue =  try parseSDouble <|> parseSInt <|> parseSBool <|> parseSString <|> parseSArray <|> parseSValueCall <|> parseSObject <|> (parseCaseString "undefined" $> SUndefined)
 
 parseInstruction :: SExprParser SAsm
 parseInstruction = (SInstruction <$> ((SPushStackOnArg <$ parseCaseString "PushStackOnArg") <|>

@@ -60,7 +60,7 @@ instance Eq Ast where
   _ == _ = False
 
 instance Show Ast where
-  show (AUndefined) = "undefined"
+  show AUndefined = "undefined"
   show (AInt x) = show x
   show (AFloat x) = show x
   show (ABool x) = if x then "true" else "false"
