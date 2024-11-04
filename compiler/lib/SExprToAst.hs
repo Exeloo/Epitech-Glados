@@ -113,8 +113,8 @@ sExpInstructionToAst (SFloat x:_) = Right $ AFloat x
 sExpInstructionToAst (SSymbol "undefined":_) = Right AUndefined
 sExpInstructionToAst (SSymbol x:_) = Right $ ASymbol x
 sExpInstructionToAst (SString x:_) = Right $ AString x
-sExpInstructionToAst (SArray x:_) = AList <$> mapM sExpInstructionToAst [x]
-sExpInstructionToAst (SParenthesis x:_) = AList <$> mapM sExpInstructionToAst [x]
+sExpInstructionToAst (SArray x:_) = AList <$> sExpInstructionsToAst x
+sExpInstructionToAst (SParenthesis x:_) = AList <$> sExpInstructionsToAst x
 sExpInstructionToAst (SLine x:_) = sExpInstructionToAst x
 sExpInstructionToAst x = Left $ "Invalid instruction: " ++ show x
 

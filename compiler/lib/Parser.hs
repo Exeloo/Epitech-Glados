@@ -71,7 +71,7 @@ parseForSParenthesis :: SexprParser SExpr
 parseForSParenthesis = SParenthesis <$> (char '(' *> sepBy (spaces *> (SLine <$> sepBy (spaces *> parseSExpr <* spaces) spaces) <* spaces) (char ';') <* char ')')
 
 parseSBracket :: SexprParser SExpr
-parseSBracket = SBracket <$> (char '{' *> sepBy (spaces *> parseSLine <* spaces) spaces <* char '}')
+parseSBracket = SBracket <$> (char '{' *> spaces*> sepBy (spaces *> parseSLine <* spaces) spaces <* char '}')
 
 parseSExpr :: SexprParser SExpr
 parseSExpr = try parseSFloat <|> parseSInt <|> parseSBool <|> parseSString <|> parseSSymbol <|> parseSStruct <|> parseSArray <|> parseSParenthesis

@@ -41,7 +41,7 @@ parseSString :: SExprParser SValue
 parseSString = SString <$> ((char '"' *> someTill charLiteral (char '"')) <|> (char '\'' *> someTill charLiteral (char '\'')))
 
 parseSArray :: SExprParser SValue
-parseSArray = SArray <$> (char '[' *> sepBy (spacesOrNewLine *> parseSValue <* spacesOrNewLine) (char ',') <* char ']')
+parseSArray = SArray <$> (char '[' *> spaces *> sepBy (spacesOrNewLine *> parseSValue <* spacesOrNewLine) (char ',') <* char ']')
 
 parseSObject :: SExprParser SValue
 parseSObject = SObject <$> (char '{' *> sepBy (spacesOrNewLine *> parseKeyValue <* spacesOrNewLine) (char ',') <* char '}')

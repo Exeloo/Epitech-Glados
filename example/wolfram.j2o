@@ -1,77 +1,116 @@
+Push [  ]
+PushStackOnArg
+.function_size_of_array_0_in:
+Push 0
+PushStackOnArg
+PushArgOnStack 0
+PushArgOnStack 1
+Push Access
+Call
+PushStackOnArg
+.while_0_in:
+Push undefined
+PushArgOnStack 2
+Push Eq
+Call
+Push Not
+Call
+JumpIfFalse while_0_out
+Push 1
+PushArgOnStack 1
+Push Add
+Call
+ModifyArg 1
+PushArgOnStack 0
+PushArgOnStack 1
+Push Access
+Call
+ModifyArg 2
+Jump while_0_in
+.while_0_out:
+PushArgOnStack 1
+Jump function_size_of_array_0_out
+.function_size_of_array_0_out:
+Push Print
+Call
+Push [ 1, 2, 3, 4, 5, 6 ]
+PushStackOnArg
+.function_size_of_array_1_in:
+Push 0
+ModifyArg 1
+PushArgOnStack 3
+PushArgOnStack 1
+Push Access
+Call
+ModifyArg 2
+.while_1_in:
+Push undefined
+PushArgOnStack 2
+Push Eq
+Call
+Push Not
+Call
+JumpIfFalse while_1_out
+Push 1
+PushArgOnStack 1
+Push Add
+Call
+ModifyArg 1
+PushArgOnStack 3
+PushArgOnStack 1
+Push Access
+Call
+ModifyArg 2
+Jump while_1_in
+.while_1_out:
+PushArgOnStack 1
+Jump function_size_of_array_1_out
+.function_size_of_array_1_out:
+Push Print
+Call
 Push 5
 PushStackOnArg
 Push 8
 PushStackOnArg
 .function_wolfram_0_in:
-Push false
+Push [ true ]
 PushStackOnArg
 Push 0
 PushStackOnArg
 .for_0_in:
-PushArgOnStack 1
-PushArgOnStack 3
+PushArgOnStack 5
+PushArgOnStack 7
 Push Less
 Call
 JumpIfFalse for_0_out
+PushArgOnStack 6
+ModifyArg 3
 Push 0
 PushStackOnArg
 .for_1_in:
-PushArgOnStack 0
 PushArgOnStack 4
+PushArgOnStack 8
 Push Less
 Call
 JumpIfFalse for_1_out
-PushArgOnStack 2
-JumpIfFalse if_0_out
-Push "x"
-Push Print
-Call
-.if_0_out:
-PushArgOnStack 2
-Push Not
-Call
-JumpIfFalse if_1_out
-Push "o"
-Push Print
-Call
-.if_1_out:
-PushArgOnStack 2
-Push Not
-Call
-ModifyArg 2
 Push 1
-PushArgOnStack 4
+PushArgOnStack 8
 Push Add
 Call
-ModifyArg 4
+ModifyArg 8
 Jump for_1_in
 .for_1_out:
 PopArg
-Push "
-"
-Push Print
-Call
 Push 1
-PushArgOnStack 3
+PushArgOnStack 7
 Push Add
 Call
-ModifyArg 3
+ModifyArg 7
 Jump for_0_in
 .for_0_out:
 PopArg
 .function_wolfram_0_out:
 PopArg
 PopArg
-PopArg
-Push { abc: 1.12 }
-PushStackOnArg
-.function_acces_arr_0_in:
-PushArgOnStack 0
-Push "abc"
-Push Access
-Call
-Push Print
-Call
-.function_acces_arr_0_out:
 PopArg
 Ret

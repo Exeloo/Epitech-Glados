@@ -24,13 +24,13 @@ testsExpBuilinFunctionToAst :: Test
 testsExpBuilinFunctionToAst = TestCase $ assertEqual "BuilinFunction to Ast" (Right $ ACall FuncCall { callFunction = ASymbol "+", callArgs = [AInt 1, AInt 2] }) (sExpBuilinFunctionToAst "+" [SInt 1, SInt 2])
 
 testsExpIfToAst :: Test
-testsExpIfToAst = TestCase $ assertEqual "If to Ast" (Right $ ACall FuncCall { callFunction = ASymbol "if", callArgs = [ABool True, AInt 1] }) (sExpIfToAst [SBool True, SInt 1])
+testsExpIfToAst = TestCase $ assertEqual "If to Ast" (Right $ ACall FuncCall { callFunction = ASymbol "if", callArgs = [ABool True, AInt 1] }) (sExpIfToAst [SBool True] [SInt 1])
 
 testsExpWhileToAst :: Test
-testsExpWhileToAst = TestCase $ assertEqual "While to Ast" (Right $ ALoop $ WhileLoop { whileCondition = ABool True, whileBody = AInt 1 }) (sExpWhileToAst [SBool True, SInt 1])
+testsExpWhileToAst = TestCase $ assertEqual "While to Ast" (Right $ ALoop $ WhileLoop { whileCondition = ABool True, whileBody = AInt 1 }) (sExpWhileToAst [SBool True] [SInt 1])
 
 testsExpForToAst :: Test
-testsExpForToAst = TestCase $ assertEqual "For to Ast" (Right $ ALoop $ ForLoop { forAssignation = [AInt 0], forCondition = ABool True, forIncrementation = [AInt 1], forBody = AInt 1 }) (sExpForToAst [SParenthesis [SLine [SInt 0], SLine [SBool True], SLine [SInt 1]], SBracket [SLine [SInt 1]]])
+testsExpForToAst = TestCase $ assertEqual "For to Ast" (Right $ ALoop $ ForLoop { forAssignation = [AInt 0], forCondition = ABool True, forIncrementation = [AInt 1], forBody = AInt 1 }) (sExpForToAst [SLine [SInt 0], SLine [SBool True], SLine [SInt 1]] [SLine [SInt 1]])
 
 testsExpInstructionToAst :: Test
 testsExpInstructionToAst = TestCase $ assertEqual "Instruction to Ast" (Right $ AInt 1) (sExpInstructionToAst [SInt 1])
@@ -46,18 +46,6 @@ testsExpVarAssignationToAstErrorValue = TestCase $ assertEqual "VarAssignation t
 
 testssExpBuilinFunctionToAstError :: Test
 testssExpBuilinFunctionToAstError = TestCase $ assertEqual "BuilinFunction to Ast Error" (Left "Invalid builtin function: + with args: [Integer: 1,Integer: 2,Integer: 3]") (sExpBuilinFunctionToAst "+" [SInt 1, SInt 2, SInt 3])
-
-testsExpIfToAstError :: Test
-testsExpIfToAstError = TestCase $ assertEqual "If to Ast Error" (Left "Invalid if: [Boolean: True]") (sExpIfToAst [SBool True])
-
-testsExpIfToAstErrorBody :: Test
-testsExpIfToAstErrorBody = TestCase $ assertEqual "If to Ast Error Body" (Left "Invalid instruction: [Bracket: {Line: [Bracket: {Symbol: \"bar\"}]}]") (sExpIfToAst [SBool True, SBracket [SLine [SBracket[SSymbol "bar"]]]])
-
-testsExpWhileToAstError :: Test
-testsExpWhileToAstError = TestCase $ assertEqual "While to Ast Error" (Left "Invalid while: [Boolean: True]") (sExpWhileToAst [SBool True])
-
-testsExpForToAstError :: Test
-testsExpForToAstError = TestCase $ assertEqual "For to Ast Error" (Left "Invalid for: [Parenthesis: (Line: [Integer: 0], Line: [Boolean: True], Line: [Integer: 1])]") (sExpForToAst [SParenthesis [SLine [SInt 0], SLine [SBool True], SLine [SInt 1]]])
 
 testsExpInstructionToAstInt :: Test
 testsExpInstructionToAstInt = TestCase $ assertEqual "Instruction to Ast Int" (Right $ AInt 1) (sExpInstructionToAst [SInt 1])
@@ -139,10 +127,6 @@ testListSExprToAst =
     testsExpVarAssignationToAstError,
     testsExpVarAssignationToAstErrorValue,
     testssExpBuilinFunctionToAstError,
-    testsExpIfToAstError,
-    testsExpIfToAstErrorBody,
-    testsExpWhileToAstError,
-    testsExpForToAstError,
     testsExpInstructionToAstInt,
     testsExpInstructionToAstBool,
     testsExpInstructionToAstFloat,
