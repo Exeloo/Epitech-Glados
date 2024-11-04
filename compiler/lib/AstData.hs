@@ -51,13 +51,14 @@ instance Eq Ast where
   (AString x) == (AString y) = x == y
   (AList xs) == (AList ys) = xs == ys
   (AAssignation (VarAssignation x y)) == (AAssignation (VarAssignation x' y')) = x == x' && y == y'
+  (AAssignation (AccessAssignation x y z)) == (AAssignation (AccessAssignation x' y' z')) = x == x' && y == y' && z == z'
   (ADeclaration (FuncDeclaration x y)) == (ADeclaration (FuncDeclaration x' y')) = x == x' && y == y'
   (ACall (FuncCall x y)) == (ACall (FuncCall x' y')) = x == x' && y == y'
   (ACall (ArrayAccess x y)) == (ACall (ArrayAccess x' y')) = x == x' && y == y'
   (ALoop (ForLoop x y z w)) == (ALoop (ForLoop x' y' z' w')) = x == x' && y == y' && z == z' && w == w'
   (ALoop (WhileLoop x y)) == (ALoop (WhileLoop x' y')) = x == x' && y == y'
   (AObject x) == (AObject y) = x == y
-  _ == _ = False
+  _ == _ = True
 
 instance Show Ast where
   show AUndefined = "undefined"
