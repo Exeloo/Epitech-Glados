@@ -1,0 +1,10 @@
+function factoriel(a) {
+    e = 1;
+    for (i = a; i > 0; i = i - 1) {
+        e = e * i;
+    }
+    return e;
+}
+
+print(factoriel(10));
+print("\n");

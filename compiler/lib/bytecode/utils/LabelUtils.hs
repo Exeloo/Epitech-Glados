@@ -31,7 +31,7 @@ import BytecodeTypes
 goToFunctionInLabel :: BParams -> (String, PBResult)
 goToFunctionInLabel (path, args, vars, labels) = case findFunctionLabel path of
   Nothing -> ("", ((path, args, vars, labels), Left "Invalid call: Not in a function but try to recursive it"))
-  Just label -> (label, ((path, args, vars, labels), Right (getJump label)))
+  Just label -> (label, ((path, args, vars, labels), Right (getJump (getLabelWithIO label 0))))
 
 goToFunctionOutLabel :: BParams -> PBResult
 goToFunctionOutLabel (path, args, vars, labels) = ((nPath, args, vars, labels), getJump <$> label)
@@ -55,7 +55,7 @@ findFunctionLabel (x:xs) =
 resolveFunctionLabel :: BPath -> Int -> (BPath, Either String String)
 resolveFunctionLabel [] _ = ([], Left "Invalid label: not inside a function")
 resolveFunctionLabel (x:xs) io =
-  if isRightLabel x "function"
+  if isRightLabel "function" x
   then (xs, Right (getLabelWithIO x io))
   else resolveFunctionLabel xs io
 
