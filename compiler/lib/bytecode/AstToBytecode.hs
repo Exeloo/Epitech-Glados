@@ -102,23 +102,25 @@ handleFunctionDeclaration _ value _ p = (p, Left ("Invalid call: " ++ show value
 
 handleFunctionLabels :: Symbol -> [Symbol] -> [Ast] -> Ast -> BParams -> PBResult
 handleFunctionLabels name argNames argValues body (path, args, vars, labels) =
-  (p4, (++) <$> ((++) <$> ((++) <$> Right (getLabel inLabel) <*> r1) <*> Right (getLabel outLabel)) <*> Right r2)
+  (p2, (++) <$> ((++) <$> r1 <*> Right (getLabel outLabel)) <*> Right r2)
     where
       (label, labels2) = getFunctionLabel name labels
       p = createScope label (path, args, vars, labels2)
       inLabel = getLabelWithIO label 0
       outLabel = getLabelWithIO label 1
-      (p3, r1) = handleFunctionParams argNames argValues body p
-      (p4, r2) = clearScope p3
+      (p1, r1) = handleFunctionParams (getLabel inLabel) argNames argValues body p
+      (p2, r2) = clearScope p1
 
-handleFunctionParams :: [Symbol] -> [Ast] -> Ast -> BParams -> PBResult
-handleFunctionParams [] [] body p = handleFunctionBody body p
-handleFunctionParams (sym:syms) (arg:args) body p = (p4, (++) <$> ((++) <$> r1 <*> Right r2) <*> r3)
+handleFunctionParams :: String -> [Symbol] -> [Ast] -> Ast -> BParams -> PBResult
+handleFunctionParams label [] [] body p = (p1, (++) <$> Right (label) <*> r1)
   where
-      (p2, r1) = pushValueOnStack arg p
-      (p3, r2) = addArgToScope sym p2
-      (p4, r3) = handleFunctionParams syms args body p3
-handleFunctionParams _ _ _ p = (p, Left "Invalid call: Invalid number of argument")
+    (p1, r1) = handleFunctionBody body p
+handleFunctionParams label (sym:syms) (arg:args) body p = (p3, (++) <$> ((++) <$> r1 <*> Right r2) <*> r3)
+  where
+      (p1, r1) = pushValueOnStack arg p
+      (p2, r2) = addArgToScope sym p1
+      (p3, r3) = handleFunctionParams label syms args body p2
+handleFunctionParams _ _ _ _ p = (p, Left "Invalid call: Invalid number of argument")
 
 handleFunctionBody :: Ast -> BParams -> PBResult
 handleFunctionBody (ALine body) p = parseBlock body p
@@ -148,7 +150,7 @@ handleForLoopLabels :: [Ast] -> Ast -> [Ast] -> Ast -> BParams -> PBResult
 handleForLoopLabels ass cond inc body (path, args, vars, labels) =
   handleForLoopAssignation ass cond inc body inLabel outLabel p
     where
-      (label, labels2) = getWhileLabel labels
+      (label, labels2) = getForLabel labels
       p = createScope label (path, args, vars, labels2)
       inLabel = getLabelWithIO label 0
       outLabel = getLabelWithIO label 1
@@ -214,8 +216,8 @@ parseAssignation (VarAssignation { assignationKey = key, assignationValue = valu
   if hasArgInScopes key params
   then parseOldAssignation key value params
   else parseNewAssignation key value params
-parseAssignation (AccessAssignation { assignationAccessArray = (ASymbol arr), assignationAccessArg = arg, assignationAccessValue = value }) params = modifyArg arr (modifyArray (ASymbol arr) arg value) params
-parseAssignation (AccessAssignation { assignationAccessArray = arr, assignationAccessArg = arg, assignationAccessValue = value }) params = (params, modifyArray arr arg value params)
+parseAssignation (AccessAssignation { assignationAccessArray = (ASymbol arr), assignationAccessArg = arg, assignationAccessValue = value }) params = modifyArray arr (ASymbol arr) arg value params
+parseAssignation (AccessAssignation { assignationAccessArray = arr }) params = (params, Left ("Invalid access assignation: the array/object that is access must be instanciated in a variable, but is " ++ show arr))
 
 parseNewAssignation :: String -> Ast -> BParams -> PBResult
 parseNewAssignation key value params = (n2Params, (++) <$> r1 <*> Right r2)
@@ -224,20 +226,20 @@ parseNewAssignation key value params = (n2Params, (++) <$> r1 <*> Right r2)
     (n2Params, r2) = addArgToScope key n1Params
 
 parseOldAssignation :: String -> Ast -> BParams -> PBResult
-parseOldAssignation key value params = modifyArg key (modifyVar value) params
+parseOldAssignation key value params = modifyVar key value params
 
-modifyVar :: Ast -> BParams -> BResult
-modifyVar value p = (++) <$> ((++) <$> Right getPopArg <*> r1) <*> Right getPushStackOnArg
+modifyVar :: String -> Ast -> BParams -> PBResult
+modifyVar name value p = (p1, (++) <$> r1 <*> modifyArg name p)
   where
-    (_, r1) = pushValueOnStack value p
+    (p1, r1) = pushValueOnStack value p
 
-modifyArray :: Ast -> Ast -> Ast -> BParams -> BResult
-modifyArray arr arg value params =
-  (++) <$> ((++) <$> ((++) <$> r1 <*> r2) <*> r3) <*> Right syscallModifyArray
+modifyArray :: String -> Ast -> Ast -> Ast -> BParams -> PBResult
+modifyArray name arr arg value p =
+  (p3, (++) <$> ((++) <$> ((++) <$> ((++) <$> r1 <*> r2) <*> r3) <*> Right syscallModifyArray) <*> modifyArg name p)
     where
-      (p1, r1) = pushValueOnStack arr params
+      (p1, r1) = pushValueOnStack arr p
       (p2, r2) = pushValueOnStack arg p1
-      (_, r3) = pushValueOnStack value p2
+      (p3, r3) = pushValueOnStack value p2
 
 -- Parse If
 

@@ -12,13 +12,20 @@ import SExprData
 
 sExpFunctionToAst :: [SExpr] -> Either String Ast
 sExpFunctionToAst (SSymbol name : SParenthesis args : SBracket body : _) = mapM sExpFunctionToAstSymbol args >>= \argSymbols -> case sExpInstructionToAst body of
-       Right bodyAst -> Right $ AAssignation $ VarAssignation
+       Right (ALine bodyAst) -> Right $ AAssignation $ VarAssignation
          { assignationKey = name
          , assignationValue = ADeclaration $ FuncDeclaration
            { declareArgs = argSymbols
-           , declareBody = bodyAst
+           , declareBody = (ALine bodyAst)
            }
          }
+       Right bodyAst -> Right $ AAssignation $ VarAssignation
+          { assignationKey = name
+          , assignationValue = ADeclaration $ FuncDeclaration
+            { declareArgs = argSymbols
+            , declareBody = (ALine [bodyAst])
+            }
+          }
        Left err -> Left err
 sExpFunctionToAst _ = Left "Invalid function"
 
@@ -45,9 +52,13 @@ sExpBuilinFunctionToAst a b = Left $ "Invalid builtin function: " ++ a ++ " with
 sExpIfToAst :: [SExpr] -> Either String Ast
 sExpIfToAst (cond: body: _) = case sExpInstructionToAst [cond] of
   Right condAst -> case sExpInstructionToAst [body] of
+    Right (ALine bodyAst) -> Right $ ACall FuncCall {
+          callFunction = ASymbol "if",
+          callArgs = [condAst, (ALine bodyAst)]
+        }
     Right bodyAst -> Right $ ACall FuncCall {
       callFunction = ASymbol "if",
-      callArgs = [condAst, bodyAst]
+      callArgs = [condAst, (ALine [bodyAst])]
     }
     Left err -> Left err
   Left err -> Left err
@@ -56,9 +67,13 @@ sExpIfToAst x = Left $ "Invalid if: " ++ show x
 sExpWhileToAst :: [SExpr] -> Either String Ast
 sExpWhileToAst (cond: body: _) = case sExpInstructionToAst [cond] of
   Right condAst -> case sExpInstructionToAst [body] of
+    Right (ALine bodyAst) -> Right $ ALoop $ WhileLoop {
+      whileCondition = condAst,
+      whileBody = (ALine bodyAst)
+    }
     Right bodyAst -> Right $ ALoop $ WhileLoop {
       whileCondition = condAst,
-      whileBody = bodyAst
+      whileBody = (ALine [bodyAst])
     }
     Left err -> Left err
   Left err -> Left err
@@ -66,12 +81,18 @@ sExpWhileToAst x = Left $ "Invalid while: " ++ show x
 
 sExpForToAst :: [SExpr] -> Either String Ast
 sExpForToAst (SParenthesis args: SBracket [SLine body]:_) = sExpForToAstArgs args >>= \(int, cond, inc) -> case sExpInstructionToAst [SLine body] of
-  Right bodyAst -> Right $ ALoop $ ForLoop {
+  Right (ALine bodyAst) -> Right $ ALoop $ ForLoop {
     forAssignation = int,
     forCondition = cond,
     forIncrementation = inc,
-    forBody = bodyAst
+    forBody = (ALine bodyAst)
   }
+  Right bodyAst -> Right $ ALoop $ ForLoop {
+      forAssignation = int,
+      forCondition = cond,
+      forIncrementation = inc,
+      forBody = (ALine [bodyAst])
+    }
   Left err -> Left err
 sExpForToAst x = Left $ "Invalid for: " ++ show x
 
@@ -101,7 +122,7 @@ sExpInstructionToAst (SSymbol "function": xs) = sExpFunctionToAst xs
 sExpInstructionToAst (SSymbol "let": xs) = sExpVarAssignationToAst xs
 sExpInstructionToAst (var: SSymbol "=" : value) = sExpVarAssignationToAst [var, SSymbol "=", SLine value]
 sExpInstructionToAst (SSymbol x: _) | x `elem` ["break", "continue"] = Right $ ACall FuncCall {callFunction = ASymbol x, callArgs = []}
-sExpInstructionToAst (SSymbol x: xs) | x `elem` ["!", "return", "print"] = sExpInstructionToAst xs >>= \ast -> Right $ ACall FuncCall {callFunction = ASymbol x, callArgs = [ast]}
+sExpInstructionToAst (SSymbol x: xs) | x `elem` ["!", "return"] = sExpInstructionToAst xs >>= \ast -> Right $ ACall FuncCall {callFunction = ASymbol x, callArgs = [ast]}
 sExpInstructionToAst (arg1: SSymbol x: arg2) | x `elem` ["+", "-", "*", "/", "%", "==", "<", ">", "<=", ">=", "&&", "||", "!="] = sExpBuilinFunctionToAst x [arg1, SLine arg2]
 sExpInstructionToAst (SSymbol "if": cond: body: _) = sExpIfToAst [cond, body]
 sExpInstructionToAst (SSymbol "while": SParenthesis [cond]: SBracket [SLine body]:_) = sExpWhileToAst [cond, SLine body]

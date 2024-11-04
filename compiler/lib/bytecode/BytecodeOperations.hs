@@ -14,7 +14,8 @@ module BytecodeOperations (
   getJump,
   getJumpIfFalse,
   getCall,
-  getRet
+  getRet,
+  getModifyArg
 ) where
 
 getLabel :: String -> String
@@ -43,3 +44,6 @@ getCall = "Call\n"
 
 getRet :: String
 getRet = "Ret\n"
+
+getModifyArg :: Int -> String
+getModifyArg x = "ModifyArg " ++ show x ++ "\n"

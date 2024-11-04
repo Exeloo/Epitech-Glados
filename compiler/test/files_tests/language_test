@@ -1,7 +1,6 @@
-a = 2;
-function test() {
-    return a + 1;
+function hello(a) {
+    for (i = 0; i < a; i = i + 1) {
+        print(i);
+    }
 }
-printf(test());
-a = 3;
-printf(test());
+hello(4);
