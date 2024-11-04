@@ -24,31 +24,31 @@ The glados part-2 language supports various data types, both simple and complex.
 
 - **Integer**: Represents whole numbers.
   ```glados
-  let num = 42;
+  num = 42;
   ```
 - **Float**: Represents numbers with decimal points.
   ```glados
-  let pi = 3.14;
+  pi = 3.14;
   ```
 - **Boolean**: Represents true or false values.
   ```glados
-  let isTrue = true;
-  let isFalse = false;
+  isTrue = true;
+  isFalse = false;
   ```
 - **String**: Represents sequences of characters.
   ```glados
-  let greeting = "Hello, World!";
+  greeting = "Hello, World!";
   ```
 
 ##### Complex Data Types
 
 - **Array**: Represents a collection of values.
   ```glados
-  let numbers = [1, 2, 3, 4, 5];
+  numbers = [1, 2, 3, 4, 5];
   ```
 - **Object**: Represents a collection of key-value pairs.
   ```glados
-  let person = {
+  person = {
       name: "Alice",
       age: 30
   };
@@ -56,10 +56,10 @@ The glados part-2 language supports various data types, both simple and complex.
 
 #### Variables
 
-Variables can be declared and assigned values using the let keyword or directly with a "=" sign.
+Variables can be declared and assigned values using the "=" sign.
 
 ```glados
-let x = 10;
+x = 10;
 y = 20;
 ```
 
@@ -68,9 +68,9 @@ y = 20;
 Arrays can be declared and initialized with values, then accessed using an index and modified.
 
 ```glados
-let numbers = [1, 2, 3, 4, 5];
+numbers = [1, 2, 3, 4, 5];
 
-let first = numbers[0];
+first = numbers[0];
 
 numbers[1] = 10;
 ```
@@ -80,11 +80,11 @@ numbers[1] = 10;
 The language supports basic arithmetic operations such as addition(+), subtraction(-), multiplication(*), division(/) and modulus(%). The result of an operation can be stored in a variable.
 
 ```glados
-let sum = x + y;
-let difference = x - y;
-let product = x * y;
-let quotient = x / y;
-let remainder = x % y;
+sum = x + y;
+difference = x - y;
+product = x * y;
+quotient = x / y;
+remainder = x % y;
 ```
 
 #### Comparison Operators
@@ -93,11 +93,11 @@ The language supports comparison operators such as less than(<), more than(>), e
 The result of a comparison can be used in conditional statements.
 
 ```glados
-let isLess = x < y;
-let isEqual = x == y;
-let isNotEqual = x != y;
-let isLessOrEqual = x <= y;
-let isMoreOrEqual = x >= y;
+isLess = x < y;
+isEqual = x == y;
+isNotEqual = x != y;
+isLessOrEqual = x <= y;
+isMoreOrEqual = x >= y;
 ```
 
 #### Logical Operators
@@ -105,9 +105,9 @@ let isMoreOrEqual = x >= y;
 The language supports logical operators such as not(!), or(||), and(&&). The result of a logical operation can be used in conditional statements.
 
 ```glados
-let isNot = !x;
-let isOr = x || y;
-let isAnd = x && y;
+isNot = !x;
+isOr = x || y;
+isAnd = x && y;
 ```
 
 #### Statements
@@ -139,14 +139,14 @@ if x > y {
 The language supports while and for loops.
 
 ```glados
-let i = 0;
-while i < 10 {
+i = 0;
+while (i < 10) {
   i = i + 1;
 }
 ```
 
 ```glados
-for (let j = 0; j < 10; j = j + 1) {
+for (j = 0; j < 10; j = j + 1) {
   print(j);
 }
 ```
@@ -160,7 +160,7 @@ function add(a, b) {
     return a + b;
 }
 
-let result = add(10, 20);
+result = add(10, 20);
 ```
 
 ## Grammar
@@ -172,7 +172,7 @@ program              = { statement } ;
 
 statement            = variable declaration | expression | if statement | while statement | for statement | function declaration | statement loop ;
 
-variable declaration = [ "let" ] , identifier , "=" , expression ;
+variable declaration = identifier , "=" , expression ;
 
 expression           = [ statement arguments ] , term , [ operator , term ] ;
 
@@ -233,4 +233,4 @@ The compiler has built-in error handling mechanisms to detect and report any syn
 
 #### Testing
 
-unit tests validate the correctness and security of the compilation process. These tests cover various scenarios, ensuring that the compiler behaves as expected under different conditions.
+Unit tests validate the correctness and security of the compilation process. These tests cover various scenarios, ensuring that the compiler behaves as expected under different conditions.
