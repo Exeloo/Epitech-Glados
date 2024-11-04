@@ -10,7 +10,7 @@ type Stack = [ValueData]
 
 type Args = [ValueData]
 
-data InstructionData = Push ValueData | Call | Ret | JumpIfFalse Int | PushArgOnStack Int | PushStackOnArg | PopArg | PopStack | Jump Int
+data InstructionData = Push ValueData | Call | Ret | JumpIfFalse Int | PushArgOnStack Int | ModifyArg Int | PushStackOnArg | PopArg | PopStack | Jump Int
     deriving (Show, Eq)
 
 type Insts = [InstructionData]

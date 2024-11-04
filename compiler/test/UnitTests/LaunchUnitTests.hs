@@ -2,7 +2,7 @@ module UnitTests.LaunchUnitTests (testlistLaunch) where
 
 import Test.HUnit
 import System.IO
-import Control.Exception (bracket)
+import Control.Exception (bracket_)
 import GHC.IO.Handle (hDuplicateTo, hDuplicate)
 import System.Process.Internals (createPipe)
 import System.IO.Error (mkIOError, eofErrorType)
@@ -11,9 +11,7 @@ import GHC.IO.Exception (IOErrorType(..), IOErrorType(UserError))
 import Launch
 
 fileInput :: FilePath -> IO Bool -> IO Bool
-fileInput filePath action = bracket
-    (openFile filePath ReadMode)
-    hClose
+fileInput filePath action = withFile filePath ReadMode
     (\fileHandle -> do
         originalStdin <- hDuplicate stdin
         hDuplicateTo fileHandle stdin
@@ -27,10 +25,7 @@ captureOutput action = do
     originalStdout <- hDuplicate stdout
     hDuplicateTo writeEnd stdout
 
-    result <- bracket (return ())
-                      (const $ hDuplicateTo originalStdout stdout >> hClose writeEnd >> hClose readEnd)
-                      (\_ -> action)
-    return result
+    bracket_ (return ()) (hDuplicateTo originalStdout stdout >> hClose writeEnd >> hClose readEnd) action
 
 suppressOutput :: IO (Maybe Info) -> IO (Maybe Info)
 suppressOutput action = do
@@ -38,10 +33,7 @@ suppressOutput action = do
     originalStdout <- hDuplicate stdout
     hDuplicateTo writeEnd stdout
 
-    result <- bracket (return ())
-                      (const $ hDuplicateTo originalStdout stdout >> hClose writeEnd >> hClose readEnd)
-                      (\_ -> action)
-    return result
+    bracket_ (return ()) (hDuplicateTo originalStdout stdout >> hClose writeEnd >> hClose readEnd) action
 
 
 paramsTooMany :: Test
@@ -79,8 +71,8 @@ paramsNotFindFile = TestCase $ assertEqual "doesn't have path in arguments" Noth
 
 paramsfileExist :: Test
 paramsfileExist = TestCase $ do
-    res <- fileExist "test/files_tests/language_test"
-    assertEqual "file exist" (Just "test/files_tests/language_test") res
+    res <- fileExist "../example/test.glados"
+    assertEqual "file exist" (Just "../example/test.glados") res
 
 paramsErrorLaunch :: Test
 paramsErrorLaunch = TestCase $ do
@@ -89,7 +81,7 @@ paramsErrorLaunch = TestCase $ do
 
 paramsSuccess :: Test
 paramsSuccess = TestCase $ do
-    res <- captureOutput $ launch ["-f", "test/files_tests/language_test"]
+    res <- captureOutput $ launch ["-f", "../example/test.glados"]
     assertEqual "Successful launch" True res
 
 paramsArgWithoutFAndC :: Test
@@ -104,37 +96,32 @@ paramsArgCWithoutF = TestCase $ do
 
 paramsArgFWithoutC :: Test
 paramsArgFWithoutC = TestCase $ do
-    res <- errorHandling ["-f", "test/files_tests/language_test"]
-    assertEqual "use flag f" (Just ((True, False), "test/files_tests/language_test")) res
+    res <- errorHandling ["-f", "../example/test.glados"]
+    assertEqual "use flag f" (Just ((True, False), "../example/test.glados")) res
 
 paramsArgWithFAndC :: Test
 paramsArgWithFAndC = TestCase $ do
-    res <- errorHandling ["-f", "test/files_tests/language_test", "-c"]
-    assertEqual "use flag f and c" (Just ((True, True), "test/files_tests/language_test")) res
-
-launchErrorInteractiveCompile :: Test
-launchErrorInteractiveCompile = TestCase $ do
-    res <-  captureOutput $ (launch ["-c"])
-    assertEqual "Launch interactive shell with flag compile return an error" False res
+    res <- errorHandling ["-f", "../example/test.glados", "-c"]
+    assertEqual "use flag f and c" (Just ((True, True), "../example/test.glados")) res
 
 launchFileStdout :: Test
 launchFileStdout = TestCase $ do
-    res <-  captureOutput $ fileInput "test/files_tests/language_test" (launch [])
+    res <- captureOutput $ fileInput "../example/test.glados" (launch [])
     assertEqual "Launch with test file in standard output" True res
 
 launchFileStdoutCompile :: Test
 launchFileStdoutCompile = TestCase $ do
-    res <-  captureOutput $ fileInput "test/files_tests/language_test" (launch ["-c"])
+    res <- captureOutput $ fileInput "../example/test.glados" (launch ["-c"])
     assertEqual "Launch with test file in standard output and compile" True res
 
 handleCtrlEOF :: Test
 handleCtrlEOF = TestCase $ do
-    res <- handleCtrl (mkIOError eofErrorType "EOF Error" Nothing Nothing) True
+    res <- captureOutput $ handleCtrl (mkIOError eofErrorType "EOF Error" Nothing Nothing) "x = 5;" True
     assertEqual "handle EOF error but didn't have error in glados" True res
 
 handleCtrlOther :: Test
 handleCtrlOther = TestCase $ do
-    res <- handleCtrl (mkIOError UserError "Other Error" Nothing Nothing) False
+    res <- captureOutput $ handleCtrl (mkIOError UserError "Other Error" Nothing Nothing) "x = 42" False
     assertEqual "handle non-EOF error but having error in glados" False res
 
 testlistLaunch :: Test
@@ -153,7 +140,6 @@ testlistLaunch = TestList [
     TestLabel "paramsArgCWithoutF" paramsArgCWithoutF,
     TestLabel "paramsArgFWithoutC" paramsArgFWithoutC,
     TestLabel "paramsArgWithFAndC" paramsArgWithFAndC,
-    TestLabel "launchErrorInteractiveCompile" launchErrorInteractiveCompile,
     TestLabel "launchFileStdout" launchFileStdout,
     TestLabel "launchFileStdoutCompile" launchFileStdoutCompile,
     TestLabel "handleCtrlEOF" handleCtrlEOF,

@@ -9,24 +9,24 @@ module AstData (Ast(..), AstDeclaration(..), AstAssignation(..), AstCall(..), As
 
 import Symbol
 
-data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: Ast } deriving (Show, Eq)
+data AstDeclaration = FuncDeclaration { declareArgs :: [Symbol], declareBody :: Ast } deriving (Eq)
 
 data AstAssignation =
   VarAssignation { assignationKey :: Symbol, assignationValue :: Ast } |
   AccessAssignation { assignationAccessArray :: Ast, assignationAccessArg :: Ast, assignationAccessValue :: Ast }
-  deriving (Show, Eq)
+  deriving (Eq)
 
 data AstCall =
   FuncCall { callFunction :: Ast, callArgs :: [Ast] } |
   ArrayAccess { accessArray :: Ast, accessArg :: Ast }
-  deriving (Show, Eq)
+  deriving (Eq)
 
 data AstLoop =
   ForLoop { forAssignation :: [Ast], forCondition :: Ast, forIncrementation :: [Ast], forBody :: Ast } |
   WhileLoop { whileCondition :: Ast, whileBody :: Ast }
-  deriving (Show, Eq)
+  deriving (Eq)
 
-data AstObjectElement = ObjectElement { objectKey :: Symbol, objectValue :: Ast} deriving (Show, Eq)
+data AstObjectElement = ObjectElement { objectKey :: Symbol, objectValue :: Ast} deriving (Eq)
 
 data Ast =
   AUndefined |
@@ -60,9 +60,35 @@ instance Eq Ast where
   _ == _ = False
 
 instance Show Ast where
+  show (AUndefined) = "undefined"
   show (AInt x) = show x
-  show (ABool x) = if x then "#t" else "#f"
+  show (AFloat x) = show x
+  show (ABool x) = if x then "true" else "false"
   show (ASymbol x) = x
-  show (AString x) = x
-  show (AList x) = "[" ++ foldl (\a b -> a ++ (if null a then "" else ", ") ++ show b) [] x ++ "]"
-  show _ = "#\\<procedure\\>"
+  show (AString x) = "\"" ++ x ++ "\""
+  show (AList x) = "[ " ++ foldl (\a b -> a ++ (if null a then "" else ", ") ++ show b) [] x ++ " ]"
+  show (AObject x) = "{ " ++ foldl (\a b -> a ++ (if null a then "" else ", ") ++ show b) [] x ++ " }"
+  show (ALine _) = "#\\<code block\\>"
+  show (ADeclaration x) = "#\\<declaration\\>" ++ show x
+  show (AAssignation x) = "#\\<assignation\\>" ++ show x
+  show (ACall x) = "#\\<call\\>" ++ show x
+  show (ALoop x) = "#\\<loop\\>" ++ show x
+
+
+instance Show AstDeclaration where
+  show (FuncDeclaration {}) = " [type=function]"
+
+instance Show AstAssignation where
+  show (VarAssignation { assignationKey = key }) = " [type=variable]: assign '" ++ key ++ "'"
+  show (AccessAssignation { assignationAccessArray = arr, assignationAccessArg = arg }) = " [type=access]: assign '" ++ show arr ++ "[" ++ show arg ++ "]'"
+
+instance Show AstCall where
+  show (FuncCall {}) = " [type=function]"
+  show (ArrayAccess {accessArray = arr, accessArg = arg}) = " [type=array]: " ++ show arr ++ "[" ++ show arg ++ "]"
+
+instance Show AstLoop where
+  show (ForLoop {}) = " [type=for]"
+  show (WhileLoop {}) = " [type=while]"
+
+instance Show AstObjectElement where
+  show (ObjectElement {objectKey = key, objectValue = value}) = key ++ ": " ++ show value

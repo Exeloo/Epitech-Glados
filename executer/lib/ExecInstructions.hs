@@ -79,10 +79,14 @@ exec res insts args ((PushArgOnStack val):as) stack =
     if val >= length args
         then Left "Index is bigger than args number"
         else exec res insts args as ((args!!val):stack)
-exec res insts args (PushStackOnArg:as) (a:s) = exec res insts (a:args) as s
+exec res insts args ((ModifyArg val):as) (a:s) =
+    if val >= length args
+        then Left "Index is bigger than args number"
+        else exec res insts (take val args ++ [a] ++ takeListEnd args (val + 1)) as s
+exec res insts args (PushStackOnArg:as) (a:s) = exec res insts (args ++ [a]) as s
 exec _ _ _ (PushStackOnArg:_) [] = Left "Can't push empty stack on arg"
-exec res insts (_:args) (PopArg:as) stack = exec res insts args as stack
 exec _ _ [] (PopArg:_) _ = Left "Can't pop empty arg"
-exec res insts args (PopStack:as) (_:stack) = exec res insts args as stack
+exec res insts args (PopArg:as) stack = exec res insts (init args) as stack
 exec _ _ _ (PopStack:_) [] = Left "Can't pop empty stack"
+exec res insts args (PopStack:as) (_:stack) = exec res insts args as stack
 exec _ _ _ _ _ = Left "No Ret at end of instructions"

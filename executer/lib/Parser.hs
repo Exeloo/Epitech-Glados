@@ -70,6 +70,7 @@ parseInstruction = (SInstruction <$> ((SPushStackOnArg <$ parseCaseString "PushS
     (SRet <$ parseCaseString "Ret") <|>
     (SJumpIfFalse <$> (parseCaseString "JumpIfFalse" *> spaces *> parseStringAlphaNum)) <|>
     (SPushArgOnStack <$> (parseCaseString "PushArgOnStack" *> spaces *> (read <$> some digitChar))) <|>
+    (SModifyArg <$> (parseCaseString "ModifyArg" *> spaces *> (read <$> some digitChar))) <|>
     (SPopArg <$ parseCaseString "PopArg") <|>
     (SPopStack <$ parseCaseString "PopStack") <|>
     (SJump <$> (parseCaseString "Jump" *> spaces *> parseStringAlphaNum)) <|>

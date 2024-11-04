@@ -6,13 +6,13 @@ import SExprData
 import AstData
 
 testsExpFunctionToAst :: Test
-testsExpFunctionToAst = TestCase $ assertEqual "Function to Ast" (Right $ AAssignation $ VarAssignation { assignationKey = "foo", assignationValue = ADeclaration $ FuncDeclaration { declareArgs = ["arg1", "arg2"], declareBody = ASymbol "bar"} }) (sExpFunctionToAst [SSymbol "foo", SParenthesis [SSymbol "arg1", SSymbol "arg2"], SBracket [SLine [SSymbol "bar"]]])
+testsExpFunctionToAst = TestCase $ assertEqual "Function to Ast" (Right $ AAssignation $ VarAssignation { assignationKey = "foo", assignationValue = ADeclaration $ FuncDeclaration { declareArgs = ["arg1", "arg2"], declareBody = ASymbol "bar"} }) (sExpFunctionToAst [SSymbol "foo", SParenthesis [SLine [SSymbol "arg1"], SLine [SSymbol "arg2"]], SBracket [SLine [SSymbol "bar"]]])
 
 testsExpFunctionToAstError :: Test
 testsExpFunctionToAstError = TestCase $ assertEqual "Function to Ast Error" (Left "Invalid function") (sExpFunctionToAst [SSymbol "foo"])
 
 testsExpFunctionToAstErrorBody :: Test
-testsExpFunctionToAstErrorBody = TestCase $ assertEqual "Function to Ast Error Body" (Left "Invalid instruction: [Bracket: {Symbol: \"bar\"}]") (sExpFunctionToAst [SSymbol "foo", SParenthesis [SSymbol "arg1", SSymbol "arg2"], SBracket [SLine [SBracket [SSymbol "bar"]]]])
+testsExpFunctionToAstErrorBody = TestCase $ assertEqual "Function to Ast Error Body" (Left "Invalid instruction: [Bracket: {Symbol: \"bar\"}]") (sExpFunctionToAst [SSymbol "foo", SParenthesis [SLine [SSymbol "arg1"], SLine [SSymbol "arg2"]], SBracket [SLine [SBracket [SSymbol "bar"]]]])
 
 testsExpFunctionToAstErrorArgs :: Test
 testsExpFunctionToAstErrorArgs = TestCase $ assertEqual "Function to Ast Error Args" (Left "Invalid function symbol: Integer: 1") (sExpFunctionToAst [SSymbol "foo", SParenthesis [SInt 1], SBracket [SLine [SSymbol "bar"]]])
@@ -84,7 +84,7 @@ testsExpInstructionToAstError :: Test
 testsExpInstructionToAstError = TestCase $ assertEqual "Instruction to Ast Error" (Left "Invalid instruction: [Bracket: {Line: [Bracket: {Symbol: \"bar\"}]}]") (sExpInstructionToAst [SBracket [SLine [SBracket[SSymbol "bar"]]]])
 
 testsExpInstructionToAstfunction :: Test
-testsExpInstructionToAstfunction = TestCase $ assertEqual "Instruction to Ast Function" (Right $ AAssignation (VarAssignation {assignationKey = "foo", assignationValue = ADeclaration (FuncDeclaration {declareArgs = ["arg1","arg2"], declareBody = ASymbol "bar"})})) (sExpInstructionToAst [SSymbol "function",SSymbol "foo", SParenthesis [SSymbol "arg1", SSymbol "arg2"], SBracket [SLine [SSymbol "bar"]]])
+testsExpInstructionToAstfunction = TestCase $ assertEqual "Instruction to Ast Function" (Right $ AAssignation (VarAssignation {assignationKey = "foo", assignationValue = ADeclaration (FuncDeclaration {declareArgs = ["arg1","arg2"], declareBody = ASymbol "bar"})})) (sExpInstructionToAst [SSymbol "function",SSymbol "foo", SParenthesis [SLine [SSymbol "arg1"], SLine [SSymbol "arg2"]], SBracket [SLine [SSymbol "bar"]]])
 
 testsExpInstructionToAstVarAssignationLet :: Test
 testsExpInstructionToAstVarAssignationLet = TestCase $ assertEqual "Instruction to Ast VarAssignation" (Right $ AAssignation $ VarAssignation { assignationKey = "foo", assignationValue = ASymbol "bar" }) (sExpInstructionToAst [SSymbol "let", SSymbol "foo", SSymbol "=", SSymbol "bar"])
