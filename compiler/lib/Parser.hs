@@ -33,13 +33,29 @@ parseSFloat :: SexprParser SExpr
 parseSFloat = SFloat . read <$> ((++) <$> some digitChar <*> ((:) <$> char '.' <*> some digitChar)) <* notFollowedBy alphaNumChar
 
 parseSBool :: SexprParser SExpr
-parseSBool = (SBool True <$ string "true") <|> (SBool False <$ string "false")
+parseSBool = SBool True <$ string "true" <|> SBool False <$ string "false"
 
 parseSString :: SexprParser SExpr
-parseSString = SString <$> ((char '"' *> someTill charLiteral (char '"')) <|> (char '\'' *> someTill charLiteral (char '\'')))
+parseSString = SString <$> (char '"' *> someTill charLiteral (char '"') <|> char '\'' *> someTill charLiteral (char '\''))
 
 parseSSymbol :: SexprParser SExpr
-parseSSymbol = SSymbol <$> some (alphaNumChar <|> oneOf "+-/*<>?=%&|\\")
+parseSSymbol = SSymbol <$>
+    (string "+" <|>
+    string "==" <|>
+    string "<=" <|>
+    string ">=" <|>
+    string "&&" <|>
+    string "||" <|>
+    string "!=" <|>
+    string "-" <|>
+    string "*" <|>
+    string "/" <|>
+    string "%" <|>
+    string "<" <|>
+    string ">" <|>
+    string "!" <|>
+    string "=" <|>
+    some (alphaNumChar <|> oneOf "_"))
 
 parseSArray :: SexprParser SExpr
 parseSArray = SArray <$> (char '[' *> spaces *> parseElems <* spaces <* char ']' <* spaces)
@@ -55,17 +71,21 @@ parseForSParenthesis :: SexprParser SExpr
 parseForSParenthesis = SParenthesis <$> (char '(' *> sepBy (spaces *> (SLine <$> sepBy (spaces *> parseSExpr <* spaces) spaces) <* spaces) (char ';') <* char ')')
 
 parseSBracket :: SexprParser SExpr
-parseSBracket = SBracket <$> (char '{' *> sepBy1 (spaces *> parseSLine <* spaces) spaces <* char '}')
+parseSBracket = SBracket <$> (char '{' *> sepBy (spaces *> parseSLine <* spaces) spaces <* char '}')
 
 parseSExpr :: SexprParser SExpr
-parseSExpr = parseSInt <|> parseSBool <|> parseSFloat <|> parseSString <|> parseSSymbol <|> parseSStruct <|> parseSArray <|> parseSParenthesis
+parseSExpr = try parseSFloat <|> parseSInt <|> parseSBool <|> parseSString <|> parseSSymbol <|> parseSStruct <|> parseSArray <|> parseSParenthesis
 
 parseSLine :: SexprParser SExpr
-parseSLine = SLine <$> (try ((\sym par bracket -> sym ++ par ++ bracket)
-    <$> (sepBy1 (spaces *> parseSSymbol <* spaces) spaces <* spaces)
+parseSLine = SLine <$> (try ((\fnName par bracket -> [SSymbol "function", fnName] ++ par ++ bracket)
+    <$> (string "function" *> spaces *> parseSSymbol <* spaces)
+    <*> (spaces *> ((: []) <$> parseSParenthesis) <* spaces)
+    <*> (spaces *> ((: []) <$> parseSBracket)) <* spaces) <|>
+    try ((\sym par bracket -> [sym] ++ par ++ bracket)
+    <$> parseSSymbol
     <*> (spaces *> ((: []) <$> parseForSParenthesis) <* spaces)
     <*> (spaces *> ((: []) <$> parseSBracket)) <* spaces) <|>
-    (sepBy (spaces *> parseSExpr <* spaces) spaces <* char ';'))
+    sepBy (spaces *> parseSExpr <* spaces) spaces <* char ';')
 
 parseSBlock :: SexprParser SExpr
 parseSBlock = SLine <$> sepBy1 (spaces *> parseSLine <* spaces) spaces <* eof

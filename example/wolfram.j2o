@@ -1,0 +1,77 @@
+Push 5
+PushStackOnArg
+Push 8
+PushStackOnArg
+.function_wolfram_0_in:
+Push false
+PushStackOnArg
+Push 0
+PushStackOnArg
+.for_0_in:
+PushArgOnStack 1
+PushArgOnStack 3
+Push Less
+Call
+JumpIfFalse for_0_out
+Push 0
+PushStackOnArg
+.for_1_in:
+PushArgOnStack 0
+PushArgOnStack 4
+Push Less
+Call
+JumpIfFalse for_1_out
+PushArgOnStack 2
+JumpIfFalse if_0_out
+Push "x"
+Push Print
+Call
+.if_0_out:
+PushArgOnStack 2
+Push Not
+Call
+JumpIfFalse if_1_out
+Push "o"
+Push Print
+Call
+.if_1_out:
+PushArgOnStack 2
+Push Not
+Call
+ModifyArg 2
+Push 1
+PushArgOnStack 4
+Push Add
+Call
+ModifyArg 4
+Jump for_1_in
+.for_1_out:
+PopArg
+Push "
+"
+Push Print
+Call
+Push 1
+PushArgOnStack 3
+Push Add
+Call
+ModifyArg 3
+Jump for_0_in
+.for_0_out:
+PopArg
+.function_wolfram_0_out:
+PopArg
+PopArg
+PopArg
+Push { abc: 1.12 }
+PushStackOnArg
+.function_acces_arr_0_in:
+PushArgOnStack 0
+Push "abc"
+Push Access
+Call
+Push Print
+Call
+.function_acces_arr_0_out:
+PopArg
+Ret

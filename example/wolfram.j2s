@@ -1,0 +1,23 @@
+function wolfram(size, line) {
+    black = false;
+    for (i = 0; i < line; i = i + 1) {
+        for (j = 0; j < size; j = j + 1) {
+            if (black) {
+                print("x");
+            }
+            if (!black) {
+                print("o");
+            }
+            black = !black;
+        }
+        print("\n");
+    }
+}
+
+wolfram(5, 8);
+
+function acces_arr(arr) {
+    print(arr["abc"]);
+}
+
+acces_arr({abc:1.12});

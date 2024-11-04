@@ -329,7 +329,7 @@ builtinIf [a, b] p = parseIf a b p
 builtinIf _ p = (p, Left "Invalid Builtin call: If require 2 params")
 
 builtinReturn :: [Ast] -> BParams -> PBResult
-builtinReturn [] p = callReturnBuiltin p
+builtinReturn [] p = builtinReturn [AUndefined] p
 builtinReturn [a] p = (p2, (++) <$> r1 <*> r2)
   where
     (p1, r1) = pushValueOnStack a p
