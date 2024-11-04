@@ -122,7 +122,7 @@ sExpInstructionToAst (SSymbol "function": xs) = sExpFunctionToAst xs
 sExpInstructionToAst (SSymbol "let": xs) = sExpVarAssignationToAst xs
 sExpInstructionToAst (var: SSymbol "=" : value) = sExpVarAssignationToAst [var, SSymbol "=", SLine value]
 sExpInstructionToAst (SSymbol x: _) | x `elem` ["break", "continue"] = Right $ ACall FuncCall {callFunction = ASymbol x, callArgs = []}
-sExpInstructionToAst (SSymbol x: xs) | x `elem` ["!", "return", "print"] = sExpInstructionToAst xs >>= \ast -> Right $ ACall FuncCall {callFunction = ASymbol x, callArgs = [ast]}
+sExpInstructionToAst (SSymbol x: xs) | x `elem` ["!", "return"] = sExpInstructionToAst xs >>= \ast -> Right $ ACall FuncCall {callFunction = ASymbol x, callArgs = [ast]}
 sExpInstructionToAst (arg1: SSymbol x: arg2) | x `elem` ["+", "-", "*", "/", "%", "==", "<", ">", "<=", ">=", "&&", "||", "!="] = sExpBuilinFunctionToAst x [arg1, SLine arg2]
 sExpInstructionToAst (SSymbol "if": cond: body: _) = sExpIfToAst [cond, body]
 sExpInstructionToAst (SSymbol "while": SParenthesis [cond]: SBracket [SLine body]:_) = sExpWhileToAst [cond, SLine body]

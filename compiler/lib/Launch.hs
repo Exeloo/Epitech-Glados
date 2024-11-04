@@ -61,7 +61,7 @@ errorHandling args | length args > 3 = putStrLn "Too many arguments, please refe
 compileAst :: Ast -> IO Bool
 compileAst resAst = case astToBytecode resAst of
     Left err -> putStrLn err >> return False
-    Right res -> putStrLn res >> return True
+    Right res -> putStr res >> return True
 
 getAst :: SExpr -> Bool -> IO Bool
 getAst sExp _ = case sExpToAst sExp of
